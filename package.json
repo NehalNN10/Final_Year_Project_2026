@@ -1,0 +1,27 @@
+{
+  "name": "final_year_project_2026",
+  "version": "1.0.0",
+  "description": "",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/NehalNN10/Final_Year_Project_2026.git"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "type": "commonjs",
+  "bugs": {
+    "url": "https://github.com/NehalNN10/Final_Year_Project_2026/issues"
+  },
+  "homepage": "https://github.com/NehalNN10/Final_Year_Project_2026#readme",
+  "dependencies": {
+    "three": "^0.181.1"
+  },
+  "devDependencies": {
+    "@types/three": "^0.181.0"
+  }
+}
