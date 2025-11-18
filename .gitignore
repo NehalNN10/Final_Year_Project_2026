@@ -1,0 +1,8 @@
+fyp_venv/
+output/
+output_videos/
+recordings/
+__pycache__/
+model_data/
+calibration.py
+model_scratch_imple.py

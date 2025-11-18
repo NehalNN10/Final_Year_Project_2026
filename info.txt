@@ -1,0 +1,10 @@
+DeepSort:
+1. Kalman filter: to predict object locations and handle occlusions by estimating the state of tracked objects over time.
+2. Appearance Embeddings (REID): It integrates a Re-Identification (REID) feature extractor (embedder) to generate visual descriptors of detected objects. These embeddings are used to compare visual properties and maintain object identities even when objects are temporarily obscured or cross paths.
+3. Parameters for Tuning:
+    max_age: Maximum number of missed detections before a track is deleted.
+    n_init: Number of frames in the initialization phase before a track is considered confirmed.
+    nms_max_overlap: Non-maxima suppression threshold.
+    max_cosine_distance: Threshold for cosine distance used in appearance-based association.
+    n_budget: Maximum size of the appearance descriptor.
+4. Input and Output: The tracker typically takes detections (e.g., from a YOLO model) and the current frame as input. It outputs tracked objects, each with a unique ID, their corresponding bounding boxes, and potentially other supplementary information.
