@@ -31,6 +31,8 @@ const baseWallMat = new THREE.MeshBasicMaterial({ color: 0x999999, side: THREE.D
 const baseWoodMat = new THREE.MeshBasicMaterial({ color: 0x462416, side: THREE.DoubleSide });
 const baseGlassMat = new THREE.MeshBasicMaterial({ color: 0xffffffff, side: THREE.DoubleSide });
 const basePillarMat = new THREE.MeshBasicMaterial({ color: 0xd1b100, side: THREE.DoubleSide })
+const baseBenchMat = new THREE.MeshBasicMaterial({ color: 0x000000, side: THREE.DoubleSide })
+const baseBuggyMat = new THREE.MeshBasicMaterial({ color: 0x880000, side: THREE.DoubleSide })
 
 const axesHelper = new THREE.AxesHelper(5);
 scene.add(axesHelper);
@@ -73,15 +75,22 @@ const doorz2 = createFloor(5.5, wallThickness, 8.75 + wallThickness/2, -0.25, ba
 const wallz3 = createFloor(6.5 + wallThickness, wallThickness, 8.75 + wallThickness/2, 5.75 + wallThickness/2, baseWallMat)
 
 // Other structures & objects
-const pillar = createFloor(1, 1, 1.75, 3, basePillarMat)
-const table_p1 = createFloor(1, 4.5, -1, 3, baseGlassMat)
-const table_p2 = createFloor(1, 4.5, 5.5, 3, baseGlassMat)
+const pillar = createFloor(1, 1, 1.75, 2.5, basePillarMat)
+const table_p1 = createFloor(1, 4.5, -1, 2.5, baseGlassMat)
+const table_p2 = createFloor(1, 4.5, 5.5, 2.5, baseGlassMat)
 
-const table_v1 = createFloor(3, 1, -4, 6.5, baseGlassMat)
-const table_v2 = createFloor(3, 1, -1, 6.5, baseGlassMat)
-const table_v3 = createFloor(3, 1, 1.75, 6.5, baseGlassMat)
-const table_v4 = createFloor(3, 1, 4.55, 6.5, baseGlassMat)
-const table_v5 = createFloor(3, 1, 7.35, 6.5, baseGlassMat)
+const table_v1 = createFloor(3, 1, -4, 6, baseGlassMat)
+const table_v2 = createFloor(3, 1, -1, 6, baseGlassMat)
+const table_v3 = createFloor(3, 1, 1.75, 6, baseGlassMat)
+const table_v4 = createFloor(3, 1, 4.55, 6, baseGlassMat)
+const table_v5 = createFloor(3, 1, 7.35, 6, baseGlassMat)
+
+const workbench_v1 = createFloor(1.8, 4.75, -1.1, 0.12, baseBenchMat)
+const workbench_v2 = createFloor(1.8, 4.75, 4.65, 0.12, baseBenchMat)
+const workbench_v3 = createFloor(1.8, 4.75, -1.1, -3.15, baseBenchMat)
+const workbench_v4 = createFloor(1.8, 4.75, 4.65, -3.15, baseBenchMat)
+
+const buggy = createFloor(1.8, 1, -8, -7.5, baseBuggyMat)
 
 function animate (t = 0) {
     requestAnimationFrame(animate);
