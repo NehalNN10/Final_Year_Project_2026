@@ -14,7 +14,7 @@ const aspect = w / h;
 const near = 1;
 const far = 200;
 const camera = new THREE.PerspectiveCamera(fov, aspect, near, far);
-camera.position.set(-20, 20);
+camera.position.set(0, 20, 0);
 
 const scene = new THREE.Scene();
 
@@ -24,7 +24,7 @@ controls.dampingFactor = 0.05;
 controls.enableRotate = true; 
 controls.screenSpacePanning = true; 
 controls.minPolarAngle = 0; 
-controls.maxPolarAngle = Math.PI / 2;
+controls.maxPolarAngle = 0;
 
 const floorMaterial = new THREE.MeshBasicMaterial({ color: 0x447c5a, side: THREE.DoubleSide });
 
