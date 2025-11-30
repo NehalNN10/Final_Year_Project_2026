@@ -117,6 +117,65 @@ const buggy = createObject(1.8, 1, -8, -7.5, baseBuggyMat)
 
 const Waiz = createMarker(-0.3, 7, 0xff0000);
 
+let angle = 0; // Track the current angle in the orbit
+
+function mockApiCall() {
+    return new Promise((resolve) => {
+        setTimeout(() => {
+            // 1. Increment the angle (Increase 0.1 to move faster, decrease to slow down)
+            angle += 0.05; 
+
+            // 2. Define the Ellipse settings
+            const centerX = 6;    // X position of the table you want to orbit (e.g., table_v series)
+            const centerZ = -1; // Z position of the table
+            const radiusX = 2.5;    // How wide the path is (X-axis)
+            const radiusZ = 1.5;    // How deep the path is (Z-axis)
+
+            // 3. Calculate new coordinates using Trig
+            // x = h + rX * cos(theta)
+            // z = k + rZ * sin(theta)
+            const newX = centerX + (radiusX * Math.cos(angle));
+            const newZ = centerZ + (radiusZ * Math.sin(angle));
+
+            resolve({
+                x: newX,
+                z: newZ
+            });
+        }, 50); // Simulate 50ms network delay
+    });
+}
+
+// ==========================================
+// 3. FETCH & UPDATE LOGIC
+// ==========================================
+async function fetchAndMoveMarker() {
+    try {
+        // --- OPTION A: USE MOCK DATA (Testing) ---
+        const data = await mockApiCall();
+
+        // --- OPTION B: USE REAL API (Uncomment to use) ---
+        // const response = await fetch(API_URL);
+        // const data = await response.json(); 
+        // Expected JSON format: { "x": 5.5, "z": -2.1 }
+
+        // Update the marker position directly
+        if (data.x !== undefined && data.z !== undefined) {
+            Waiz.position.x = data.x;
+            Waiz.position.z = data.z;
+            
+            console.log("Updated Position:", data.x, data.z);
+        }
+
+    } catch (error) {
+        console.error("Error fetching coords:", error);
+    }
+}
+
+// ==========================================
+// 4. START THE LOOP (Every 0.1 seconds)
+// ==========================================
+setInterval(fetchAndMoveMarker, 100); // 100ms = 0.1 seconds
+
 function animate (t = 0) {
     requestAnimationFrame(animate);
     controls.update();
