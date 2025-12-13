@@ -58,8 +58,9 @@ function createObject(w, h, z, x, material) {
     return mesh
 }
 
-function createMarker(z, x, color) {
-    const markerGeometry = new THREE.CircleGeometry(0.1, 32);
+/*
+function createMarker(z, x, color, radius=0.1, label='') {
+    const markerGeometry = new THREE.CircleGeometry(radius, 32);
     const markerMaterial = new THREE.MeshBasicMaterial({ color: color });
     const marker = new THREE.Mesh(markerGeometry, markerMaterial);
     marker.rotation.x = -Math.PI / 2;
@@ -69,7 +70,51 @@ function createMarker(z, x, color) {
     scene.add(marker);
     return marker
 }
+*/
 
+// ...existing code...
+function createMarker(z, x, color, radius = 0.1, label = '') {
+  const geom = new THREE.SphereGeometry(radius, 12, 8);
+  const mat = new THREE.MeshBasicMaterial({ color });
+  const mesh = new THREE.Mesh(geom, mat);
+  mesh.position.set(x, radius, z);
+
+  var alpha = 0.15;
+  if(label === '')
+    alpha = 0;
+
+
+  // label sprite
+  const canvas = document.createElement('canvas');
+  const size = 256;
+  canvas.width = canvas.height = size;
+  const ctx = canvas.getContext('2d');
+  ctx.fillStyle = `rgba(255,255,255,${alpha})`;
+  ctx.fillRect(0, 0, size, size);
+  ctx.fillStyle = '#000';
+  ctx.font = '150px Arial';
+  ctx.textAlign = 'center';
+  ctx.textBaseline = 'middle';
+  ctx.fillText(label, size / 2, size / 2);
+
+  const tex = new THREE.CanvasTexture(canvas);
+  tex.minFilter = THREE.LinearFilter;
+  const smat = new THREE.SpriteMaterial({ map: tex, transparent: true });
+  const sprite = new THREE.Sprite(smat);
+  sprite.scale.set(0.8, 0.4, 1);      // tweak label size
+  sprite.position.set(x, radius + 0.4, z);
+
+  const group = new THREE.Group();
+  group.add(mesh);
+  group.add(sprite);
+  scene.add(group);
+
+  // expose helpers if needed
+  group.marker = mesh;
+  group.label = sprite;
+  return group;
+}
+// ...existing code...
 // Floor
 const floor1 = createFloor(14, 11.5, 3, 2, floorMaterial)
 const floor2 = createFloor(18, 6, -5.75, 0, floorMaterial)
@@ -115,7 +160,9 @@ const workbench_v4 = createObject(1.8, 4.75, 4.65, -3.15, baseBenchMat)
 
 const buggy = createObject(1.8, 1, -8, -7.5, baseBuggyMat)
 
-const Waiz = createMarker(-0.3, 7, 0xff0000);
+// const Waiz = createMarker(-0.3, 7, 0xff0000);
+
+// const dummy = createMarker(7, 0, 0xffaf00);
 
 let angle = 0; // Track the current angle in the orbit
 
@@ -174,7 +221,7 @@ async function fetchAndMoveMarker() {
 // ==========================================
 // 4. START THE LOOP (Every 0.1 seconds)
 // ==========================================
-setInterval(fetchAndMoveMarker, 100); // 100ms = 0.1 seconds
+// setInterval(fetchAndMoveMarker, 100); // 100ms = 0.1 seconds
 
 function animate (t = 0) {
     requestAnimationFrame(animate);
@@ -184,3 +231,130 @@ function animate (t = 0) {
 
 animate();
 
+/**
+ * Animate tracks from a CSV with columns: frame,track_id,...,three_x,three_z
+ * - url: CSV path (default './mapped_tracks (1).csv')
+ * - fps: frames per second (default 10)
+ * - loop: whether to loop playback (default true)
+ */
+async function animateTracksFromCsv(url = './mapped_tracks.csv', fps = 10, loop = true) {
+  // simple CSV parser (assumes no complex quoting)
+  function parseCSV(text) {
+    const lines = text.split(/\r?\n/).map(l => l.trim()).filter(Boolean);
+    if (lines.length === 0) return { header: [], rows: [] };
+    const header = lines[0].split(',').map(h => h.trim());
+    const rows = lines.slice(1).map(l => {
+      const cols = l.split(',').map(c => c.trim());
+      const obj = {};
+      header.forEach((h, i) => obj[h] = cols[i] ?? '');
+      return obj;
+    });
+    return { header, rows };
+  }
+
+  // fetch CSV
+  try {
+    const resp = await fetch(encodeURI(url), { cache: 'no-store' });
+    if (!resp.ok) {
+      console.warn('CSV fetch failed:', resp.status, url);
+      return;
+    }
+    const text = await resp.text();
+    const { header, rows } = parseCSV(text);
+
+    // column names expected in your mapped_tracks: 'frame','track_id','three_x','three_z'
+    const hdrLower = header.map(h => h.toLowerCase());
+    const frameKey = header[hdrLower.indexOf('frame')];
+    const idKey = header[hdrLower.indexOf('track_id')];
+    const xKey = header[hdrLower.indexOf('three_x')];
+    const zKey = header[hdrLower.indexOf('three_z')];
+
+    if (!frameKey || !idKey || !xKey || !zKey) {
+      console.error('CSV missing required columns. Found header:', header);
+      return;
+    }
+
+    // build frames map: frame -> detections[]
+    const framesMap = new Map();
+    const trackIds = new Set();
+    for (const r of rows) {
+      const frame = parseInt(r[frameKey], 10);
+      if (Number.isNaN(frame)) continue;
+      const id = String(r[idKey]);
+      const x = parseFloat(r[xKey]);
+      const z = parseFloat(r[zKey]);
+      if (Number.isNaN(x) || Number.isNaN(z)) continue;
+      if (!framesMap.has(frame)) framesMap.set(frame, []);
+      framesMap.get(frame).push({ id, x, z });
+      trackIds.add(id);
+    }
+
+    if (framesMap.size === 0) {
+      console.warn('No valid frames found in CSV.');
+      return;
+    }
+
+    const frames = Array.from(framesMap.keys()).sort((a, b) => a - b);
+
+    // color generator per id (stable)
+    function colorFromId(id) {
+      let hash = 0;
+      for (let i = 0; i < id.length; i++) hash = id.charCodeAt(i) + ((hash << 5) - hash);
+      const h = Math.abs(hash) % 360;
+      const c = new THREE.Color(`hsl(${h} 70% 50%)`);
+      return c.getHex();
+    }
+
+    // create marker for each track id (hidden initially)
+    const markers = new Map();
+    for (const id of trackIds) {
+      const color = colorFromId(id);
+      var viewColor = 0xff0000;
+      // place at origin; will set visible=false until first appearance
+      const m = createMarker(0, 0, viewColor, 0.2, id); // createMarker(z, x, color)
+      m.visible = false;
+      m.name = `track_${id}`;
+      markers.set(id, m);
+    }
+
+    // animation loop
+    let idx = 0;
+    const interval = 1000 / Math.max(1, fps);
+    const timer = setInterval(() => {
+      const frameNo = frames[idx];
+      const detections = framesMap.get(frameNo) || [];
+
+      // hide all markers first
+      for (const m of markers.values()) m.visible = false;
+
+      // place detections
+      for (const d of detections) {
+        const marker = markers.get(d.id);
+        if (!marker) continue;
+        marker.position.x = d.z;
+        marker.position.z = d.x;
+        marker.visible = true;
+      }
+
+      idx++;
+      if (idx >= frames.length) {
+        if (loop) idx = 0;
+        else {
+          clearInterval(timer);
+        }
+      }
+    }, interval);
+
+    // return control handles if needed
+    return {
+      stop() { clearInterval(timer); },
+      framesCount: frames.length
+    };
+
+  } catch (err) {
+    console.error('animateTracksFromCsv error:', err);
+  }
+}
+
+// start animating immediately (matches your red-dot loop behavior)
+animateTracksFromCsv('../../mapped_tracks_angle_01.csv', 10, true);
