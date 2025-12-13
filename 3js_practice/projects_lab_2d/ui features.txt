@@ -1,0 +1,35 @@
+- Room Info
+    + Room Name
+    + Room ID
+    + Room Floor
+
+- IoT Data
+    + Occupancy
+    + Temperature
+    + AC & Light On/Off
+
+- UX
+    + Dark/Light Mode
+    + Show Ppl or No
+    + Rotations and zooms??
+    + Timestamp
+
+
+
+
+    De Gea
+
+Neville Vidic Ferdinand Robson
+
+Beckham Scholes Keane Best
+    
+    Rooney  Ronaldo
+
+
+            De Gea
+
+Valencia  Varane    De Ligt   Shaw
+
+            Case
+        Bruno   Pogba
+Amad        Ronaldo     Rashford
