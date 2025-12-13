@@ -45,9 +45,10 @@
     </div>
 
     <div id="tracker-ui" class="iot">
-      <h3>IoT Data</h3> <div class="row">
-          <span class="label">Occupancy:</span>
-          <span id="ui-iot-occupancy" class="value">Detecting...</span>
+      <h3>IoT Data</h3> 
+      <div class="row">
+          <span class="label">Time (s): </span>
+          <span id="ui-iot-time">0</span>
       </div>
 
       <div class="row">
@@ -57,14 +58,10 @@
 
       <div class="row">
           <span class="label">AC State:</span>
-          <span id="ui-iot-ac" class="value">On</span>
+          <span id="ui-iot-ac" class="value">--</span>
        
           <span class="label">Lights State:</span>
-          <span id="ui-iot-lights" class="value">On</span>
-      </div>
-      <div class="row" style="margin-top: 10px; border-top: 1px solid #444; padding-top: 5px;">
-          <span class="label" style="font-size: 0.8em">Time (s): </span>
-          <span id="ui-iot-time" class="value" style="font-size: 0.8em">0</span>
+          <span id="ui-iot-lights" class="value">--</span>
       </div>
     </div>
 
@@ -89,6 +86,11 @@
       </div>
     </div>
 
+    <div id="tracker-ui" class="occupancy row">
+      <span>Occupancy:</span>
+      <span id="ui-iot-occupancy" class="value">Detecting...</span>
+    </div>
+
     <style>
       #tracker-ui {
           position: absolute;
@@ -97,29 +99,57 @@
           padding: 15px;
           border-radius: 8px;
           font-family: 'League Spartan';
-          width: 250px;
           pointer-events: none; /* Allows clicking on the 3D scene behind the text */
           border: 1px solid #444;
           z-index: 100; /* Ensures it sits ON TOP of the canvas */
       }
-      #tracker-ui h3 { margin-top: 0; border-bottom: 1px solid #555; padding-bottom: 5px; }
-      .row { display: flex; justify-content: space-between; margin-bottom: 8px; }
-      .label { color: #aaa; }
+      #tracker-ui h3 { margin-top: 0; margin-bottom: 15px; border-bottom: 1px solid #555; font-size: 25px; padding-bottom: 7px; }
+      .row { display: flex; justify-content: space-between; margin-top: 15px; }
+      .label { color: #bbb; }
       .value { font-weight: bold; color: #00ff88; }
 
       .room{
-          top: 20px;
+          bottom: 20px;
           left: 20px;
+          width: 15em;
+          font-size: 1.2em;
       }
 
       .iot{
-          top: 200px;
+          top: 20px;
           left: 20px;
+          width: 15em;
+          font-size: 1.2em;
       }
 
       .controls{
           bottom: 20px;
           right: 20px;
+          width: 15em;
+          font-size: 1.2em;
+      }
+
+      .occupancy {
+          top: 30px;
+          
+          /* 1. CENTERING MAGIC */
+          left: 50%;
+          transform: translateX(-50%);
+          
+          /* 2. Sizing: Fit content instead of full width */
+          width: auto;
+          padding-left: 30px; /* Add extra padding if it feels too tight */
+          padding-right: 30px;
+
+          font-size: 2em;
+          font-weight: bold;
+          color: white;
+
+          /* 3. Text Alignment */
+          justify-content: center; /* Keeps Label and Value together */
+          gap: 20px; /* Space between "Occupancy:" and the number */
+          
+          align-items: center;
       }
     </style>
 

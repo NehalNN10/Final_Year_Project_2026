@@ -81,6 +81,7 @@ function createMarker(z, x, color, radius = 0.1, label = '') {
   const mat = new THREE.MeshBasicMaterial({ color });
   const mesh = new THREE.Mesh(geom, mat);
   mesh.position.set(x, radius, z);
+  mesh.position.y= 0.01;
 
   var alpha = 0.15;
   if(label === '')
@@ -163,11 +164,10 @@ const workbench_v4 = createObject(1.8, 4.75, 4.65, -3.15, baseBenchMat)
 
 const buggy = createObject(1.8, 1, -8, -7.5, baseBuggyMat)
 
-// const Waiz = createMarker(-0.3, 7, 0xff0000);
 
 // const dummy = createMarker(7, 0, 0xffaf00);
 
-const targetPosition = new THREE.Vector3(Waiz.position.x, Waiz.position.y, Waiz.position.z);
+
 
 let angle = 0; // Track the current angle in the orbit
 
@@ -411,83 +411,6 @@ function getRoomInfo(x, z) {
     };
 }
 
-function animate(t) {
-    // FIX: If t is undefined (first manual call), use the current browser time
-    if (t === undefined) {
-        t = performance.now();
-    }
-    
-    requestAnimationFrame(animate);
-
-    // --- UI UPDATE LOGIC ---
-    if (uiName && uiID && uiFloor) {
-        // 1. Get Camera Position
-        const camX = camera.position.x;
-        const camZ = camera.position.z;
-
-        // 2. Get Info Object for this location
-        const info = getRoomInfo(camX, camZ);
-
-        // 3. Update Text
-        uiName.innerText = info.name;
-        uiID.innerText = info.id;
-        uiFloor.innerText = info.floor;
-        
-        // Update Coords (Optional)
-        if(uiCoords) uiCoords.innerText = `${camX.toFixed(1)}, ${camZ.toFixed(1)}`;
-        
-        // Optional: Change color if "N/A"
-        if (info.id === "EXT-01") {
-            uiName.style.color = "#ff4444"; // Red for outside
-        } else {
-            uiName.style.color = "#00ff88"; // Green for inside
-        }
-    }
-
-    if (iotData.length > 0) {
-        // 1. If this is the first frame with data, mark the start time using 't'
-        if (simulationStartTime === null) {
-            simulationStartTime = t;
-        }
-
-        // 2. Calculate seconds using 't' instead of Date.now()
-        // (Current Time - Start Time) / 1000 to get seconds
-        const elapsedSeconds = ((t - simulationStartTime) / 1000).toFixed(1);
-        
-        // Optional: Loop the data every 60 seconds?
-        // const loopedTime = elapsedSeconds % 60; 
-
-        const currentState = getIoTStateAtTime(elapsedSeconds);
-
-        if (currentState) {
-            if (uiOccupancy) uiOccupancy.innerText = currentState.occu || "--";
-            if (uiTemp) uiTemp.innerText = currentState.temp + "°C" || "--";
-            if (uiAC) {
-                uiAC.innerText = currentState.ac || "Off";
-                uiAC.style.color = (currentState.ac === "On") ? "#00ff88" : "#ff4444";
-            }
-             // Add check for lights if you have that column in CSV
-            if (uiLights) {
-                uiLights.innerText = currentState.lights || "Off";
-                uiLights.style.color = (currentState.lights === "On") ? "#00ff88" : "#ff4444";
-            }
-            if (uiTime) {
-                // Formatting: currentState.timestamp might be a long number
-                // Let's make it look nice (e.g., "12.5s")
-                uiTime.innerText = currentState.timestamp + "s";
-            }
-        }
-    }
-
-    params.x = controls.target.x;
-    params.z = controls.target.z;
-
-    controls.update();
-    renderer.render(scene, camera);
-}
-
-animate();
-
 /**
  * Animate tracks from a CSV with columns: frame,track_id,...,three_x,three_z
  * - url: CSV path (default './mapped_tracks (1).csv')
@@ -600,6 +523,10 @@ async function animateTracksFromCsv(url = './mapped_tracks.csv', fps = 10, loop 
           clearInterval(timer);
         }
       }
+
+      const uiOccupancy = document.getElementById('ui-iot-occupancy');
+
+      if (uiOccupancy) uiOccupancy.innerText = detections.length;
     }, interval);
 
     // return control handles if needed
@@ -612,6 +539,119 @@ async function animateTracksFromCsv(url = './mapped_tracks.csv', fps = 10, loop 
     console.error('animateTracksFromCsv error:', err);
   }
 }
+/**
+ * Animate IoT Data frame-by-frame from CSV
+ * Mimics the logic of animateTracksFromCsv for synchronization
+ */
+async function animateIoTFromCsv(url = './iot.csv', fps = 10, loop = true) {
+    // 1. Same CSV Parser
+    function parseCSV(text) {
+        const lines = text.split(/\r?\n/).map(l => l.trim()).filter(Boolean);
+        if (lines.length === 0) return { header: [], rows: [] };
+        const header = lines[0].split(',').map(h => h.trim());
+        const rows = lines.slice(1).map(l => {
+            const cols = l.split(',').map(c => c.trim());
+            const obj = {};
+            header.forEach((h, i) => obj[h] = cols[i] ?? '');
+            return obj;
+        });
+        return { header, rows };
+    }
 
+    try {
+        const resp = await fetch(encodeURI(url), { cache: 'no-store' });
+        if (!resp.ok) {
+            console.warn('IoT CSV fetch failed:', resp.status);
+            return;
+        }
+        const text = await resp.text();
+        const { header, rows } = parseCSV(text);
+
+        // 2. Normalize Data (Handle lowercase/uppercase headers)
+        // We create a clean list of data objects
+        const dataList = rows.map(r => {
+            const cleanObj = {};
+            Object.keys(r).forEach(key => {
+                cleanObj[key.toLowerCase()] = r[key];
+            });
+            return cleanObj;
+        });
+
+        // 3. Get UI Elements
+        // const uiOccupancy = document.getElementById('ui-iot-occupancy');
+        const uiTemp = document.getElementById('ui-iot-temp');
+        const uiAC = document.getElementById('ui-iot-ac');
+        const uiTime = document.getElementById('ui-iot-time');
+
+        // 4. Animation Loop
+        let idx = 0;
+        const interval = 1000 / Math.max(1, fps);
+        
+        const timer = setInterval(() => {
+            const row = dataList[idx];
+
+            if (row) {
+                // Update UI directly from this "frame's" row
+                // if (uiOccupancy) uiOccupancy.innerText = row['occu'];
+                if (uiTemp) uiTemp.innerText = (row['temp']) + "°C";
+                
+                if (uiAC) {
+                    // Check for 'ac' or 'ac_state' depending on your CSV header
+                    const acVal = row['ac'];
+                    uiAC.innerText = acVal;
+                    uiAC.style.color = (acVal === "On") ? "#00ff88" : "#ff4444";
+                }
+
+                if (uiLights) {
+                    // Check for 'Lights' or 'Lights_state' depending on your CSV header
+                    const lightsVal = row['lights'];
+                    uiLights.innerText = lightsVal;
+                    uiLights.style.color = (lightsVal === "On") ? "#00ff88" : "#ff4444";
+                }
+
+                if (uiTime) {
+                    uiTime.innerText = (row['timestamp'] || idx)/10 + "s";
+                }
+            }
+
+            idx++;
+            if (idx >= dataList.length) {
+                if (loop) idx = 0;
+                else clearInterval(timer);
+            }
+        }, interval);
+
+        return { stop() { clearInterval(timer); } };
+
+    } catch (err) {
+        console.error('animateIoTFromCsv error:', err);
+    }
+}
 // start animating immediately (matches your red-dot loop behavior)
 animateTracksFromCsv('../../mapped_tracks_angle_01.csv', 10, true);
+
+animateIoTFromCsv('./iot.csv', 10, true);
+
+function animate(t=0) {
+    if (t === undefined) t = performance.now();
+    requestAnimationFrame(animate);
+    
+    // Only Room Info and Controls update here now
+    if (uiName && uiID && uiFloor) {
+        const camX = camera.position.x;
+        const camZ = camera.position.z;
+        const info = getRoomInfo(camX, camZ);
+        uiName.innerText = info.name;
+        uiID.innerText = info.id;
+        uiFloor.innerText = info.floor;
+        if(uiCoords) uiCoords.innerText = `${camX.toFixed(1)}, ${camZ.toFixed(1)}`;
+        if (info.id === "EXT-01") uiName.style.color = "#ff4444"; 
+        else uiName.style.color = "#00ff88"; 
+    }
+
+    params.x = controls.target.x;
+    params.z = controls.target.z;
+    controls.update();
+    renderer.render(scene, camera);
+}
+animate();
