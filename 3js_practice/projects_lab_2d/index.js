@@ -20,6 +20,7 @@ const camera = new THREE.PerspectiveCamera(fov, aspect, near, far);
 camera.position.set(0, 20, 0);
 
 const scene = new THREE.Scene();
+scene.background = new THREE.Color(0x131314);
 
 const controls = new OrbitControls(camera, renderer.domElement);
 controls.enableDamping = true;
@@ -235,7 +236,8 @@ const params = {
     x: 0,
     z: 0,
     y: 20,
-    rotation: 0 // New Rotation Value (Radians)
+    rotation: 0, // New Rotation Value (Radians)
+    darkMode: true
 };
 
 const camFolder = gui.addFolder('Camera Controls');
@@ -315,6 +317,24 @@ const settings = {
 
 camFolder.add(settings, 'resetView').name("Reset Camera");
 
+camFolder.add(params, 'darkMode')
+    .name("Dark Moode")
+    .onChange((value) => {
+        if (value) {
+            scene.background = new THREE.Color(0x131314);
+
+            doorx3.material = baseGlassMat;
+            doorz1.material = baseGlassMat;
+            doorz2.material = baseGlassMat;
+        }
+        else {
+            scene.background = new THREE.Color(0xffffff);
+            doorx3.material = baseBenchMat;
+            doorz1.material = baseBenchMat;
+            doorz2.material = baseBenchMat;
+        }
+    });
+
 camFolder.open();
 
 // --- ADD THESE LINES ---
@@ -334,6 +354,15 @@ const uiAC = document.getElementById('ui-iot-ac');
 const uiLights = document.getElementById('ui-iot-lights');
 const uiTime = document.getElementById('ui-iot-time');
 
+const uiElements = {
+    uiOccupancy,
+    uiTemp,
+    uiAC,
+    uiLights,
+    uiName,
+    uiID,
+    uiFloor
+};
 async function loadCSV() {
     try {
         const response = await fetch('./iot.csv'); // Make sure path matches exactly
@@ -524,8 +553,6 @@ async function animateTracksFromCsv(url = './mapped_tracks.csv', fps = 10, loop 
         }
       }
 
-      const uiOccupancy = document.getElementById('ui-iot-occupancy');
-
       if (uiOccupancy) uiOccupancy.innerText = detections.length;
     }, interval);
 
@@ -577,11 +604,6 @@ async function animateIoTFromCsv(url = './iot.csv', fps = 10, loop = true) {
             return cleanObj;
         });
 
-        // 3. Get UI Elements
-        // const uiOccupancy = document.getElementById('ui-iot-occupancy');
-        const uiTemp = document.getElementById('ui-iot-temp');
-        const uiAC = document.getElementById('ui-iot-ac');
-        const uiTime = document.getElementById('ui-iot-time');
 
         // 4. Animation Loop
         let idx = 0;
@@ -593,7 +615,14 @@ async function animateIoTFromCsv(url = './iot.csv', fps = 10, loop = true) {
             if (row) {
                 // Update UI directly from this "frame's" row
                 // if (uiOccupancy) uiOccupancy.innerText = row['occu'];
-                if (uiTemp) uiTemp.innerText = (row['temp']) + "°C";
+                if (uiTemp) {
+                    uiTemp.innerText = (row['temp']) + "°C";
+                    if (row['temp'] <= 19) uiTemp.style.color = "#0088ff";
+                    else if (row['temp'] <= 22) uiTemp.style.color = "#00ffff";
+                    else if (row['temp'] <= 27) uiTemp.style.color = "#00ff88";
+                    else if (row['temp'] <= 30) uiTemp.style.color = "#ff8800";
+                    else uiTemp.style.color = "#f00";
+                }
                 
                 if (uiAC) {
                     // Check for 'ac' or 'ac_state' depending on your CSV header
@@ -645,8 +674,19 @@ function animate(t=0) {
         uiID.innerText = info.id;
         uiFloor.innerText = info.floor;
         if(uiCoords) uiCoords.innerText = `${camX.toFixed(1)}, ${camZ.toFixed(1)}`;
-        if (info.id === "EXT-01") uiName.style.color = "#ff4444"; 
-        else uiName.style.color = "#00ff88"; 
+        if (info.id === "N/A") {
+            for (const key in uiElements) {
+                if (uiElements[key]) {
+                    uiElements[key].style.color = "#ff4444";
+                    uiElements[key].innerText = "N/A";
+                }
+            }
+        }
+        else {
+            uiFloor.style.color = "#fff";
+            uiID.style.color = "#fff";
+            uiName.style.color = "#00ff88";
+        }
     }
 
     params.x = controls.target.x;

@@ -1,0 +1,62 @@
+body { margin: 0; overflow: hidden; } /* Added overflow:hidden to stop scrollbars */
+
+.tracker-ui {
+    position: absolute;
+    background: rgba(0, 0, 0, 0.8);
+    color: white;
+    padding: 15px;
+    border-radius: 8px;
+    font-family: 'League Spartan';
+    pointer-events: none; /* Allows clicking on the 3D scene behind the text */
+    border: 1px solid #444;
+    z-index: 100; /* Ensures it sits ON TOP of the canvas */
+}
+.tracker-ui h3 { margin-top: 0; margin-bottom: 15px; border-bottom: 1px solid #555; font-size: 25px; padding-bottom: 7px; }
+.row { display: flex; justify-content: space-between; margin-top: 15px; }
+.label { color: #ddd; }
+.bold { font-weight: bold;}
+.value { color: #00ff88; }
+
+#room{
+    bottom: 20px;
+    left: 20px;
+    width: 15em;
+    font-size: 1.2em;
+}
+
+#iot{
+    top: 20px;
+    left: 20px;
+    width: 15em;
+    font-size: 1.2em;
+}
+
+#controls{
+    bottom: 20px;
+    right: 20px;
+    width: 15em;
+    font-size: 1.2em;
+}
+
+#occupancy {
+    top: 30px;
+    
+    /* 1. CENTERING MAGIC */
+    left: 50%;
+    transform: translateX(-50%);
+    
+    /* 2. Sizing: Fit content instead of full width */
+    width: auto;
+    padding-left: 30px; /* Add extra padding if it feels too tight */
+    padding-right: 30px;
+
+    font-size: 2em;
+    font-weight: bold;
+    color: white;
+
+    /* 3. Text Alignment */
+    justify-content: center; /* Keeps Label and Value together */
+    gap: 20px; /* Space between "Occupancy:" and the number */
+    
+    align-items: center;
+}

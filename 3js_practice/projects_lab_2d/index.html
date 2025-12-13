@@ -3,14 +3,14 @@
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=League+Spartan:wght@100..900&display=swap" rel="stylesheet">
-    <title>Three.js App</title>
-    <style>
-      body { margin: 0; overflow: hidden; } /* Added overflow:hidden to stop scrollbars */
-    </style>
-    
+    <link rel="stylesheet" href="index.css" />
+
+    <title>HU Digital Twin</title>
+
     <script type="importmap">
       {
         "imports": {
@@ -19,53 +19,64 @@
         }
       }
     </script>
+
     <script type="text/javascript" src="../dat.gui.min.js"></script>
   </head>
-  <body>
-    <div id="tracker-ui" class="room">
-      <h3>Room Info</h3> <div class="row">
-          <span class="label">Room Name:</span>
-          <span id="ui-room-name" class="value">Detecting...</span>
-      </div>
 
+  <body>
+
+    <!-- UI for Room Data -->
+    <div class="tracker-ui" id="iot">
+
+      <!-- Room Name -->
+      <h3 class="row">
+        <span class="label">Room:</span>
+        <span id="ui-room-name" class="bold">--</span>
+      </h3>
+
+      <!-- Room ID -->
       <div class="row">
           <span class="label">Room ID:</span>
-          <span id="ui-room-id" class="value">--</span>
+          <span id="ui-room-id" class="bold">--</span>
       </div>
 
+      <!-- Room Floor -->
       <div class="row">
           <span class="label">Room Floor:</span>
-          <span id="ui-room-floor" class="value">--</span>
+          <span id="ui-room-floor" class="bold">--</span>
       </div>
 
-      <div class="row" style="margin-top: 10px; border-top: 1px solid #444; padding-top: 5px;">
-          <span class="label" style="font-size: 0.8em">Coords:</span>
-          <span id="ui-coords" class="value" style="font-size: 0.8em">0, 0</span>
-      </div>
-    </div>
-
-    <div id="tracker-ui" class="iot">
-      <h3>IoT Data</h3> 
-      <div class="row">
-          <span class="label">Time (s): </span>
-          <span id="ui-iot-time">0</span>
-      </div>
-
-      <div class="row">
+      <!-- Room Temperature -->
+      <div class="row" style="margin-top: 15px; border-top: 1px solid #444; padding-top: 15px;">
           <span class="label">Temperature:</span>
-          <span id="ui-iot-temp">21</span>
+          <span id="ui-iot-temp" class="bold">">??</span>
       </div>
 
+      <!-- Room AC & Light State -->
       <div class="row">
           <span class="label">AC State:</span>
-          <span id="ui-iot-ac" class="value">--</span>
+          <span id="ui-iot-ac" class="bold">--</span>
        
           <span class="label">Lights State:</span>
-          <span id="ui-iot-lights" class="value">--</span>
+          <span id="ui-iot-lights" class="bold">--</span>
       </div>
+
+      <!-- Time & Coordinates -->
+      <div class="row" style="margin-top: 15px; border-top: 1px solid #444; padding-top: 15px;">
+          <span class="label">Time:</span>
+          <span id="ui-iot-time" class="bold value">??</span>
+      </div>
+
+      <div class="row">
+          <span class="label">Coordinates:</span>
+          <span id="ui-coords" class="bold value">??</span>
+      </div>
+
     </div>
 
-    <div id="tracker-ui" class="controls">
+    <!-- Controls Explanation -->
+    <div class="tracker-ui" id="controls">
+
       <h3>Controls</h3> <div class="row">
           <span class="label">Zoom:</span>
           <span id="ui-room-name">Scroll Wheel/Pinch</span>
@@ -82,77 +93,20 @@
       </div>
 
       <div class="row" style="margin-top: 10px; border-top: 1px solid #444; padding-top: 5px;">
-        <span class="label" style="font-size: 0.8em">Model can also be controlled via the "Camera Controls" panel at the top right.</span>
+        <span style="font-size: 0.8em">Model can also be controlled via the "Camera Controls" panel at the top right.</span>
       </div>
+
     </div>
 
-    <div id="tracker-ui" class="occupancy row">
+    <div class="tracker-ui row" id="occupancy">
+
       <span>Occupancy:</span>
-      <span id="ui-iot-occupancy" class="value">Detecting...</span>
+      <span id="ui-iot-occupancy" class="bold value">Detecting...</span>
+
     </div>
-
-    <style>
-      #tracker-ui {
-          position: absolute;
-          background: rgba(0, 0, 0, 0.8);
-          color: white;
-          padding: 15px;
-          border-radius: 8px;
-          font-family: 'League Spartan';
-          pointer-events: none; /* Allows clicking on the 3D scene behind the text */
-          border: 1px solid #444;
-          z-index: 100; /* Ensures it sits ON TOP of the canvas */
-      }
-      #tracker-ui h3 { margin-top: 0; margin-bottom: 15px; border-bottom: 1px solid #555; font-size: 25px; padding-bottom: 7px; }
-      .row { display: flex; justify-content: space-between; margin-top: 15px; }
-      .label { color: #bbb; }
-      .value { font-weight: bold; color: #00ff88; }
-
-      .room{
-          bottom: 20px;
-          left: 20px;
-          width: 15em;
-          font-size: 1.2em;
-      }
-
-      .iot{
-          top: 20px;
-          left: 20px;
-          width: 15em;
-          font-size: 1.2em;
-      }
-
-      .controls{
-          bottom: 20px;
-          right: 20px;
-          width: 15em;
-          font-size: 1.2em;
-      }
-
-      .occupancy {
-          top: 30px;
-          
-          /* 1. CENTERING MAGIC */
-          left: 50%;
-          transform: translateX(-50%);
-          
-          /* 2. Sizing: Fit content instead of full width */
-          width: auto;
-          padding-left: 30px; /* Add extra padding if it feels too tight */
-          padding-right: 30px;
-
-          font-size: 2em;
-          font-weight: bold;
-          color: white;
-
-          /* 3. Text Alignment */
-          justify-content: center; /* Keeps Label and Value together */
-          gap: 20px; /* Space between "Occupancy:" and the number */
-          
-          align-items: center;
-      }
-    </style>
 
     <script type="module" src="index.js"></script>
+
   </body>
+  
 </html>
