@@ -686,6 +686,7 @@ function animate(t=0) {
             uiFloor.style.color = "#fff";
             uiID.style.color = "#fff";
             uiName.style.color = "#00ff88";
+            uiOccupancy.style.color = "#00ff88";
         }
     }
 
