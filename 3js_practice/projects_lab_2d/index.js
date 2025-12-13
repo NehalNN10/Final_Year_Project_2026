@@ -1,6 +1,9 @@
 import * as THREE from "three";
 import { OrbitControls } from "jsm/controls/OrbitControls.js";
 
+
+const gui = new dat.GUI();
+
 const w = window.innerWidth;
 const h = window.innerHeight;
 
@@ -164,6 +167,8 @@ const buggy = createObject(1.8, 1, -8, -7.5, baseBuggyMat)
 
 // const dummy = createMarker(7, 0, 0xffaf00);
 
+const targetPosition = new THREE.Vector3(Waiz.position.x, Waiz.position.y, Waiz.position.z);
+
 let angle = 0; // Track the current angle in the orbit
 
 function mockApiCall() {
@@ -223,8 +228,260 @@ async function fetchAndMoveMarker() {
 // ==========================================
 // setInterval(fetchAndMoveMarker, 100); // 100ms = 0.1 seconds
 
-function animate (t = 0) {
+scene.rotateY(Math.PI/2)
+
+// 1. Create the Folder
+const params = {
+    x: 0,
+    z: 0,
+    y: 20,
+    rotation: 0 // New Rotation Value (Radians)
+};
+
+const camFolder = gui.addFolder('Camera Controls');
+
+
+camFolder.add(params, 'rotation', -Math.PI, Math.PI, 0.1)
+    .name("Rotate View")
+    .listen() // Syncs if user rotates with mouse
+    .onChange((angle) => {
+        // 1. Calculate how far the camera is from the target (Radius)
+        // We use Pythagorean theorem in 2D (X and Z only)
+        const dx = camera.position.x - controls.target.x;
+        const dz = camera.position.z - controls.target.z;
+        const radius = Math.sqrt(dx * dx + dz * dz);
+
+        // 2. Set new Camera Position based on the Angle and Radius
+        // x = center + r * sin(a)
+        // z = center + r * cos(a)
+        camera.position.x = controls.target.x + radius * Math.sin(angle);
+        camera.position.z = controls.target.z + radius * Math.cos(angle);
+        
+        // 3. Force controls to update
+        controls.update();
+    });
+
+// --- X AXIS (Left/Right) ---
+camFolder.add(params, 'x', -50, 50, 0.1)
+    .name("Position X")
+    .listen() // Update slider if user drags mouse
+    .onChange((value) => {
+        // Calculate how much the slider moved
+        const delta = value - controls.target.x;
+        
+        // Move the Target (Anchor)
+        controls.target.x = value;
+        
+        // Move the Camera by the EXACT same amount
+        camera.position.x += delta;
+    });
+
+// --- Z AXIS (Forward/Back) ---
+camFolder.add(params, 'z', -50, 50, 0.1)
+    .name("Position Z")
+    .listen()
+    .onChange((value) => {
+        const delta = value - controls.target.z;
+        controls.target.z = value;
+        camera.position.z += delta;
+    });
+
+// --- Y AXIS (Zoom/Height) ---
+// For height, we usually just want to move the camera up/down
+camFolder.add(camera.position, 'y', 1, 100, 0.1)
+    .name("Zoom Height")
+    .listen();
+
+camFolder.open();
+
+// 3. Optional: Add a Reset Button
+const settings = {
+    resetView: function() {
+        // 1. Reset the variables bound to the sliders
+        params.x = 0;
+        params.z = 0;
+        params.rotation = 0; // <--- This updates the slider visually
+
+        // 2. Reset the Camera
+        // We set Z to 0.1 instead of 0. This tiny offset forces the math
+        // to calculate the angle as "0" immediately.
+        camera.position.set(0, 20, 0.1);
+        
+        // 3. Reset the Focus Point
+        camera.lookAt(0, 0, 0);
+        controls.target.set(0, 0, 0);
+    }
+};
+
+camFolder.add(settings, 'resetView').name("Reset Camera");
+
+camFolder.open();
+
+// --- ADD THESE LINES ---
+// Grab the new HTML elements
+const uiName = document.getElementById('ui-room-name');
+const uiID = document.getElementById('ui-room-id');
+const uiFloor = document.getElementById('ui-room-floor');
+const uiCoords = document.getElementById('ui-coords');
+
+let iotData = [];
+let simulationStartTime = null; // When did the animation start?
+
+// 2. UI ELEMENTS
+const uiOccupancy = document.getElementById('ui-iot-occupancy');
+const uiTemp = document.getElementById('ui-iot-temp');
+const uiAC = document.getElementById('ui-iot-ac');
+const uiLights = document.getElementById('ui-iot-lights');
+const uiTime = document.getElementById('ui-iot-time');
+
+async function loadCSV() {
+    try {
+        const response = await fetch('./iot.csv'); // Make sure path matches exactly
+        const text = await response.text();
+        
+        // Simple Parser
+        const rows = text.split('\n').map(row => row.trim()).filter(row => row);
+        const headers = rows[0].split(','); // Assumes first row is headers
+        
+        // Inside loadCSV...
+        iotData = rows.slice(1).map(row => {
+            const values = row.split(',');
+            const entry = {};
+            headers.forEach((header, index) => {
+                // FIX: Force lowercase here to prevent matching errors
+                const cleanHeader = header.trim().toLowerCase(); 
+                const cleanValue = values[index] ? values[index].trim() : "";
+                entry[cleanHeader] = cleanValue;
+            });
+            return entry;
+        });
+        
+        console.log("CSV Loaded:", iotData);
+        
+    } catch (err) {
+        console.error("Error loading CSV:", err);
+    }
+}
+
+// Call the loader
+loadCSV();
+
+function getIoTStateAtTime(elapsedSeconds) {
+    if (iotData.length === 0) return null;
+
+    let activeRow = iotData[0];
+    
+    // Get the start time of the data (the timestamp of the first row)
+    // We treat this as "Time 0"
+    const dataStartTime = parseFloat(iotData[0].timestamp);
+
+    for (let i = 0; i < iotData.length; i++) {
+        const rowRawTime = parseFloat(iotData[i].timestamp);
+        
+        // Normalize: How many seconds after the start is this row?
+        const relativeRowTime = rowRawTime - dataStartTime;
+        
+        if (relativeRowTime <= elapsedSeconds) {
+            activeRow = iotData[i];
+        } else {
+            break;
+        }
+    }
+    return activeRow;
+}
+
+// Function to determine the name of the location based on X/Z coords
+function getRoomInfo(x, z) {
+    // 1. Check for "C-007" (The big room)
+    if (z >= -8.75 && z <= 8.75) {
+        if (x >= -9 && x <= 9) {
+            return {
+                name: "Projects Lab",
+                id: "C-007",
+                floor: "Lower Ground Floor"
+            };
+        }
+    }
+
+    // 2. Default (Outside)
+    return {
+        name: "Outside Bounds",
+        id: "N/A",
+        floor: "N/A"
+    };
+}
+
+function animate(t) {
+    // FIX: If t is undefined (first manual call), use the current browser time
+    if (t === undefined) {
+        t = performance.now();
+    }
+    
     requestAnimationFrame(animate);
+
+    // --- UI UPDATE LOGIC ---
+    if (uiName && uiID && uiFloor) {
+        // 1. Get Camera Position
+        const camX = camera.position.x;
+        const camZ = camera.position.z;
+
+        // 2. Get Info Object for this location
+        const info = getRoomInfo(camX, camZ);
+
+        // 3. Update Text
+        uiName.innerText = info.name;
+        uiID.innerText = info.id;
+        uiFloor.innerText = info.floor;
+        
+        // Update Coords (Optional)
+        if(uiCoords) uiCoords.innerText = `${camX.toFixed(1)}, ${camZ.toFixed(1)}`;
+        
+        // Optional: Change color if "N/A"
+        if (info.id === "EXT-01") {
+            uiName.style.color = "#ff4444"; // Red for outside
+        } else {
+            uiName.style.color = "#00ff88"; // Green for inside
+        }
+    }
+
+    if (iotData.length > 0) {
+        // 1. If this is the first frame with data, mark the start time using 't'
+        if (simulationStartTime === null) {
+            simulationStartTime = t;
+        }
+
+        // 2. Calculate seconds using 't' instead of Date.now()
+        // (Current Time - Start Time) / 1000 to get seconds
+        const elapsedSeconds = ((t - simulationStartTime) / 1000).toFixed(1);
+        
+        // Optional: Loop the data every 60 seconds?
+        // const loopedTime = elapsedSeconds % 60; 
+
+        const currentState = getIoTStateAtTime(elapsedSeconds);
+
+        if (currentState) {
+            if (uiOccupancy) uiOccupancy.innerText = currentState.occu || "--";
+            if (uiTemp) uiTemp.innerText = currentState.temp + "°C" || "--";
+            if (uiAC) {
+                uiAC.innerText = currentState.ac || "Off";
+                uiAC.style.color = (currentState.ac === "On") ? "#00ff88" : "#ff4444";
+            }
+             // Add check for lights if you have that column in CSV
+            if (uiLights) {
+                uiLights.innerText = currentState.lights || "Off";
+                uiLights.style.color = (currentState.lights === "On") ? "#00ff88" : "#ff4444";
+            }
+            if (uiTime) {
+                // Formatting: currentState.timestamp might be a long number
+                // Let's make it look nice (e.g., "12.5s")
+                uiTime.innerText = currentState.timestamp + "s";
+            }
+        }
+    }
+
+    params.x = controls.target.x;
+    params.z = controls.target.z;
+
     controls.update();
     renderer.render(scene, camera);
 }
