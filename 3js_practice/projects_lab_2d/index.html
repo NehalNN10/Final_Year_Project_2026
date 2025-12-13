@@ -3,22 +3,126 @@
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>Getting Started with Three.js</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=League+Spartan:wght@100..900&display=swap" rel="stylesheet">
+    <title>Three.js App</title>
     <style>
-      body {
-        margin: 0;
-      }
+      body { margin: 0; overflow: hidden; } /* Added overflow:hidden to stop scrollbars */
     </style>
+    
     <script type="importmap">
-			{
-				"imports": {
-					"three": "https://cdn.jsdelivr.net/npm/three@0.161.0/build/three.module.js",
+      {
+        "imports": {
+          "three": "https://cdn.jsdelivr.net/npm/three@0.161.0/build/three.module.js",
           "jsm/": "https://cdn.jsdelivr.net/npm/three@0.161.0/examples/jsm/"
         }
-			}
-		</script>
+      }
+    </script>
+    <script type="text/javascript" src="../dat.gui.min.js"></script>
   </head>
   <body>
+    <div id="tracker-ui" class="room">
+      <h3>Room Info</h3> <div class="row">
+          <span class="label">Room Name:</span>
+          <span id="ui-room-name" class="value">Detecting...</span>
+      </div>
+
+      <div class="row">
+          <span class="label">Room ID:</span>
+          <span id="ui-room-id" class="value">--</span>
+      </div>
+
+      <div class="row">
+          <span class="label">Room Floor:</span>
+          <span id="ui-room-floor" class="value">--</span>
+      </div>
+
+      <div class="row" style="margin-top: 10px; border-top: 1px solid #444; padding-top: 5px;">
+          <span class="label" style="font-size: 0.8em">Coords:</span>
+          <span id="ui-coords" class="value" style="font-size: 0.8em">0, 0</span>
+      </div>
+    </div>
+
+    <div id="tracker-ui" class="iot">
+      <h3>IoT Data</h3> <div class="row">
+          <span class="label">Occupancy:</span>
+          <span id="ui-iot-occupancy" class="value">Detecting...</span>
+      </div>
+
+      <div class="row">
+          <span class="label">Temperature:</span>
+          <span id="ui-iot-temp">21</span>
+      </div>
+
+      <div class="row">
+          <span class="label">AC State:</span>
+          <span id="ui-iot-ac" class="value">On</span>
+       
+          <span class="label">Lights State:</span>
+          <span id="ui-iot-lights" class="value">On</span>
+      </div>
+      <div class="row" style="margin-top: 10px; border-top: 1px solid #444; padding-top: 5px;">
+          <span class="label" style="font-size: 0.8em">Time (s): </span>
+          <span id="ui-iot-time" class="value" style="font-size: 0.8em">0</span>
+      </div>
+    </div>
+
+    <div id="tracker-ui" class="controls">
+      <h3>Controls</h3> <div class="row">
+          <span class="label">Zoom:</span>
+          <span id="ui-room-name">Scroll Wheel/Pinch</span>
+      </div>
+
+      <div class="row">
+          <span class="label">Move:</span>
+          <span id="ui-room-id">Right Click & Pan</span>
+      </div>
+
+      <div class="row">
+          <span class="label">Rotate:</span>
+          <span id="ui-room-floor">Left Click & Pan</span>
+      </div>
+
+      <div class="row" style="margin-top: 10px; border-top: 1px solid #444; padding-top: 5px;">
+        <span class="label" style="font-size: 0.8em">Model can also be controlled via the "Camera Controls" panel at the top right.</span>
+      </div>
+    </div>
+
+    <style>
+      #tracker-ui {
+          position: absolute;
+          background: rgba(0, 0, 0, 0.8);
+          color: white;
+          padding: 15px;
+          border-radius: 8px;
+          font-family: 'League Spartan';
+          width: 250px;
+          pointer-events: none; /* Allows clicking on the 3D scene behind the text */
+          border: 1px solid #444;
+          z-index: 100; /* Ensures it sits ON TOP of the canvas */
+      }
+      #tracker-ui h3 { margin-top: 0; border-bottom: 1px solid #555; padding-bottom: 5px; }
+      .row { display: flex; justify-content: space-between; margin-bottom: 8px; }
+      .label { color: #aaa; }
+      .value { font-weight: bold; color: #00ff88; }
+
+      .room{
+          top: 20px;
+          left: 20px;
+      }
+
+      .iot{
+          top: 200px;
+          left: 20px;
+      }
+
+      .controls{
+          bottom: 20px;
+          right: 20px;
+      }
+    </style>
+
     <script type="module" src="index.js"></script>
   </body>
 </html>
