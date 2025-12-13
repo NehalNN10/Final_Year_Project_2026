@@ -337,6 +337,41 @@ camFolder.add(params, 'darkMode')
 
 camFolder.open();
 
+// --- ANIMATION STATE ---
+const playback = {
+    frame: 0,        // Current frame
+    maxFrames: 0,    // Will be set after data loads
+    playing: true,   // Play/Pause toggle
+    speed: 1         // How fast it plays
+};
+
+const animFolder = gui.addFolder('Playback Controls');
+
+// We will update the 'max' of this slider once data loads
+const frameController = animFolder.add(playback, 'frame', 0, 100, 1)
+    .name("Frame Scrubber")
+    .listen() // Important: Makes the slider move automatically
+    .onChange((val) => {
+        // Allow manual seeking
+        renderFrame(Math.floor(val));
+    });
+
+const play = {
+    resetPlayback: function() {
+        // 1. Reset the variables bound to the sliders
+        playback.frame = 0;
+        playback.playing = true;
+        playback.speed = 1;
+
+    }
+};
+
+
+animFolder.add(playback, 'playing').name("Play / Pause");
+animFolder.add(playback, 'speed', 0.1, 5, 0.1).name("Speed");
+animFolder.add(play, 'resetPlayback').name("Reset Playback");
+animFolder.open();
+
 // --- ADD THESE LINES ---
 // Grab the new HTML elements
 const uiName = document.getElementById('ui-room-name');
@@ -363,60 +398,66 @@ const uiElements = {
     uiID,
     uiFloor
 };
-async function loadCSV() {
-    try {
-        const response = await fetch('./iot.csv'); // Make sure path matches exactly
-        const text = await response.text();
-        
-        // Simple Parser
-        const rows = text.split('\n').map(row => row.trim()).filter(row => row);
-        const headers = rows[0].split(','); // Assumes first row is headers
-        
-        // Inside loadCSV...
-        iotData = rows.slice(1).map(row => {
-            const values = row.split(',');
-            const entry = {};
-            headers.forEach((header, index) => {
-                // FIX: Force lowercase here to prevent matching errors
-                const cleanHeader = header.trim().toLowerCase(); 
-                const cleanValue = values[index] ? values[index].trim() : "";
-                entry[cleanHeader] = cleanValue;
-            });
-            return entry;
+
+function renderFrame(index) {
+    // A. UPDATE TRACKS ---------------------------
+    // 1. Hide all markers first
+    trackMarkers.forEach(m => m.visible = false);
+
+    // 2. Get the specific frame number from our sorted list
+    // (Check bounds to prevent errors)
+    if (index < globalTrackFrames.length) {
+        const realFrameNumber = globalTrackFrames[index];
+        const detections = globalTrackData.get(realFrameNumber) || [];
+
+        // 3. Move and Show active markers
+        detections.forEach(d => {
+            const marker = trackMarkers.get(d.id);
+            if (marker) {
+                marker.position.x = d.z; // Swap X/Z if needed based on your previous code
+                marker.position.z = d.x;
+                marker.visible = true;
+            }
         });
         
-        console.log("CSV Loaded:", iotData);
-        
-    } catch (err) {
-        console.error("Error loading CSV:", err);
+        if (uiOccupancy) uiOccupancy.innerText = detections.length;
     }
-}
 
-// Call the loader
-loadCSV();
-
-function getIoTStateAtTime(elapsedSeconds) {
-    if (iotData.length === 0) return null;
-
-    let activeRow = iotData[0];
-    
-    // Get the start time of the data (the timestamp of the first row)
-    // We treat this as "Time 0"
-    const dataStartTime = parseFloat(iotData[0].timestamp);
-
-    for (let i = 0; i < iotData.length; i++) {
-        const rowRawTime = parseFloat(iotData[i].timestamp);
+    // B. UPDATE IOT UI ---------------------------
+    if (index < globalIoTData.length) {
+        const row = globalIoTData[index];
         
-        // Normalize: How many seconds after the start is this row?
-        const relativeRowTime = rowRawTime - dataStartTime;
+        // Temp
+        if (uiTemp) {
+            const t = parseFloat(row['temp']);
+            uiTemp.innerText = t + "°C";
+            // Color Logic
+            if (t <= 19) uiTemp.style.color = "#0088ff";
+            else if (t <= 22) uiTemp.style.color = "#00ffff";
+            else if (t <= 27) uiTemp.style.color = "#00ff88";
+            else if (t <= 30) uiTemp.style.color = "#ff8800";
+            else uiTemp.style.color = "#f00";
+        }
         
-        if (relativeRowTime <= elapsedSeconds) {
-            activeRow = iotData[i];
-        } else {
-            break;
+        // AC
+        if (uiAC) {
+            const ac = row['ac']; 
+            uiAC.innerText = ac;
+            uiAC.style.color = (ac === "On") ? "#00ff88" : "#ff4444";
+        }
+
+        // Lights
+        if (uiLights) {
+            const l = row['lights'];
+            uiLights.innerText = l;
+            uiLights.style.color = (l === "On") ? "#00ff88" : "#ff4444";
+        }
+        
+        // Time
+        if (uiTime) {
+            uiTime.innerText = ((row['timestamp'] || index)/10).toFixed(1) + "s";
         }
     }
-    return activeRow;
 }
 
 // Function to determine the name of the location based on X/Z coords
@@ -446,224 +487,130 @@ function getRoomInfo(x, z) {
  * - fps: frames per second (default 10)
  * - loop: whether to loop playback (default true)
  */
-async function animateTracksFromCsv(url = './mapped_tracks.csv', fps = 10, loop = true) {
-  // simple CSV parser (assumes no complex quoting)
-  function parseCSV(text) {
-    const lines = text.split(/\r?\n/).map(l => l.trim()).filter(Boolean);
-    if (lines.length === 0) return { header: [], rows: [] };
-    const header = lines[0].split(',').map(h => h.trim());
-    const rows = lines.slice(1).map(l => {
-      const cols = l.split(',').map(c => c.trim());
-      const obj = {};
-      header.forEach((h, i) => obj[h] = cols[i] ?? '');
-      return obj;
-    });
-    return { header, rows };
-  }
+// Global storage for the data
+let globalTrackFrames = []; // Array of frame numbers
+let globalTrackData = new Map(); // Map<FrameNumber, ListOfDetections>
+let globalIoTData = [];     // Array of IoT rows
+let trackMarkers = new Map(); // Map<TrackID, Mesh>
 
-  // fetch CSV
-  try {
-    const resp = await fetch(encodeURI(url), { cache: 'no-store' });
-    if (!resp.ok) {
-      console.warn('CSV fetch failed:', resp.status, url);
-      return;
-    }
-    const text = await resp.text();
-    const { header, rows } = parseCSV(text);
-
-    // column names expected in your mapped_tracks: 'frame','track_id','three_x','three_z'
-    const hdrLower = header.map(h => h.toLowerCase());
-    const frameKey = header[hdrLower.indexOf('frame')];
-    const idKey = header[hdrLower.indexOf('track_id')];
-    const xKey = header[hdrLower.indexOf('three_x')];
-    const zKey = header[hdrLower.indexOf('three_z')];
-
-    if (!frameKey || !idKey || !xKey || !zKey) {
-      console.error('CSV missing required columns. Found header:', header);
-      return;
-    }
-
-    // build frames map: frame -> detections[]
-    const framesMap = new Map();
-    const trackIds = new Set();
-    for (const r of rows) {
-      const frame = parseInt(r[frameKey], 10);
-      if (Number.isNaN(frame)) continue;
-      const id = String(r[idKey]);
-      const x = parseFloat(r[xKey]);
-      const z = parseFloat(r[zKey]);
-      if (Number.isNaN(x) || Number.isNaN(z)) continue;
-      if (!framesMap.has(frame)) framesMap.set(frame, []);
-      framesMap.get(frame).push({ id, x, z });
-      trackIds.add(id);
-    }
-
-    if (framesMap.size === 0) {
-      console.warn('No valid frames found in CSV.');
-      return;
-    }
-
-    const frames = Array.from(framesMap.keys()).sort((a, b) => a - b);
-
-    // color generator per id (stable)
-    function colorFromId(id) {
-      let hash = 0;
-      for (let i = 0; i < id.length; i++) hash = id.charCodeAt(i) + ((hash << 5) - hash);
-      const h = Math.abs(hash) % 360;
-      const c = new THREE.Color(`hsl(${h} 70% 50%)`);
-      return c.getHex();
-    }
-
-    // create marker for each track id (hidden initially)
-    const markers = new Map();
-    for (const id of trackIds) {
-      const color = colorFromId(id);
-      var viewColor = 0xff0000;
-      // place at origin; will set visible=false until first appearance
-      const m = createMarker(0, 0, viewColor, 0.2, id); // createMarker(z, x, color)
-      m.visible = false;
-      m.name = `track_${id}`;
-      markers.set(id, m);
-    }
-
-    // animation loop
-    let idx = 0;
-    const interval = 1000 / Math.max(1, fps);
-    const timer = setInterval(() => {
-      const frameNo = frames[idx];
-      const detections = framesMap.get(frameNo) || [];
-
-      // hide all markers first
-      for (const m of markers.values()) m.visible = false;
-
-      // place detections
-      for (const d of detections) {
-        const marker = markers.get(d.id);
-        if (!marker) continue;
-        marker.position.x = d.z;
-        marker.position.z = d.x;
-        marker.visible = true;
-      }
-
-      idx++;
-      if (idx >= frames.length) {
-        if (loop) idx = 0;
-        else {
-          clearInterval(timer);
-        }
-      }
-
-      if (uiOccupancy) uiOccupancy.innerText = detections.length;
-    }, interval);
-
-    // return control handles if needed
-    return {
-      stop() { clearInterval(timer); },
-      framesCount: frames.length
-    };
-
-  } catch (err) {
-    console.error('animateTracksFromCsv error:', err);
-  }
-}
-/**
- * Animate IoT Data frame-by-frame from CSV
- * Mimics the logic of animateTracksFromCsv for synchronization
- */
-async function animateIoTFromCsv(url = './iot.csv', fps = 10, loop = true) {
-    // 1. Same CSV Parser
-    function parseCSV(text) {
-        const lines = text.split(/\r?\n/).map(l => l.trim()).filter(Boolean);
-        if (lines.length === 0) return { header: [], rows: [] };
-        const header = lines[0].split(',').map(h => h.trim());
-        const rows = lines.slice(1).map(l => {
-            const cols = l.split(',').map(c => c.trim());
-            const obj = {};
-            header.forEach((h, i) => obj[h] = cols[i] ?? '');
-            return obj;
-        });
-        return { header, rows };
-    }
-
+async function loadSimulationData() {
+    
+    // --- 1. LOAD TRACKS (Robuster Version) ---
     try {
-        const resp = await fetch(encodeURI(url), { cache: 'no-store' });
-        if (!resp.ok) {
-            console.warn('IoT CSV fetch failed:', resp.status);
+        // Double check this path! If the file is in the SAME folder, remove the ".."
+        // const tResp = await fetch('./mapped_tracks_angle_01.csv'); 
+        const tResp = await fetch('./mapped_tracks.csv'); 
+        
+        if (!tResp.ok) throw new Error(`Track CSV not found: ${tResp.statusText}`);
+
+        const tText = await tResp.text();
+        const tLines = tText.split('\n').filter(l => l.trim());
+
+        if (tLines.length < 2) throw new Error("Track CSV is empty or missing headers");
+
+        // 1. Find the correct column indices by name
+        const headers = tLines[0].split(',').map(h => h.trim().toLowerCase());
+        
+        // We look for 'frame', 'track_id' (or 'id'), 'three_x' (or 'x'), 'three_z' (or 'z')
+        const frameIdx = headers.indexOf('frame');
+        const idIdx = headers.findIndex(h => h.includes('id') || h.includes('track'));
+        const xIdx = headers.findIndex(h => h.includes('three_x') || h === 'x');
+        const zIdx = headers.findIndex(h => h.includes('three_z') || h === 'z');
+
+        if (frameIdx === -1 || xIdx === -1 || zIdx === -1) {
+            console.error("Missing columns in CSV:", headers);
             return;
         }
-        const text = await resp.text();
-        const { header, rows } = parseCSV(text);
 
-        // 2. Normalize Data (Handle lowercase/uppercase headers)
-        // We create a clean list of data objects
-        const dataList = rows.map(r => {
-            const cleanObj = {};
-            Object.keys(r).forEach(key => {
-                cleanObj[key.toLowerCase()] = r[key];
-            });
-            return cleanObj;
+        // 2. Process Rows
+        const rows = tLines.slice(1); // Skip header
+        rows.forEach(line => {
+            const cols = line.split(',');
+            // Use the indices we found above
+            const frame = parseInt(cols[frameIdx]);
+            const id = cols[idIdx];
+            const x = parseFloat(cols[xIdx]);
+            const z = parseFloat(cols[zIdx]);
+            
+            if (isNaN(frame) || isNaN(x) || isNaN(z)) return; // Skip bad data
+
+            if (!globalTrackData.has(frame)) globalTrackData.set(frame, []);
+            globalTrackData.get(frame).push({ id, x, z });
+
+            // Create Marker if needed
+            if (!trackMarkers.has(id)) {
+                let hash = 0;
+                for (let i = 0; i < id.length; i++) hash = id.charCodeAt(i) + ((hash << 5) - hash);
+                const color = new THREE.Color(`hsl(${Math.abs(hash) % 360}, 70%, 50%)`);
+                
+                const marker = createMarker(0, 0, color.getHex(), 0.2, id);
+                marker.visible = false;
+                trackMarkers.set(id, marker);
+            }
         });
 
-
-        // 4. Animation Loop
-        let idx = 0;
-        const interval = 1000 / Math.max(1, fps);
+        globalTrackFrames = Array.from(globalTrackData.keys()).sort((a, b) => a - b);
         
-        const timer = setInterval(() => {
-            const row = dataList[idx];
-
-            if (row) {
-                // Update UI directly from this "frame's" row
-                // if (uiOccupancy) uiOccupancy.innerText = row['occu'];
-                if (uiTemp) {
-                    uiTemp.innerText = (row['temp']) + "°C";
-                    if (row['temp'] <= 19) uiTemp.style.color = "#0088ff";
-                    else if (row['temp'] <= 22) uiTemp.style.color = "#00ffff";
-                    else if (row['temp'] <= 27) uiTemp.style.color = "#00ff88";
-                    else if (row['temp'] <= 30) uiTemp.style.color = "#ff8800";
-                    else uiTemp.style.color = "#f00";
-                }
-                
-                if (uiAC) {
-                    // Check for 'ac' or 'ac_state' depending on your CSV header
-                    const acVal = row['ac'];
-                    uiAC.innerText = acVal;
-                    uiAC.style.color = (acVal === "On") ? "#00ff88" : "#ff4444";
-                }
-
-                if (uiLights) {
-                    // Check for 'Lights' or 'Lights_state' depending on your CSV header
-                    const lightsVal = row['lights'];
-                    uiLights.innerText = lightsVal;
-                    uiLights.style.color = (lightsVal === "On") ? "#00ff88" : "#ff4444";
-                }
-
-                if (uiTime) {
-                    uiTime.innerText = (row['timestamp'] || idx)/10 + "s";
-                }
-            }
-
-            idx++;
-            if (idx >= dataList.length) {
-                if (loop) idx = 0;
-                else clearInterval(timer);
-            }
-        }, interval);
-
-        return { stop() { clearInterval(timer); } };
-
-    } catch (err) {
-        console.error('animateIoTFromCsv error:', err);
+    } catch (e) { 
+        console.error("Error loading tracks:", e); 
+        alert("Track CSV failed to load. Check console for details."); // Visual alert
     }
-}
-// start animating immediately (matches your red-dot loop behavior)
-animateTracksFromCsv('../../mapped_tracks_angle_01.csv', 10, true);
 
-animateIoTFromCsv('./iot.csv', 10, true);
+    // --- 2. LOAD IOT ---
+    try {
+        const iResp = await fetch('./iot.csv');
+        if (iResp.ok) {
+            const iText = await iResp.text();
+            const iRows = iText.split('\n').map(r => r.trim()).filter(r => r);
+            const headers = iRows[0].split(',').map(h => h.trim().toLowerCase());
+            
+            globalIoTData = iRows.slice(1).map(row => {
+                const vals = row.split(',');
+                const obj = {};
+                headers.forEach((h, i) => obj[h] = vals[i]);
+                return obj;
+            });
+        }
+    } catch (e) { console.error("Error loading IoT", e); }
+
+    // --- 3. SYNC SETTINGS ---
+    const maxT = globalTrackFrames.length;
+    const maxI = globalIoTData.length;
+    
+    playback.maxFrames = Math.max(maxT, maxI) - 1;
+    
+    // Update the Slider Limit
+    if (frameController) {
+        frameController.max(playback.maxFrames);
+        frameController.updateDisplay();
+    }
+    
+    console.log(`Loaded! Tracks: ${maxT}, IoT: ${maxI}`);
+}
+
+// Trigger the load
+loadSimulationData();
 
 function animate(t=0) {
     if (t === undefined) t = performance.now();
     requestAnimationFrame(animate);
+
+    // --- NEW PLAYBACK LOGIC ---
+    if (playback.maxFrames > 0) {
+        if (playback.playing) {
+            // Increment frame
+            playback.frame += (0.1 * playback.speed); 
+            
+            // Loop if we hit the end
+            if (playback.frame > playback.maxFrames) {
+                playback.frame = 0;
+            }
+        }
+        
+        // Actually render the scene at this integer frame
+        renderFrame(Math.floor(playback.frame));
+    }
+    // ---------------------------
     
     // Only Room Info and Controls update here now
     if (uiName && uiID && uiFloor) {
