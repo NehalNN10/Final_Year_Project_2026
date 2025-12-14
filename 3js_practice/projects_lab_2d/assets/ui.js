@@ -28,6 +28,15 @@ export function setupGUI(frameUpdateCallback) {
         if (dom) dom.innerText = newText;
     };
 
+    const updateButtonColor = (controller, bg, text) => {
+        if (!controller) return;
+        const dom = controller.domElement.parentElement.querySelector('.property-name');
+        if (dom) {
+            dom.style.setProperty('background-color', bg, 'important');
+            dom.style.setProperty('color', text, 'important');
+        }
+    };
+
     let playBtn;
     let darkMode;
 
@@ -42,11 +51,26 @@ export function setupGUI(frameUpdateCallback) {
         reset: () => { playback.frame = 0; playback.speed = 1; },
         dark: () => {
             params.darkMode = !params.darkMode;
+            
+            // 1. Scene Changes
             scene.background = new THREE.Color(params.darkMode ? 0x131314 : 0xffffff);
-            const doorMat = val ? materials.glass : materials.bench; 
+            const doorMat = params.darkMode ? materials.glass : materials.bench; 
             if(worldObjects.doorx3) worldObjects.doorx3.material = doorMat;
             if(worldObjects.doorz1) worldObjects.doorz1.material = doorMat;
             if(worldObjects.doorz2) worldObjects.doorz2.material = doorMat;
+
+            // 2. UI Text Change
+            const label = params.darkMode ? "Light Mode" : "Dark Mode";
+            updateLabel(darkMode, label);
+
+            // 3. UI Color Change
+            if (!params.darkMode) {
+                // Active Light Mode -> Make Button White
+                updateButtonColor(darkMode, '#ffffff', '#000000');
+            } else {
+                // Active Dark Mode -> Make Button Dark
+                updateButtonColor(darkMode, '#222222', '#ffffff');
+            }
         },
         resetView: () => { 
             params.x = 0; 
