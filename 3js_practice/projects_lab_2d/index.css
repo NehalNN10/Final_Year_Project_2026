@@ -25,7 +25,7 @@ body { margin: 0; overflow: hidden; }
     font-family: 'League Spartan', sans-serif !important;
     font-size: 18px !important;
     color: #ccc !important;
-    font-weight: normal !important;
+    font-weight: bold !important;
     text-shadow: none !important;
 }
 
@@ -79,7 +79,7 @@ body { margin: 0; overflow: hidden; }
 }
 
 .dg .cr.number .property-name {
-    width: 35% !important; 
+    width: 40% !important; 
     float: none !important;
     text-align: left !important;
     padding-right: 5px;
@@ -87,7 +87,7 @@ body { margin: 0; overflow: hidden; }
 }
 
 .dg .cr.number .c {
-    width: 65% !important;
+    width: 60% !important;
     display: flex !important;
     align-items: center !important;
     justify-content: flex-end !important;
@@ -117,7 +117,8 @@ body { margin: 0; overflow: hidden; }
     border: 1px solid #555 !important;
     border-radius: 4px !important;
     color: #00ff88 !important;
-    font-family: 'League Spartan', sans-serif !important;
+    font-family: 'League Spartan' !important;
+    font-weight: bold !important;
     width: 30px !important;
     text-align: center;
     height: 15px !important;
