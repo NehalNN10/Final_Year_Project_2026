@@ -113,5 +113,5 @@ export const worldObjects = {
 
     shelf: createObject(1.05, 0.6, -3.8, 0.3, materials.table),
 
-    buggy: createObject(1.8, 1, -8, -7.5, materials.buggy),
+    buggy: createObject(1.8, 0.8, -8, -5, materials.buggy),
 };
