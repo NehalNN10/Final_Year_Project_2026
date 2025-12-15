@@ -140,6 +140,12 @@ body { margin: 0; overflow: hidden; }
     overflow: hidden; /* Needed for the slide animation */
 }
 
+.scroll {
+    pointer-events: auto !important; /* CRITICAL: Allows clicking the header */
+    transition: all 0.3s ease;
+    overflow: hidden; /* Needed for the slide animation */
+}
+
 .tracker-ui h3 { 
     margin-top: 0; 
     margin-bottom: 15px;
@@ -225,7 +231,7 @@ body { margin: 0; overflow: hidden; }
 
 #top-left {
     position: absolute;
-    top: 10px;
+    top: 20px;
     left: 20px;
     z-index: 100;
     width: 20%;
@@ -234,10 +240,8 @@ body { margin: 0; overflow: hidden; }
     max-height: 96vh;
     overflow-y: auto;
     overflow-x: hidden;
-    
     background: transparent; 
     border: none;
-    padding: 0;
     pointer-events: none;
 }
 
