@@ -106,6 +106,8 @@ export function setupGUI(frameUpdateCallback) {
         camera.position.z += delta;
     });
 
+    camFolder.add(camera.position, 'y', 1, 100, 0.1).name("Zoom Height").listen();
+
     const resetCam = camFolder.add(funcs, 'resetView').name("Reset Camera");
 
     darkMode = camFolder.add(funcs, 'dark').name("Dark Mode");

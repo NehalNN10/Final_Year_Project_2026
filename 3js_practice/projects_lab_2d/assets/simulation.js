@@ -9,6 +9,9 @@ export const playback = {
     speed: 1
 };
 
+const tracker = './files/mapped_tracks_angle_01.csv';
+const iot = './files/iot.csv'
+
 export const uiElements = {
     uiOccupancy: document.getElementById('ui-iot-occupancy'),
     uiTemp: document.getElementById('ui-iot-temp'),
@@ -42,8 +45,6 @@ export function renderFrame(index) {
                 marker.visible = true;
             }
         });
-        
-        if (uiElements.uiOccupancy) uiElements.uiOccupancy.innerText = detections.length;
     }
 
     if (index < globalIoTData.length) {
@@ -75,6 +76,12 @@ export function renderFrame(index) {
         if (uiElements.uiTime) {
             uiElements.uiTime.innerText = ((row['timestamp'] || index)/10).toFixed(1) + "s";
         }
+
+        if (uiElements.uiOccupancy) {
+            const l = row['occu'];
+            uiElements.uiOccupancy.innerText = l;
+            uiElements.uiOccupancy.style.color = (l > 20) ? "#ff4444" : ( l === 0 ? "#fff" : "#00ff88");
+        }
     }
     
     if (uiElements.uiName && uiElements.uiID && uiElements.uiFloor) {
@@ -101,7 +108,6 @@ export function renderFrame(index) {
             uiElements.uiFloor.style.color = "#fff";
             uiElements.uiID.style.color = "#fff";
             uiElements.uiName.style.color = "#00ff88";
-            if (uiElements.uiOccupancy) uiElements.uiOccupancy.style.color = "#00ff88";
         }
     }
 }
@@ -119,7 +125,7 @@ export function getRoomInfo(x, z) {
 export async function loadSimulationData(onLoadComplete) {
     
     try {
-        const tResp = await fetch('./mapped_tracks.csv'); 
+        const tResp = await fetch(tracker); 
         if (!tResp.ok) throw new Error(`Track CSV not found`);
 
         const tText = await tResp.text();
@@ -162,7 +168,7 @@ export async function loadSimulationData(onLoadComplete) {
     }
 
     try {
-        const iResp = await fetch('./iot.csv');
+        const iResp = await fetch(iot);
         if (iResp.ok) {
             const iText = await iResp.text();
             const iRows = iText.split('\n').map(r => r.trim()).filter(r => r);
