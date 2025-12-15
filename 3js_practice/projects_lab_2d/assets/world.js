@@ -111,5 +111,7 @@ export const worldObjects = {
     workbench_v3: createObject(1.8, 4.75, -1.1, -3.15, materials.bench),
     workbench_v4: createObject(1.8, 4.75, 4.65, -3.15, materials.bench),
 
+    shelf: createObject(1.05, 0.6, -3.8, 0.3, materials.table),
+
     buggy: createObject(1.8, 1, -8, -7.5, materials.buggy),
 };
