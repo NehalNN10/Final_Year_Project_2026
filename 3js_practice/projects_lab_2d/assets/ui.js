@@ -3,11 +3,17 @@ import { camera, controls, scene } from "./scene.js";
 import { materials, worldObjects } from "./world.js";
 import { playback, renderFrame } from "./simulation.js";
 
-const gui = new dat.GUI({ autoPlace: false }); 
+const gui_sim = new dat.GUI({ autoPlace: false }); 
+const gui_cam = new dat.GUI({ autoPlace: false }); 
 
-const container = document.getElementById('gui-container');
-if (container) {
-    container.appendChild(gui.domElement);
+const container_sim = document.getElementById('sim-content');
+if (container_sim) {
+    container_sim.appendChild(gui_sim.domElement);
+}
+
+const container_cam = document.getElementById('cam-content');
+if (container_cam) {
+    container_cam.appendChild(gui_cam.domElement);
 }
 
 export const params = {
@@ -19,7 +25,7 @@ export const params = {
 };
 
 export function setupGUI(frameUpdateCallback) {
-    const camFolder = gui.addFolder('Camera Controls');
+    // const camFolder = gui.addFolder('Camera Controls');
 
     const updateLabel = (controller, newText) => {
         if (!controller) return;
@@ -82,7 +88,7 @@ export function setupGUI(frameUpdateCallback) {
         }
     };
 
-    const rotate = camFolder.add(params, 'rotation', -Math.PI, Math.PI, 0.1)
+    const rotate = gui_cam.add(params, 'rotation', -Math.PI, Math.PI, 0.1)
         .name("Rotate View")
         .listen()
         .onChange((angle) => {
@@ -94,23 +100,23 @@ export function setupGUI(frameUpdateCallback) {
             controls.update();
         });
 
-    const posX = camFolder.add(params, 'x', -50, 50, 0.1).name("Position X").listen().onChange((val) => {
+    const posX = gui_cam.add(params, 'x', -50, 50, 0.1).name("Position X").listen().onChange((val) => {
         const delta = val - controls.target.x;
         controls.target.x = val;
         camera.position.x += delta;
     });
 
-    const posZ = camFolder.add(params, 'z', -50, 50, 0.1).name("Position Z").listen().onChange((val) => {
+    const posZ = gui_cam.add(params, 'z', -50, 50, 0.1).name("Position Z").listen().onChange((val) => {
         const delta = val - controls.target.z;
         controls.target.z = val;
         camera.position.z += delta;
     });
 
-    camFolder.add(camera.position, 'y', 1, 100, 0.1).name("Zoom Height").listen();
+    gui_cam.add(camera.position, 'y', 1, 100, 0.1).name("Zoom Height").listen();
 
-    const resetCam = camFolder.add(funcs, 'resetView').name("Reset Camera");
+    const resetCam = gui_cam.add(funcs, 'resetView').name("Reset Camera");
 
-    darkMode = camFolder.add(funcs, 'dark').name("Dark Mode");
+    darkMode = gui_cam.add(funcs, 'dark').name("Light Mode");
 
     const resetBtn = resetCam.domElement.parentNode.parentNode;
     const darkBtn = darkMode.domElement.parentNode.parentNode;
@@ -128,17 +134,19 @@ export function setupGUI(frameUpdateCallback) {
 
     setSideBySideCam(resetBtn);
     setSideBySideCam(darkBtn);
+
+    const speed = gui_sim.add(playback, 'speed', 0.1, 5, 0.1).name("Speed").listen();
     
-    const frameController = camFolder.add(playback, 'frame', 0, 100, 1)
+    const frameController = gui_sim.add(playback, 'frame', 0, 100, 1)
         .name("Scrubber")
         .listen()
         .onChange((val) => {
             renderFrame(Math.floor(val));
         });
 
-    const rwBtn = camFolder.add(funcs, 'rewind').name("<< -50");
-    playBtn = camFolder.add(funcs, 'play').name("Pause");
-    const ffBtn = camFolder.add(funcs, 'ff').name("+50 >>");
+    const rwBtn = gui_sim.add(funcs, 'rewind').name("<< -50");
+    playBtn = gui_sim.add(funcs, 'play').name("Pause");
+    const ffBtn = gui_sim.add(funcs, 'ff').name("+50 >>");
     
     const rwRow = rwBtn.domElement.parentNode.parentNode;
     const ffRow = ffBtn.domElement.parentNode.parentNode;
@@ -159,10 +167,9 @@ export function setupGUI(frameUpdateCallback) {
     setSideBySideAnim(playRow);
     setSideBySideAnim(ffRow);
 
-    const speed = camFolder.add(playback, 'speed', 0.1, 5, 0.1).name("Speed").listen();
-    const resetPlay = camFolder.add(funcs, 'reset').name("Reset Playback");
+    const resetPlay = gui_sim.add(funcs, 'reset').name("Reset Playback");
     
-    camFolder.open();
+    // gui.open();
 
     return { frameController };
 }
