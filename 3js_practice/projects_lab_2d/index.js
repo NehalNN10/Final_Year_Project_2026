@@ -18,7 +18,7 @@ function animate() {
     requestAnimationFrame(animate);
 
     if (playback.maxFrames > 0 && playback.playing) {
-        playback.frame += (0.1 * playback.speed);
+        playback.frame += (0.167 * playback.speed);
         
         if (playback.frame > playback.maxFrames) {
             playback.frame = 0;
