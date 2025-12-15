@@ -9,7 +9,7 @@ export const playback = {
     speed: 1
 };
 
-const tracker = './files/mapped_tracks_angle_01.csv';
+const tracker = './files/mapped_tracks_angle_03.csv';
 const iot = './files/iot.csv'
 
 export const uiElements = {
