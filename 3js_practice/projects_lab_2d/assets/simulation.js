@@ -4,7 +4,7 @@ import { camera, controls } from "./scene.js";
 
 export const playback = {
     frame: 0,
-    maxFrames: 0,
+    maxFrames: 1200,
     playing: true,
     speed: 1
 };
@@ -187,7 +187,9 @@ export async function loadSimulationData(onLoadComplete) {
         }
     } catch (e) { console.error("Error loading IoT", e); }
 
-    playback.maxFrames = Math.max(globalTrackFrames.length, globalIoTData.length) - 1;
+    // playback.maxFrames = Math.max(globalTrackFrames.length, globalIoTData.length) - 1;
+
+    playback.maxFrames = 1200;
     
     if (onLoadComplete) onLoadComplete();
 }
