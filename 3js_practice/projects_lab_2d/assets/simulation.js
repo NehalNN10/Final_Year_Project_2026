@@ -9,6 +9,7 @@ export const playback = {
     speed: 1
 };
 
+// const tracker = './files/mapped_tracks_angle_03.csv';
 const tracker = './files/mapped_tracks_angle_01.csv';
 const iot = './files/iot.csv'
 
@@ -45,6 +46,9 @@ export function renderFrame(index) {
                 marker.visible = true;
             }
         });
+        
+        if (uiElements.uiOccupancy)
+            uiElements.uiOccupancy.innerText = detections.length;
     }
 
     if (index < globalIoTData.length) {
@@ -77,11 +81,11 @@ export function renderFrame(index) {
             uiElements.uiTime.innerText = ((row['timestamp'] || index)/10).toFixed(1) + "s";
         }
 
-        if (uiElements.uiOccupancy) {
-            const l = row['occu'];
-            uiElements.uiOccupancy.innerText = l;
-            uiElements.uiOccupancy.style.color = (l > 20) ? "#ff4444" : ( l === 0 ? "#fff" : "#00ff88");
-        }
+        // if (uiElements.uiOccupancy) {
+        //     const l = row['occu'];
+        //     uiElements.uiOccupancy.innerText = l;
+        //     uiElements.uiOccupancy.style.color = (l > 20) ? "#ff4444" : ( l === 0 ? "#fff" : "#00ff88");
+        // }
     }
     
     if (uiElements.uiName && uiElements.uiID && uiElements.uiFloor) {
@@ -187,3 +191,5 @@ export async function loadSimulationData(onLoadComplete) {
     
     if (onLoadComplete) onLoadComplete();
 }
+
+// const dummy = createMarker(8, 8.75, "red", 0.1);
