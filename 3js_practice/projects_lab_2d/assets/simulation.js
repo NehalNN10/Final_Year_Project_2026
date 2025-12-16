@@ -194,4 +194,4 @@ export async function loadSimulationData(onLoadComplete) {
     if (onLoadComplete) onLoadComplete();
 }
 
-// const dummy = createMarker(8, 8.75, "red", 0.1);
+const dummy = createMarker(7, 1.5, "red", 0.1);

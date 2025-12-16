@@ -1,5 +1,239 @@
-This chapter presents the current state of the art in the domain and talks about other similar work that has been done in this area. It also establishes the novelty of our work by highlighting the differences between the existing work and our work.
+\section{Introduction}
+University campuses are dynamic environments where students and staff continuously move through classrooms, laboratories, and shared facilities. However, 
+% building operators typically lack
+campus management lacks a unified, real-time understanding of how these spaces are being utilized, relying instead on manual counts, static schedules, or fragmented CCTV monitoring. Digital twin technology has recently emerged as a promising solution for improving operational awareness by creating virtual representations of spaces that update in real time based on sensor and vision data \cite{sayed2023}. \\\\
+%When combined with occupancy analytics, digital twins offer the potential to enhance safety, sustainability, and resource management across institutional settings.\\\\
+Recent research in multi-camera multi-people tracking 
+% and edge-based indoor monitoring 
+has demonstrated that computer vision can accurately extract per-person positions, handle occlusions, and provide spatially aligned occupancy insights suitable for real-world deployments. Multi-camera fusion and coordinate mapping techniques have enabled reliable and privacy-aware tracking in complex indoor environments, supporting robust real time analytics even under challenging visual conditions \cite{kwon2023}. In parallel, advances in digital twin based building automation demonstrate that integrating real time occupancy, environmental sensing, and predictive control can improve energy efficiency and maintain occupant comfort \cite{clausen2021}. Together, these developments highlight the growing importance of unified data-driven facility management tools.\\\\
+% Motivated by these gaps and opportunities, 
+Therefore, this project presents an anonymity preserving digital twin for two adjacent university laboratories, integrating capabilities that existing systems traditionally address separately. The proposed system combines anonymous multi-camera crowd monitoring, automated emergency evacuation alerts to identify uncleared spaces, and energy-occupancy correlation using simulated IoT parameters. Through the use of non-identifiable avatars and interactive 3D visualization, the system aims to provide campus operators with a centralized, actionable platform for improving safety, reducing energy waste, and enabling proactive space management. 
+\section{Current State-of-the-Art}
+\subsection{Computer Vision for Anonymous Crowd Monitoring}
 
-We will keep updating this chapter (especially if our project is research-intensive) as our research proceeds and we come across more work related to our problem.
+\subsubsection{Object Detection Models}
+Rane (2023) highlights that YOLO and Faster R-CNN are central to the evolution of real-time object detection technologies \cite{rane2023}. The author discusses key differences between these two widely used algorithms.\\\\
+\textbf{YOLO:}
+\begin{itemize}
+    \item YOLO is recognized for its high speed and strong accuracy. It divides the image into a grid and simultaneously predicts bounding boxes and class probabilities for each grid cell \cite{rane2023}.
+    
+    \item The recently introduced YOLOv8 by Ultralytics continues the YOLO lineage through an anchor-free design, a decoupled detection head, and a lightweight CSPDarknet-style backbone that supports detection, segmentation, and classification within a unified architecture \cite{yolov8}.
+    
+    \item YOLOv8 maintains competitive accuracy while providing high throughput suitable for live CCTV feeds and real-time digital-twin applications.
+\end{itemize}
+\textbf{Faster R-CNN:}
+\begin{itemize}
+    \item Faster R-CNN is another widely adopted object detection algorithm known for its accuracy and robustness. Unlike YOLO, it employs a two-stage architecture: a Region Proposal Network (RPN) to generate candidate bounding boxes, followed by a detection network to classify and refine the proposals.
+    
+    \item Ren et al. introduced the Region Proposal Network (RPN), which produces object proposals directly from convolutional feature maps, significantly improving efficiency over traditional selective search methods \cite{fasterrcnn}.
+\end{itemize}
+For digital-twin components of crowd monitoring, YOLO is preferable because of its speed and ability to track people and objects in real time, enhancing overall security monitoring \cite{rane2023}.  
 
-Of course, we take inspiration from \cite{einstein} but wish the work was typeset in \LaTeX \cite{knuthwebsite}, e.g. by taking help from \cite{latexcompanion}.
+
+\subsubsection{Multi-Object Tracking (MOT) Techniques}
+
+Multi-Object Tracking (MOT) is essential for digital-twin indoor monitoring, ensuring consistent identity and trajectory estimation of individuals across video frames. Most MOT systems follow the 'tracking by detection' paradigm, pairing detectors such as YOLO with association algorithms to maintain persistent identities. This subsection summarizes three widely adopted MOT techniques.\\\\
+\textbf{SORT (Simple Online and Realtime Tracking):}
+SORT is a fast, motion-based tracker that uses a Kalman Filter for prediction and the Hungarian Algorithm for frame-to-frame association. Its simplicity enables high speed, but the lack of appearance features makes it vulnerable to identity switches during occlusions or reentries \cite{bewley2016}.\\\\
+\textbf{DeepSORT:}
+DeepSORT enhances SORT by incorporating appearance embeddings through a deep association metric, enabling more reliable identity tracking in crowded or occluded scenes \cite{wojke2017}. This addition significantly reduces ID switches while maintaining real-time performance.\\\\
+\textbf{ByteTrack:}
+ByteTrack advances MOT by associating both high- and low-confidence detections, allowing it to recover missed objects and maintain identities more effectively \cite{zhang2022}. Its robust data-association strategy yields strong benchmark performance and makes it suitable for complex, real-time digital-twin environments.\\\\
+Overall, SORT provides speed, while DeepSORT and ByteTrack offer stronger robustness and identity consistency, key requirements for accurate multi-camera digital-twin systems.
+
+
+
+\subsubsection{Multi-Camera People Re-Identification (ReID)}
+
+Person Re-Identification (ReID) focuses on matching the same person across different camera views \cite{ristani2018}. ReID is essential in digital-twin or multi-camera systems to avoid counting the same person multiple times or to stitch person trajectories across non-overlapping camera views.\\\\
+\textbf{Feature Learning:}
+Modern ReID methods learn embeddings that cluster images of the same person close together while pushing different identities apart. Approaches commonly use triplet loss, cross-entropy ID loss, and hard-mining strategies. Benchmarks such as Market-1501 and DukeMTMC-ReID significantly advanced this domain by providing large multi-camera datasets \cite{zheng2015}.\\\\
+\textbf{Integration with Tracking and Trajectory Models:} Practical multi-camera pipelines combine:
+
+\begin{itemize}
+    \item detection (e.g., YOLOv8),
+    \item single-camera tracking (creating tracklets),
+    \item inter-camera ReID or trajectory association,
+\end{itemize}
+to resolve identity duplication. Systems integrating spatio-temporal priors, trajectory continuity, locality-aware metrics, and motion cues significantly reduce false duplicates \cite{ristani2018}.\\\\
+\textbf{Overlapping and Non-Overlapping Camera Views:} In multi-camera networks with mixed overlapping and non-overlapping fields of view, modeling spatial layout and appearance similarity helps enhance identity accuracy and reduce duplication errors \cite{multicamera2023}.\\\\
+In our project multiple cameras may detect the same individual simultaneously—especially in overlapping views, ReID is necessary to avoid duplicate counting. ReID enables accurate movement tracking across camera zones, improving the fidelity of the digital twin.
+
+
+\subsection{Translating CCTV Co-ordinates using Homography}
+Homography is a foundational technique in multi-camera computer vision for projecting image coordinates onto a shared planar reference frame \cite{homographysurvey}. 
+\subsubsection{Ground-Plane Homography for CCTV Monitoring}
+
+Ground-plane homography is widely used in surveillance and pedestrian analytics to project detections onto a 2D top-down map. \\\\
+This paper\cite{eshel2008} demonstrated application of this technique for multi-camera pedestrian localization, where detections from multiple cameras were projected onto a unified ground-plane mosaic to compute trajectories and occupancy maps \cite{eshel2008}. \\\\
+By using known camera parameters or calibration patterns, each camera estimates its homography matrix, enabling all detections to be fused into a shared reference coordinate system. This process is essential for digital-twin systems, which require consistent spatial reasoning across multiple non-overlapping views \cite{homographysurvey}.
+
+\subsubsection{Beyond Planar Homography: 3D Mapping and Bird’s-Eye-View (BEV) Transformations}
+
+BEV (bird’s-eye-view) transformations and 3D lifting methods estimate a pseudo-top-down representation of the scene from monocular or multi-camera setups.\\\\
+Philion and Fidler introduced the Lift-Splat-Shoot framework, where image features are lifted into 3D space and then projected into a BEV representation for autonomous driving applications \cite{liftsplatshoot}. Such 3D-aware approaches offer richer spatial context compared to simple planar warping and are increasingly adopted in advanced monitoring and digital-twin pipelines.
+
+\subsection{ Digital Twin Visualization}
+
+Digital twin systems depend on real-time 3D visualization to represent physical spaces, user interactions, and sensor-driven updates. Following are the engines widely used for 3D modeling.
+
+\subsubsection{Unity}
+Unity is one of the most widely used real-time engines for digital twin development due to its flexibility, fast rendering pipeline, and support for geospatial data integration. Unity enables interactive simulation, terrain modeling, and real-time visual updates, making it ideal for built-environment twins.\\\\
+Gong and Ding (2025) demonstrate Unity’s ability to model complex urban environments through a real-time traffic digital twin, showcasing its capacity for scalable visualization and dynamic system behavior \cite{gong2025}. Similarly, Woo et al. (2025) propose an automated Unity-based pipeline that generates terrain and building geometries directly from open geospatial datasets, significantly reducing manual modeling effort for large-scale twins \cite{woo2025}.\\\\
+Lee et al. (2020) extend Unity’s capabilities to planetary-scale environments using VWorld geospatial data, illustrating how Unity can handle large-capacity datasets while supporting interactive 3D geospatial applications \cite{lee2020}. Their work emphasizes Unity’s strengths in rendering extensive terrain and structural information efficiently.
+
+\subsubsection{Unreal Engine}
+Unreal Engine is increasingly used in digital twin research due to its high-fidelity rendering, strong support for procedural content, and advanced simulation capabilities. Somanath et al.(2024) develop a procedural pipeline in Unreal Engine that transforms GIS and LiDAR datasets into detailed urban digital twins, capturing building footprints and volumetric spatial context \cite{somanath2024}.\\\\
+In the construction domain, Ellul et al. (2024) build an Unreal Engine–based twin integrating BIM, IoT, and site monitoring data to support safety analysis and real-time progress visualization \cite{ellul2024}. Lyu et al. (2024) describe the engineering workflow of a UE5-based twin platform, emphasizing Unreal’s advantages in large-scene rendering, physics simulation, material editing, and cinematic visualization \cite{lyu2024}. Their comparison highlights Unreal’s suitability for graphically intensive and large-scale twins.\\\\
+Kilijanek and Miłosz (2025) provide a direct performance comparison between Unity and Unreal Engine, concluding that Unreal performs better in graphically complex scenes with many dynamic objects due to its advanced rendering tools, while Unity remains more resource-efficient for simpler projects with lower complexity \cite{kilijanek2025}.
+
+\subsubsection{Three.js}
+WebGL frameworks like \textbf{Three.js} enable browser-based 3D visualization for digital twins, offering real-time rendering without client-side installation. La Guardia et al. (2024) demonstrate a web-accessible urban digital twin integrating geospatial datasets and live sensor data. Their system, built using an HTML5/WebGL stack, demonstrates how libraries like Three.js can serve as an efficient front-end engine for visualizing heterogeneous 3D assets, including buildings, terrain models, and environmental datasets, directly in the browser \cite{laguardia2024}. \\\\
+A detailed example of Three.js integration in BIM-oriented digital twins is provided by the Carleton University \textbf{CDC Digital Twin} project \cite{CIMS2024}. In the project, Three.js was used to render campus BIM models in real time, integrating geometric data (preprocessed as \texttt{glTF}) and attribute data (exported as JSON) linked via element IDs.\\\\
+Compared to game-engine solutions like Unreal Engine Pixel Streaming, Three.js offers key advantages: 
+
+\begin{itemize}
+    \item \textbf{Lightweight Deployment \& Scalability:} Runs entirely in-browser with no installation or heavy server rendering, allowing potentially unlimited global users.  
+    \item \textbf{Flexible Data Integration:} Geometry and attributes are separated, supporting updates, expansions, and real-time sensor data integration.  
+    \item \textbf{Broad 3D Asset Support:} Handles glTF, OBJ, FBX, dense point clouds (LAS, E57), textured meshes, and IFC via IFC.js.  
+    \item \textbf{Open-Source and Customizable:} Fully open-source with extensive community support for customizing rendering pipelines, shaders, and interactions.  
+\end{itemize}
+Limitations include lower visual fidelity compared to AAA game engines and the need for careful data subdivision for large models. Despite this, Three.js provides a robust foundation for web-based Digital Twins.
+
+\section{Similar Work}
+
+\subsection{Multi-Camera Fusion and Bird-Eye View Location Mapping for Deep Learning-Based Cattle Behavior Monitoring}
+
+Nasir et al.\ propose a multi-viewpoint surveillance and behavior monitoring system for precision livestock farming, integrating deep learning and multi-camera fusion for real-time cattle behavior understanding \cite{nasir2025}. \\\\
+\textbf{Domain:}
+Precision Livestock Farming (PLF), deep learning–based surveillance, and multi-camera behavior analytics.\\\\
+\textbf{Key Contribution:}
+The authors present an end-to-end methodology for accurate behavior detection and location mapping of individual cattle using synchronized multi-camera footage. The system is deployed in real cattle barns and enables continuous monitoring for welfare analysis.\\\\
+\textbf{Problem Addressed:}
+Traditional bovine surveillance systems struggle due to occlusions, pose changes, limited viewpoints, and difficulty distinguishing visually similar cattle. The proposed system mitigates these challenges using a fusion of detection, pose estimation, and BEV mapping.\\\\
+\textbf{System Components:}
+The architecture uses four synchronized cameras, action detection, and pose estimation:
+
+\begin{itemize}
+    \item \textbf{Action Detector:} Identifies 14 distinct cattle behaviors with a mean Average Precision (mAP) of 99.2\%.
+    \item \textbf{Ground Point Estimator:} Built on YOLOv8 Pose Estimation, it extracts the ground point for each cow, enabling precise 2D-to-3D location mapping.
+\end{itemize}
+\textbf{BEV Mapping and Fusion:}
+An Enhanced Bird’s-Eye-View (BEV) algorithm projects detections onto a unified top-down map using homography. Fusion strategies resolve duplicate projections and identity ambiguities by combining views from all cameras.
+
+\subsection{Crowded Event Management in Smart Cities Using a Digital Twin Approach}
+
+Villanueva et al.\ introduce a digital twin–driven platform for event management in smart cities, emphasizing situational awareness and resource planning during crowded events \cite{villanueva2022}. \\\\
+\textbf{Domain:}
+Smart-city systems, crowd event management, and augmented virtuality interfaces.\\\\
+\textbf{Key Contribution:}
+The paper proposes a modular architecture and GUI design leveraging augmented virtuality to merge real-world sensor inputs with a 3D virtual city model. The system aids decision-makers during large events such as concerts or marathons.\\\\
+\textbf{Digital Twin Concept:}
+The digital twin acts as a dynamically updated virtual replica of the physical urban environment. It supports simulation and forecasting using live data streams (IoT sensors, citizen apps, social media).\\\\
+\textbf{System Architecture:}
+Data flows from the physical city layer (sensors, citizens, IoT devices) into the digital city layer containing 3D models, simulation engines, and virtual objects. Augmented virtuality overlays real-time observations into this environment for improved situational awareness.
+
+\subsection{Intelligent Real-Time Crowd Density Estimation for Proactive Event Safety}
+
+Maharajpet and Hegde propose a hybrid dual-model system to estimate crowd density in real time, combining YOLOv8 with CSRNet for high accuracy and responsiveness \cite{maharajpet2025}. \\\\
+\textbf{Domain:}
+Real-time crowd monitoring, event safety, density estimation.\\\\
+\textbf{Key Contribution:}
+The system strategically fuses the fast inference speed of YOLOv8 with the density map precision of CSRNet, addressing the trade-off between speed and accuracy faced by earlier systems.\\\\
+\textbf{System Architecture:}
+\begin{itemize}
+    \item \textbf{YOLOv8:} Provides real-time person detection and handles occlusion effectively.
+    \item \textbf{CSRNet:} Generates high-resolution density maps for dense crowd conditions.
+\end{itemize}
+\textbf{Density Classification and Interface:}
+The monitored area is divided into zones and classified into four density levels: Low, Medium, High, and Critical. A web dashboard visualizes heatmaps (e.g., red for high density) and issues alerts when thresholds are exceeded.
+
+\subsection{Crowd Density Estimation and Real-Time Monitoring Using Digital Twins in Transportation Hubs}
+
+Shah et al.\ develop a digital twin–based platform for real-time monitoring in transportation hubs, emphasizing low-latency inference and 3D visualization \cite{shah2024}. \\\\
+\textbf{Domain:}
+Transportation hubs, digital twins for crowd monitoring, edge analytics.\\\\
+\textbf{Key Contribution:} The system employs YOLOv8 for detection and uses Three.js for 3D visualization. Designed for edge computing, it minimizes latency and supports rapid response in real-time operations.\\\\
+\textbf{System Pipeline:}
+Video frames are processed through YOLOv8 to identify individuals, compute bounding boxes, and calculate centroids.\\\\
+\textbf{3D Visualization:}
+Detected coordinates are transformed into 3D space using inferred depth and camera intrinsics. The results are rendered as spheres on a virtual 3D plane using React Three Fiber, forming an interactive digital-twin display.
+
+\subsection{Interactive 3D and VR-Based Digital Twin for an Industrial Machine - FYP 2024}
+The project \textit{Design and Development of an Interactive 3D Web-Based and Virtual-Reality Digital Twin for an Industrial Machine} \cite{habib2021digitaltwin} applies digital-twin concepts to an Industry~4.0 setting. The system features both a web-based 3D visualization and a virtual reality (VR) environment for a spice packaging machine.
+
+Key features include:
+\begin{itemize}
+    \item ingestion of real-time IoT sensor data (voltage, current, packet count) via bidirectional WebSocket communication,
+    \item remote machine actuation (e.g., ON/OFF control),
+    \item a 2D dashboard integrated with a 3D machine model,
+    \item immersive VR for enhanced monitoring and operator training.
+\end{itemize}
+
+This demonstrates the utility of digital twins for remote monitoring, predictive maintenance, and industrial supervision.
+
+\subsection{GitHub Repositories}
+
+\subsubsection{Crowd Management using a Digital Twin Approach}
+The repository \textit{Crowd Management using a Digital Twin Approach} \cite{pattanaik2023crowdtwin} proposes an end-to-end framework integrating CSRNet-based density estimation to compute crowd counts in highly congested environments such as the Mahakumbh Mela.\\\\
+The system processes continuous video streams to generate density heatmaps, detect congestion spikes, and trigger automated emergency alerts via SMS and WhatsApp using Twilio.  
+The digital-twin visualization primarily overlays 2D density maps onto the physical scene, providing an abstract yet informative view of spatial crowd pressure.
+
+\subsubsection{CCTV-Person-ReID-MultiCam}
+The repository \textit{CCTV-Person-ReID-MultiCam} \cite{umang2024multicam} presents a multi-camera person re-identification (ReID) pipeline built on the WildTrack dataset. The system integrates:
+\begin{itemize}
+    \item YOLOv8m for person detection,
+    \item DeepSORT for intra-camera tracking,
+    \item custom feature extractors for ReID embeddings,
+    \item and OpenCV-based camera calibration for geometric alignment.
+\end{itemize}
+
+This enables consistent identity association across non-overlapping CCTV views.
+
+\subsubsection{Multi-Camera Person Tracking and Re-Identification}
+The repository \textit{Multi-Camera-Person-Tracking-and-Re-Identification} \cite{sami2022multireid} proposes a practical implementation that uses YOLOv3/YOLOv4 for person detection and Torchreid models for feature embedding extraction. The pipeline outputs per-camera tracking trajectories and cross-camera identity matches using distance-based metric learning.
+
+\section{Difference between existing work and our own}
+
+While existing literature demonstrates various approaches to crowd monitoring, digital twin visualization, and multi-camera tracking systems, our Digital Twin project for Habib University's laboratories introduces several distinctive features and design choices that differentiate it from prior work.
+
+\subsection{Identity Handling and Privacy Preservation}
+
+Nasir et al. \cite{nasir2025} and ReID-based GitHub repositories such as CCTV-Person-ReID-MultiCam \cite{umang2024multicam} and Multi-Camera-Person-Tracking-and-Re-Identification \cite{sami2022multireid} perform persistent identity tracking, storing appearance embeddings to maintain identity continuity across cameras.
+Similarly, Maharajpet \& Hegde \cite{maharajpet2025} and Pattanaik \cite{pattanaik2023crowdtwin} do not focus on privacy because their systems handle aggregated density data rather than individuals.\\
+Our system instead prioritizes anonymity by:
+\begin{itemize}
+
+\item Using ReID only for duplicate removal,
+
+\item Representing each person as an anonymous avatar,
+\end{itemize}
+
+\subsection{Domain \& Functional Scope}
+Most of the reviewed digital-twin and monitoring systems are designed for single, domain-specific purposes. Nasir et al. focus on cattle behaviour monitoring in agriculture \cite{nasir2025}, Villanueva et al. address city-scale event management \cite{villanueva2022}, while Maharajpet and Hegde target crowd density estimation \cite{maharajpet2025}. Shah et al. develop solutions for transportation hub monitoring \cite{shah2024}, industrial twins such as Mehmood and Razzaq emphasize machine-level diagnostics \cite{habib2021digitaltwin}, and Pattanaik proposes a congestion-based emergency alerting system \cite{pattanaik2023crowdtwin}. ReID repositories similarly concentrate on identity tracking within multi-camera networks.
+In contrast, our system is a multi-functional digital twin built for indoor university spaces, integrating capabilities that prior works treat separately. Specifically, it combines (i) real-time occupancy monitoring with per-person mapping as an avatar, (ii) IoT-based energy–occupancy correlation for facility optimization, and (iii) emergency evacuation tracking with automated notifications to the Campus Security Office (CSO). This unified, multi-capability design makes our digital twin significantly broader and more operationally integrated than existing single-purpose solutions.
+
+
+% \subsection{Data}
+% Most existing works rely solely on visual data, including Nasir et al.’s multi-camera setup \cite{nasir2025}, Maharajpet and Hegde’s YOLO–CSRNet pipeline \cite{maharajpet2025}, Shah et al.’s YOLOv8s model \cite{shah2024}, and Pattanaik’s CSRNet-based approach \cite{pattanaik2023crowdtwin}. ReID repositories \cite{umang2024multicam, sami2022multireid} also operate exclusively on video feeds. The VR Industrial Twin \cite{habib2021digitaltwin} uses only IoT machine data, whereas Villanueva et al. \cite{villanueva2022} integrate citywide IoT streams and social data.\\
+% Our system uniquely fuses CCTV-based multi-camera detection with simulated IoT parameters such as temperature and lighting, enabling room-level energy–occupancy mapping, an integration absent in all compared systems.
+
+\subsection{Visualization and 3D Digital Twin Technology}
+Visual outputs in existing systems are largely 2D or low-detail: Maharajpet and Hegde produce density heatmaps \cite{maharajpet2025}, Pattanaik overlays CSRNet maps \cite{pattanaik2023crowdtwin}, and ReID repositories show 2D bounding boxes. Nasir et al.’s BEV mapping \cite{nasir2025} is also 2D in nature. While Shah et al. \cite{shah2024} also employ Three.js with React Three Fiber for 3D visualization in transportation hubs, our system extends this approach by rendering a spatially accurate 3D digital twin of laboratory environments with live avatar movements synchronized to detected person coordinates from multiple CCTV streams. Unlike the VR-based industrial digital twin \cite{habib2021digitaltwin}, which requires dedicated VR hardware and focuses on machine monitoring with bidirectional IoT control, our system prioritizes accessibility through standard web browsers without requiring specialized equipment. 
+%This design choice enables broader stakeholder access compared to 2D or VR-constrained systems.
+
+\subsection{Detection \& Tracking Methodology}
+Our technical pipeline combines YOLO 12 for real-time person detection with DeepSORT/ByteTrack for multi-frame tracking and duplicate mitigation across overlapping camera views. While Maharajpet and Hegde \cite{maharajpet2025} propose a hybrid YOLOv8-CSRNet system for density estimation and CSRNet-based systems such as Pattanaik’s digital-twin implementation \cite{pattanaik2023crowdtwin} perform well in highly congested scenes, they do not support precise individual-level tracking. In contrast, our system focuses on per-person coordinate tracking and accurate occupancy counting, enabling precise avatar placement within the 3D digital twin rather than generating only density heatmaps.\\
+The ReID systems \cite{umang2024multicam, sami2022multireid} rely on embedding-based identity maintenance, and Shah et al. \cite{shah2024} employ simple centroid tracking without multi-camera fusion. Nasir et al. \cite{nasir2025} use multi-view pose estimation for identity consistency. 
+\\Our system integrates YOLO 12 for detection, DeepSORT/ByteTrack for short-term ID continuity, homography-based spatial alignment for multi-camera fusion, and temporarily non-persistent IDs to enforce privacy. This combination is unique among the surveyed systems.
+
+ 
+
+\subsection{Emergency Evacuation and Safety Response}
+
+None of the existing works whether the smart-city framework of Villanueva et al. \cite{villanueva2022}, the transportation twin of Shah et al. \cite{shah2024}, the livestock system of Nasir et al. \cite{nasir2025}, or Pattanaik’s crowd-twin \cite{pattanaik2023crowdtwin} provide room-level evacuation verification. Only Pattanaik includes SMS alerts, but these relate to density rather than evacuation. 
+\\Our system introduces the ability to declare emergencies, track un-evacuated rooms in real time, and automatically notify the CSOs via email. This emergency intelligence module is absent across the entire body of compared work.
+
+\subsection{Energy Occupancy Correlation}
+
+None of the reviewed systems analyzes building energy usage or correlates occupancy with AC or lighting inefficiencies. The VR Industrial Digital Twin \cite{habib2021digitaltwin} employs IoT data, but only for machine diagnostics rather than facility energy management. Our system fills this gap by detecting energy waste in unoccupied rooms, generating temperature threshold alerts, and offering an Energy Dashboard dedicated to the Facilities Manager, positioning energy analysis as a core component of the digital twin.

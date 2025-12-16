@@ -1,17 +1,158 @@
+\section{Introduction}
 
-This chapter provides important artifacts related to design of our project.
+The purpose of this Software Design Specification (SDS) is to document the architecture, data flow, database design, and algorithms used in the Digital Twin project. This document will serve as a roadmap for the technical implementation, ensuring all project components align to meet the user requirements. 
 
-\section{Software Design}
+\subsection{Scope}
 
-This section presents the UML class diagram and gives a brief description of each class in our system. Attributes and methods of each class and relationship among classes are clearly presented.
+The scope of this project is to develop a proof-of-concept digital twin system for two adjacent university laboratory spaces: the Projects Lab and the Digital Instrumentation Lab on the lower-ground floor. The system addresses three critical challenges in campus management that are traditionally handled separately: occupancy monitoring, emergency preparedness, and energy efficiency. \\
 
-% Your report will contain ONE of the following 2 sections.
+\noindent The digital twin will perform real-time, anonymous crowd counting using vision-based analysis of video segments. Occupancy data will be visualized in a 3D virtual environment using avatars and crowd-density heatmaps, providing an intuitive interface for monitoring space usage. The system will automatically generate alert notifications for security personnel during emergency or evacuation scenarios, identifying spaces that remain occupied to support faster, coordinated responses. Additionally, the system will integrate simulated IoT data - such as temperature and lighting - with real-time occupancy levels to identify inefficiencies like lighting or cooling systems operating unnecessarily in empty rooms. 
 
-\section{Data Design}
+\section{Project Architecture}
 
-This section presents the structure of our database that caters to persistent data storage in our project. The structure is shown as a normalized data model for relational databases. It clearly shows entities, attributes, relationships with their cardinalities, and primary and foreign keys. We have used DB designer (or any other similar data modeling tool) to build our data model.
+\subsection{UML Class Diagram}
 
- 
+\begin{figure}[H]
+    \centering
+    \includegraphics[width=1\linewidth]{uml.png}
+    \caption{UML Class Diagram}
+\end{figure}
+
+\subsection{Description}
+
+\subsubsection{User}
+The \textbf{User} class represents an individual within the system and contains several key attributes: a unique identifier (\texttt{UserID}, stored as an integer), the user's full name (\texttt{Name}), their email address (\texttt{EmailAddress}), the role assigned to them (such as Facility Manager or CSO), and a secure hash of their password (\texttt{PasswordHash}). While the class itself does not directly manage role assignment, the user's role is administered by the \textbf{Admin} class, which establishes an association between Admin and User. Authentication of the User is handled through the \textbf{Authenticator} class, for secure login and verification.
+
+\subsubsection{Authenticator}
+The \textbf{Authenticator} class is responsible for managing user access within the system. It provides one primary method: \texttt{login(email, password)}, which authenticates a user based on their email and password.
+
+\subsubsection{Admin}
+The \textbf{Admin} class represents the system administrator and has two attributes: the administrator's name (\texttt{Name}) and their email address (\texttt{EmailAddress}) inherited from the \textbf{User} class. It provides several methods to manage the system and for emergency control. Through \texttt{addFacilityManager(email)} and \texttt{removeFacilityManager(email)}, the Admin can add or remove Facility Managers from the system. The method \texttt{triggerEmergency()} allows the Admin to activate the emergency alert system when needed. Additionally, the Admin can manage emergency communication by using \texttt{addEmergencyEmailRec(email)} to add recipients for alerts and \\\texttt{removeEmergencyEmailRec(email)} to remove them. The Admin class  assigns roles and manages users through its connection to the \textbf{User} class, while also linking to the \textbf{EmergencyAlert} class to initiate and control emergency notifications.
+
+\subsubsection{Notification System}
+The \textbf{Notification System} class is designed to deliver real-time alerts to users, particularly Facility Managers and designated CSOs. Each alert is defined by an \texttt{alertID} (a unique integer identifier), a \texttt{Message} containing the content of the alert, and a \texttt{recipientEmail} specifying the recipient's address. The class provides the method \texttt{sendAlert(message, recipientEmail)}, which generates and transmits the alert to the intended recipient.
+
+\subsubsection{Energy Management}
+The \textbf{Energy Management} class is responsible for monitoring and optimizing energy usage within facilities. Each room or facility is identified by a unique \texttt{RoomID} (Integer), and the class tracks key environmental parameters such as the current \texttt{Temperature} (Float), the \texttt{LightingStatus} (Boolean), and whether the air conditioning system is active (\texttt{acOn}, Boolean). To support real-time analysis, the method \texttt{viewIoTData()} enables the system to retrieve simulated IoT sensor data, providing continuous visibility into environmental conditions. When lights or the AC is found to be on when the room occupancy is 0, the \texttt{sendAlert()} method is used to notify facility managers. In terms of relationships, the Energy Management system integrates with both \textbf{CrowdCount} and \textbf{Sensor Data} to gain insights into occupancy and environmental patterns, which inform optimization strategies. It also interacts with the \textbf{Notification System} to trigger alerts whenever anomalies are detected.
+
+\subsubsection{Crowd Count}
+The \textbf{Crowd Count} class is responsible for monitoring and analyzing crowd occupancy within a given area. It processes a \texttt{VideoFeed}, represented as an array of video streams, to detect and track people in real time. From this data, it calculates the \texttt{CrowdCount}, an integer representing the number of individuals present, and records \texttt{Coordinates}, a tuple of integers that captures the geographical location of each individual. The class provides two key methods: \texttt{getPeopleCount()}, which returns the total number of people detected, and \texttt{generateCrowdHeatmap()}, which produces a visual heatmap based on crowd distribution patterns. In terms of relationships, the Crowd Count class integrates with both the \textbf{Energy Management} system and the \textbf{Notification System}, supplying occupancy data that informs energy optimization decisions and triggers emergency alerts when people are detected during evacuation.
+
+\subsubsection{Database}
+The \textbf{Database} class functions as the central repository for all system data, ensuring that information is securely stored and readily accessible to other components. It maintains three primary categories of data: \texttt{userData}, which contains authentication details and role management information; \texttt{occupancyData}, which records real-time occupancy metrics; and \texttt{sensorData}, which stores simulated IoT data. To manage this information, the class provides two key methods: \texttt{storeData(data)}, which saves new entries into the database, and \texttt{retrieveData(query)}, which allows data to be fetched based on specific queries. In terms of relationships, the Database class serves as the backbone for data exchange, providing access to User, Occupancy, and Sensor information that supports authentication, energy management, crowd monitoring, and alert generation.
+
+\subsubsection{Avatar}
+The \textbf{Avatar} class represents individual agents within the virtual 3D environment. Each avatar is uniquely identified by an \texttt{AvatarID} (Integer) and maintains a \texttt{Position} (Tuple of integers) that specifies its current location in the simulated space. To support analysis and visualization, the class provides the method \texttt{generateCrowdHeatmap()}, which captures avatar movement patterns and produces a heatmap to track crowd density across the environment. In terms of relationships, the Avatar class interacts closely with the \textbf{Crowd Count} system and the \textbf{Digital Twin Visualization} system, serving as the digital representation of people or agents whose positioning inform occupancy analysis and energy management.
+
+\subsubsection{Digital Twin Visualization}
+The \textbf{Digital Twin Visualization} class serves as the graphical interface for the system, which will render a real-time, 3D replica of the labs. It maintains a reference to the static building structure (\texttt{scene3D}) and a dynamic list of \texttt{avatars} that represent people currently in the building. The class relies on the \texttt{processVideo()} method to ingest real-time \textbf{OccupancyData}, translating raw coordinates into visual avatar movements. Additionally, it uses \texttt{generateCrowdHeatmap()} to generate a heatmap of crowd density.
+
+\subsubsection{Facility Manager}
+The \textbf{Facility Manager} class represents a specialized user role responsible for the operational maintenance and energy efficiency of the building. Inheriting from the \textbf{User} class, it 
+gains specific authority over building zones. Relationships in the system indicate that a Facility Manager is assigned to monitor one or more \textbf{Rooms}. This role is the primary recipient of energy efficiency alerts (e.g., lights left on in empty rooms) generated by the \textbf{Energy Management} system.
+
+\subsubsection{CSO (Chief Security Officer)}
+The \textbf{CSO} class represents security personnel tasked with monitoring safety and responding to emergencies. Like the Facility Manager, the CSO inherits from the \textbf{User} class but is distinguished by the \texttt{AssignedRooms} attribute, which links them to specific security zones or sensitive areas within the facility. The CSO is the designated recipient of high-priority alerts triggered by the \textbf{Notification System}, particularly when the \textbf{Admin} triggers an emergency mode.
+
+\subsubsection{Room}
+The \textbf{Room} class acts as the logical representation of a physical space within the facility, identified by a unique \texttt{RoomID} and a descriptive \texttt{Name}. The diagram illustrates that a Room is the parent entity for \texttt{0..*} instances of \textbf{Sensor Data} (environmental logs) and \textbf{Occupancy Data} (crowd logs), creating a history of what occurs within that specific space. It also maintains direct associations with the \textbf{CSO} and \textbf{Facility Manager} classes, defining who is responsible for the security and maintenance of that specific area.
+
+\subsubsection{Occupancy Data}
+The \textbf{Occupancy Data} class serves as a structured record of crowd analytics obtained from the computer vision processing pipeline. Each instance captures a snapshot of a specific moment, recording the \texttt{RoomID}, the total person \texttt{Count}, and precise \texttt{Coordinates} (tuples) of individuals. It also includes \texttt{reID\_metadata}, which allows the system to maintain the identity of individuals across video frames for consistent tracking. This data is generated by the \textbf{Crowd Count} system and is consumed by the \textbf{Digital Twin Visualization} to render avatars and by the \textbf{Energy Management} system to correlate occupancy with energy usage.
+
+\subsubsection{Sensor Data}
+Each record is timestamped and linked to a specific \texttt{RoomID}. The class tracks critical variables including\texttt{Temperature} (Float), \texttt{LightingStatus} (Boolean), and the state of the AC system (\texttt{acOn}). By providing a historical log of environmental conditions, this class allows the \textbf{Energy Management} system to detect inefficiencies - such as cooling systems running in unoccupied rooms - and serves as the data source for the \texttt{viewIoTData()} method used for real-time monitoring.
+
+\section{Data Model}
+
+We will now cover the database design of our project, entailing the Entity-Relationship Diagram (ERD) and its descriptions. This section will allow for efficient storage and allowing the usage of room sensor and occupancy data, enabling model generation, and defining user access for security measures.
+\subsection{Entity-Relationship Diagram (ERD)}
+
+\begin{figure}[H]
+    \centering
+    \includegraphics[width=1\linewidth]{erd.png}
+    \caption{Entity-Relationship Diagram}
+\end{figure}
+
+\subsection{Entities}
+\subsubsection{Users} 
+
+The \textbf{Users} entity includes attributes such as \texttt{user\_id} (Primary Key), \texttt{email}, \texttt{password}, and \texttt{role\_id} (foreign key from Roles). It stores information about the users, including their authentication credentials and role IDs, which is useful for identifying users and granting appropriate access to the system’s functionalities. 
+
+\subsubsection{Roles}
+
+The \textbf{Roles} entity defines the access privileges of the users according to their roles. Attributes include \texttt{role\_id} (Primary Key), \texttt{role\_name}, and \texttt{facilities\_email}. Roles define the department and position of the user, alongside whether they are eligible to receives email regarding facilities alerts. 
+
+\subsubsection{Rooms} 
+
+The \textbf{Rooms} entity stores data regarding the rooms in the university. Attributes include \texttt{room\_id} (Primary Key), \texttt{room\_name}, \texttt{min\_temp}, \texttt{max\_temp}, and \texttt{max\_occupancy}. It acts as a key entity which stores the ideal temperature ranges and maximum occupancy the room can hold before over-crowding, as well as connecting room sensor and occupancy data. 
+
+\subsubsection{Room Sensor} 
+
+The \textbf{Room Sensor} entity keeps data regarding IoT data of the room at a specific time. Attributes include \texttt{id} (Primary Key), \texttt{room\_id} (foreign key from Rooms), \texttt{date\_time}, \texttt{temp}, \texttt{ac} and \texttt{light}. It helps in storing data for each room at specific timeframes regarding the temperature, as well as whether the AC and lights are on at a specific time.  
+
+\subsubsection{Room Occupancy \& Occupancy Coordinates} 
+
+The two entities coupled together store data regarding the occupancy count and coordinates of individuals at a specific time. The \textbf{Room Occupancy} attributes include \texttt{id} (Primary Key), \texttt{room\_id} (foreign key from Rooms), \texttt{date\_time}, and \texttt{reID\_metadata}. \textbf{Occupancy Coordinates'} attributes include \texttt{id} (Primary Key), \texttt{occupancy\_id} (foreign key from Room Occupancy), \texttt{coordinate\_x} and \texttt{coordinate\_y}. \\
+
+\noindent This duet helps in storing key occupancy data for each room at specific timeframes, which is reflected onto the 3D model, and giving security alerts regarding over-population at a certain area. 
+
+\subsubsection{Security Emails \& Notifications}
+
+The two entities help in sending alerts regarding a specific room whenever there is an emergency. The \textbf{Security Emails} entity entails of the attributes \texttt{id} (Primary Key), \texttt{room\_id} (foreign key from Rooms) and \texttt{user\_id} (foreign key from Users). \textbf{Notifications’} attributes include \texttt{id} (Primary Key), \texttt{room\_id} (foreign key from Rooms) and \texttt{message}.  \\
+
+\noindent Both entities help in controlling the distribution and timing of notifications. 
+
+\section{Data Pipeline}
+This section describes the data pipeline, detailing the stages from data collection to final user output. Each step ensures data is processed to meet the requirements of the prediction models and user interface.
+\subsection{Data Collection}
+Visual data is gathered through synchronized video footage captured by 5 CCTV cameras installed in specific locations within the Projects Lab and the Digital Instrumentation Lab. The system also ingests simulated IoT data - including temperature readings and lighting status - which supplies data for real-time environmental monitoring.
+
+\subsection{Data Preprocessing}
+Before analysis can occur, raw video inputs undergo preprocessing to ensure the object detection and tracking models perform optimally. Specifically, the lighting and contrast levels of the video streams are adjusted to standardize visual input quality.
+
+\subsection{Data Storage}
+\textbf{MongoDB} will be used to store both structured data, such as occupancy counts and timestamps, and unstructured data, including tracking metadata to provide immediate access to necessary historical and current data.
+
+\subsection{Data Processing}
+For crowd analytics, video data is continuously analyzed using YOLO 12 to detect individuals, while ByteTrack/DeepSORT maintains unique identities across multiple frames to prevent double-counting. Simultaneously, the Energy Management module correlates IoT sensor readings with occupancy records to identify inefficiencies, such as detecting specific instances where lights are left active in empty rooms.
+
+\subsection{Data Visualization}
+To translate complex data into interpretable insights for campus managers, the system employs a variety of visualization tools. \textbf{Three.js} is used to render a 3D digital twin of the facility, overlaying real-time occupancy and crowd-density heatmaps directly onto the virtual model. \textbf{Matplotlib} generates the crowd density heatmaps. \textbf{React Three Fiber} is used to create the User Interface, allowing users to view their respective dashboards.
+
+\subsection{Notifications}
+\textbf{SMTP2GO}, a SMTP service, triggers real-time email notifications to designated CSOs if individualas are detected during emergency evacuations. Similarly, Facilities Managers receive immediate energy alerts if rooms remain unoccupied for extended periods (e.g., exceeding 25 minutes) while systems are active.
+
 \section{Technical Details}
 
-Our project does not have persistent data so we have no ERD. Instead we exaplin here the technical details of the algortihsm we use. These include the inputs and the outputs, how and where these algorothms fit in our tool chain, the techniques used in these algorithms, etc.
+\subsection{Machine Learning Models}
+Machine learning models form the backbone of the project's crowd detection and forecasting capabilities, working in tandem to process raw video into actionable data.
+
+\subsubsection*{YOLO 12 (You Only Look Once)}
+YOLO 12 serves as the project's primary deep learning engine for real-time object detection. By analyzing video frames directly from university lab CCTV cameras, the model generates bounding boxes and class labels to identify individuals with high precision.
+\subsubsection*{ByteTrack (Multi-Object Tracking)}
+Alongside the detection layer, ByteTrack provides robust multi-object tracking capabilities. It takes in the detection outputs from YOLO 12 to assign and maintain persistent object IDs across consecutive video frames. This mechanism makes sure that specific individuals are accurately tracked over time, even as they move between different camera angles or are temporarily obstructed, preserving the integrity and continuity of the occupancy data.
+
+\subsection{Notifications}
+For communication during critical events, the system relies on the \textbf{SMTP2GO API} to deliver real-time notifications. Acting on triggers received from the crowd detection or energy management subsystems, the API generates automated email alerts for CSOs and Facility Managers respectively.
+
+\subsection{Data Storage}
+Data persistence is managed through a hybrid approach to balance system performance with ethical compliance. \textbf{MongoDB} is used for the high-speed storage and retrieval of structured data, such as real-time occupancy counts and temperature readings. On the other hand, raw video feeds are stored physically on-premises using \textbf{Workstation Local Storage}.
+
+\subsection{Visualization Algorithms}
+To interpret and display complex data for campus managers, the system makes use of specific algorithms and visualization libraries. \textbf{Matplotlib} is used to generate crowd density heatmaps, offering a clear view of the labs' real-time status. The system also applies \textbf{Homography}, a computer vision technique that translates coordinates from 2D video streams into 3D world coordinates. This transformation is essential for accurately mapping physical locations onto the digital twin.
+
+% \section{Software Design}
+
+% This section presents the UML class diagram and gives a brief description of each class in our system. Attributes and methods of each class and relationship among classes are clearly presented.
+
+% % Your report will contain ONE of the following 2 sections.
+
+% \section{Data Design}
+
+% This section presents the structure of our database that caters to persistent data storage in our project. The structure is shown as a normalized data model for relational databases. It clearly shows entities, attributes, relationships with their cardinalities, and primary and foreign keys. We have used DB designer (or any other similar data modeling tool) to build our data model.
+
+ 
+% \section{Technical Details}
+
+% Our project does not have persistent data so we have no ERD. Instead we exaplin here the technical details of the algortihsm we use. These include the inputs and the outputs, how and where these algorothms fit in our tool chain, the techniques used in these algorithms, etc.
