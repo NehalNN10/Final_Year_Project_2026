@@ -75,7 +75,7 @@ export function setupGUI(frameUpdateCallback) {
                 updateButtonColor(darkMode, '#ffffff', '#000000');
             } else {
                 // Active Dark Mode -> Make Button Dark
-                updateButtonColor(darkMode, '#222222', '#ffffff');
+                updateButtonColor(darkMode, '#000', '#ffffff');
             }
         },
         resetView: () => { 
