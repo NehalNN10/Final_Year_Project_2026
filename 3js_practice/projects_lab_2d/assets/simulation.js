@@ -38,11 +38,10 @@ export function renderFrame(index) {
     
     trackMarkers.forEach(m => m.visible = false);
 
-    if (view != "fac") {
-        if (index < globalTrackFrames.length) {
-            const realFrameNumber = globalTrackFrames[index];
-            const detections = globalTrackData.get(realFrameNumber) || [];
-
+    if (index < globalTrackFrames.length) {
+        const realFrameNumber = globalTrackFrames[index];
+        const detections = globalTrackData.get(realFrameNumber) || [];
+        if (view != "fac") {
             detections.forEach(d => {
                 const marker = trackMarkers.get(d.id);
                 if (marker) {
@@ -51,9 +50,20 @@ export function renderFrame(index) {
                     marker.visible = true;
                 }
             });
-        
-            if (uiElements.uiOccupancy)
-                uiElements.uiOccupancy.innerText = detections.length;
+        }
+    
+        if (uiElements.uiOccupancy && uiElements.uiOccuHeader) {
+            const l = detections.length;
+            if (view == "fac"){
+                uiElements.uiOccuHeader.innerText = "Status: ";
+                uiElements.uiOccupancy.innerText = (l > 0) ? "Occupied" : "Vacant";
+                uiElements.uiOccupancy.style.color = (l > 0) ? "#ff4444" : "#00ff88";
+            }
+            else {
+                uiElements.uiOccuHeader.innerText = "Occupancy Count: ";
+                uiElements.uiOccupancy.innerText = l;
+                uiElements.uiOccupancy.style.color = (l > 20) ? "#ff4444" : ( l === 0 ? "#fff" : "#00ff88");
+            }
         }
     }
 
@@ -216,4 +226,4 @@ export async function loadSimulationData(onLoadComplete) {
     if (onLoadComplete) onLoadComplete();
 }
 
-const dummy = createMarker(7, 1.5, "red", 0.1);
+// const dummy = createMarker(7, 1.5, "red", 0.1);
