@@ -88,17 +88,14 @@ export function setupGUI(frameUpdateCallback) {
         }
     };
 
-    const rotate = gui_cam.add(params, 'rotation', -Math.PI, Math.PI, 0.1)
-        .name("Rotate View")
-        .listen()
-        .onChange((angle) => {
-            const dx = camera.position.x - controls.target.x;
-            const dz = camera.position.z - controls.target.z;
-            const radius = Math.sqrt(dx * dx + dz * dz);
-            camera.position.x = controls.target.x + radius * Math.sin(angle);
-            camera.position.z = controls.target.z + radius * Math.cos(angle);
-            controls.update();
-        });
+    const rotate = gui_cam.add(params, 'rotation', -Math.PI, Math.PI, 0.1).name("Rotate View").listen().onChange((angle) => {
+        const dx = camera.position.x - controls.target.x;
+        const dz = camera.position.z - controls.target.z;
+        const radius = Math.sqrt(dx * dx + dz * dz);
+        camera.position.x = controls.target.x + radius * Math.sin(angle);
+        camera.position.z = controls.target.z + radius * Math.cos(angle);
+        controls.update();
+    });
 
     const posX = gui_cam.add(params, 'x', -50, 50, 0.1).name("Position X").listen().onChange((val) => {
         const delta = val - controls.target.x;
@@ -170,6 +167,21 @@ export function setupGUI(frameUpdateCallback) {
     const resetPlay = gui_sim.add(funcs, 'reset').name("Reset Playback");
     
     // gui.open();
+
+    controls.addEventListener('change', () => {
+        // 1. Sync the params with the actual control target
+        params.x = controls.target.x;
+        params.z = controls.target.z;
+        
+        // 2. (Optional) Sync the Rotation slider
+        // We calculate the angle based on the offset between camera and target
+        const dx = camera.position.x - controls.target.x;
+        const dz = camera.position.z - controls.target.z;
+        
+        // atan2(x, y) returns the angle in radians
+        // We use dx, dz because your code uses sin(angle) for X and cos(angle) for Z
+        params.rotation = Math.atan2(dx, dz);
+    });
 
     return { frameController };
 }
