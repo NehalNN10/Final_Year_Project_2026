@@ -29,4 +29,4 @@ controls.minPolarAngle = 0;
 controls.maxPolarAngle = 0;
 
 const axesHelper = new THREE.AxesHelper(5);
-scene.add(axesHelper);
+// scene.add(axesHelper);
