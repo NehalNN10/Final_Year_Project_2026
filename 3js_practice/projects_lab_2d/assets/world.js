@@ -25,19 +25,20 @@ export function createObject(w, h, z, x, material) {
     const floorGeometry1 = new THREE.PlaneGeometry(w, h);
     const mesh = new THREE.Mesh(floorGeometry1, material);
     mesh.rotation.x = -Math.PI / 2;
-    mesh.position.z = z
-    mesh.position.x = x
-    mesh.position.y = 0.1
+    mesh.position.z = z;
+    mesh.position.x = x;
+    mesh.position.y = 0.02;
     scene.add(mesh);
     return mesh
 }
 
 export function createMarker(z, x, color, radius = 0.1, label = '') {
-    const geom = new THREE.SphereGeometry(radius, 12, 8);
+    const geom = new THREE.CircleGeometry(radius, 12, 8);
     const mat = new THREE.MeshBasicMaterial({ color });
     const mesh = new THREE.Mesh(geom, mat);
+    mesh.rotation.x = -Math.PI / 2;
     mesh.position.set(x, radius, z);
-    mesh.position.y= 0.01;
+    mesh.position.y= 0.05;
 
     let alpha = label === '' ? 0 : 0.15;
 

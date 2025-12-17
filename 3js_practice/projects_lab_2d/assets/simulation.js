@@ -16,6 +16,7 @@ const iot = './files/iot.csv'
 
 export const uiElements = {
     uiOccupancy: document.getElementById('ui-iot-occupancy'),
+    uiOccuHeader: document.getElementById('ui-iot-occu-header'),
     uiTemp: document.getElementById('ui-iot-temp'),
     uiAC: document.getElementById('ui-iot-ac'),
     uiLights: document.getElementById('ui-iot-lights'),
@@ -23,7 +24,8 @@ export const uiElements = {
     uiName: document.getElementById('ui-room-name'),
     uiID: document.getElementById('ui-room-id'),
     uiFloor: document.getElementById('ui-room-floor'),
-    uiCoords: document.getElementById('ui-coords')
+    uiCoords: document.getElementById('ui-coords'),
+    uiIot: document.getElementById('iot-data')
 };
 
 let globalTrackFrames = []; 
@@ -32,52 +34,71 @@ let globalIoTData = [];
 let trackMarkers = new Map();
 
 export function renderFrame(index) {
+
+    const view = document.querySelector('input[name="view"]:checked').value;
     
     trackMarkers.forEach(m => m.visible = false);
 
     if (index < globalTrackFrames.length) {
         const realFrameNumber = globalTrackFrames[index];
         const detections = globalTrackData.get(realFrameNumber) || [];
-
-        detections.forEach(d => {
-            const marker = trackMarkers.get(d.id);
-            if (marker) {
-                marker.position.x = d.z; 
-                marker.position.z = d.x;
-                marker.visible = true;
+        if (view != "fac") {
+            detections.forEach(d => {
+                const marker = trackMarkers.get(d.id);
+                if (marker) {
+                    marker.position.x = d.z; 
+                    marker.position.z = d.x;
+                    marker.visible = true;
+                }
+            });
+        }
+    
+        if (uiElements.uiOccupancy && uiElements.uiOccuHeader) {
+            const l = detections.length;
+            if (view == "fac"){
+                uiElements.uiOccuHeader.innerText = "Status: ";
+                uiElements.uiOccupancy.innerText = (l > 0) ? "Occupied" : "Vacant";
+                uiElements.uiOccupancy.style.color = (l > 0) ? "#ff4444" : "#00ff88";
             }
-        });
-        
-        if (uiElements.uiOccupancy)
-            uiElements.uiOccupancy.innerText = detections.length;
+            else {
+                uiElements.uiOccuHeader.innerText = "Occupancy Count: ";
+                uiElements.uiOccupancy.innerText = l;
+                uiElements.uiOccupancy.style.color = (l > 20) ? "#ff4444" : ( l === 0 ? "#fff" : "#00ff88");
+            }
+        }
     }
 
     if (index < globalIoTData.length) {
         const row = globalIoTData[index];
         
-        if (uiElements.uiTemp) {
-            const t = parseFloat(row['temp']);
-            uiElements.uiTemp.innerText = t + "°C";
-            
-            if (t <= 19) uiElements.uiTemp.style.color = "#0088ff";
-            else if (t <= 22) uiElements.uiTemp.style.color = "#00ffff";
-            else if (t <= 27) uiElements.uiTemp.style.color = "#00ff88";
-            else if (t <= 30) uiElements.uiTemp.style.color = "#ff8800";
-            else uiElements.uiTemp.style.color = "#f00";
-        }
-        
-        if (uiElements.uiAC) {
-            const ac = row['ac']; 
-            uiElements.uiAC.innerText = ac;
-            uiElements.uiAC.style.color = (ac === "On") ? "#00ff88" : "#ff4444";
-        }
+        if (view == "sec") uiElements.uiIot.style.display = "none";
+        else {
+            uiElements.uiIot.style.display = "block";
 
-        if (uiElements.uiLights) {
-            const l = row['lights'];
-            uiElements.uiLights.innerText = l;
-            uiElements.uiLights.style.color = (l === "On") ? "#00ff88" : "#ff4444";
+            if (uiElements.uiTemp) {
+                const t = parseFloat(row['temp']);
+                uiElements.uiTemp.innerText = t + "°C";
+                
+                if (t <= 19) uiElements.uiTemp.style.color = "#0088ff";
+                else if (t <= 22) uiElements.uiTemp.style.color = "#00ffff";
+                else if (t <= 27) uiElements.uiTemp.style.color = "#00ff88";
+                else if (t <= 30) uiElements.uiTemp.style.color = "#ff8800";
+                else uiElements.uiTemp.style.color = "#f00";
+            }
+            
+            if (uiElements.uiAC) {
+                const ac = row['ac']; 
+                uiElements.uiAC.innerText = ac;
+                uiElements.uiAC.style.color = (ac === "On") ? "#00ff88" : "#ff4444";
+            }
+
+            if (uiElements.uiLights) {
+                const l = row['lights'];
+                uiElements.uiLights.innerText = l;
+                uiElements.uiLights.style.color = (l === "On") ? "#00ff88" : "#ff4444";
+            }
         }
-        
+            
         if (uiElements.uiTime) {
             uiElements.uiTime.innerText = ((row['timestamp'] || index)/10).toFixed(1) + "s";
         }
@@ -86,6 +107,19 @@ export function renderFrame(index) {
         //     const l = row['occu'];
         //     uiElements.uiOccupancy.innerText = l;
         //     uiElements.uiOccupancy.style.color = (l > 20) ? "#ff4444" : ( l === 0 ? "#fff" : "#00ff88");
+        // }
+        // if (uiElements.uiOccupancy && uiElements.uiOccuHeader) {
+        //     const l = row['occu'];
+        //     if (view == "fac"){
+        //         uiElements.uiOccuHeader.innerText = "Status: ";
+        //         uiElements.uiOccupancy.innerText = (l > 0) ? "Occupied" : "Vacant";
+        //         uiElements.uiOccupancy.style.color = (l > 0) ? "#ff4444" : "#00ff88";
+        //     }
+        //     else {
+        //         uiElements.uiOccuHeader.innerText = "Occupancy Count: ";
+        //         uiElements.uiOccupancy.innerText = l;
+        //         uiElements.uiOccupancy.style.color = (l > 20) ? "#ff4444" : ( l === 0 ? "#fff" : "#00ff88");
+        //     }
         // }
     }
     
@@ -118,11 +152,11 @@ export function renderFrame(index) {
 }
 
 export function getRoomInfo(x, z) {
-    if (x >= -8.75 && x <= -2.75 && z >= -9 && z <= 9) {
-        return { name: "Projects Lab", id: "C-007", floor: "Lower Ground Floor" };
+    if (x >= -9.1 && x <= -2.4 && z >= -9.35 && z <= 9.35) {
+        return { name: "Projects Lab", id: "C-007", floor: "Lower Ground" };
     }
-    else if (x >= -2.75 && x <= 8.75 && z <= 5 && z >= -9) {
-         return { name: "Projects Lab", id: "C-007", floor: "Lower Ground Floor" };
+    else if (x >= -2.4 && x <= 9.1 && z <= 5.35 && z >= -9.35) {
+         return { name: "Projects Lab", id: "C-007", floor: "Lower Ground" };
     }
     return { name: "Outside Bounds", id: "N/A", floor: "N/A" };
 }
@@ -189,8 +223,6 @@ export async function loadSimulationData(onLoadComplete) {
     } catch (e) { console.error("Error loading IoT", e); }
 
     // playback.maxFrames = Math.max(globalTrackFrames.length, globalIoTData.length) - 1;
-
-    playback.maxFrames = 1200;
     
     if (onLoadComplete) onLoadComplete();
 }

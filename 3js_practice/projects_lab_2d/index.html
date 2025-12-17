@@ -37,29 +37,31 @@
         <div class="content" id="ui-content">
           <!-- Room ID -->
           <div class="row">
-              <span class="label">Room ID:</span>
+              <span class="label">ID:</span>
               <span id="ui-room-id" class="bold">--</span>
           </div>
 
           <!-- Room Floor -->
           <div class="row">
-              <span class="label">Room Floor:</span>
+              <span class="label">Floor:</span>
               <span id="ui-room-floor" class="bold">--</span>
           </div>
 
-          <!-- Room Temperature -->
-          <div class="row border">
-              <span class="label">Temperature:</span>
-              <span id="ui-iot-temp" class="bold">">??</span>
-          </div>
+          <div id="iot-data">
+            <!-- Room Temperature -->
+            <div class="row border">
+                <span class="label">Temperature:</span>
+                <span id="ui-iot-temp" class="bold">">??</span>
+            </div>
 
-          <!-- Room AC & Light State -->
-          <div class="row">
-              <span class="label">AC State:</span>
-              <span id="ui-iot-ac" class="bold">--</span>
-          
-              <span class="label">Lights State:</span>
-              <span id="ui-iot-lights" class="bold">--</span>
+            <!-- Room AC & Light State -->
+            <div class="row">
+                <span class="label">AC State:</span>
+                <span id="ui-iot-ac" class="bold">--</span>
+            
+                <span class="label">Lights State:</span>
+                <span id="ui-iot-lights" class="bold">--</span>
+            </div>
           </div>
 
           <!-- Time & Coordinates -->
@@ -107,15 +109,35 @@
 
           </div>
         </div>
-
         
 
+      </div>
+
+      <div class="tracker-ui">
+        <h3>Display Type</h3> 
+
+        <div class="content" id="ui-content">
+          <div class="row" style="display: block;">
+            <input type="radio" id="sec_view" name="view" value="sec">
+            <label for="sec_view">Security Admin</label>
+          </div>
+
+          <div class="row" style="display: block;">
+            <input type="radio" id="fac_view" name="view" value="fac">
+            <label for="fac_view">Facilities Admin</label>
+          </div>
+
+          <div class="row" style="display: block;">
+            <input type="radio" id="all_view" name="view" value="all" checked>
+            <label for="all_view">All</label>
+          </div>
+        </div>
       </div>
     </div>
 
     <div class="tracker-ui row" id="occupancy">
 
-      <span>Occupancy:</span>
+      <span id="ui-iot-occu-header">Occupancy Count:</span>
       <span id="ui-iot-occupancy" class="bold value">Detecting...</span>
 
     </div>
