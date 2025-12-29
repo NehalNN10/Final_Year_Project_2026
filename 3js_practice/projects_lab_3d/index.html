@@ -3,22 +3,152 @@
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>Getting Started with Three.js</title>
-    <style>
-      body {
-        margin: 0;
-      }
-    </style>
+
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=League+Spartan:wght@100..900&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="index.css" />
+
+    <title>HU Digital Twin</title>
+
     <script type="importmap">
-			{
-				"imports": {
-					"three": "https://cdn.jsdelivr.net/npm/three@0.161.0/build/three.module.js",
+      {
+        "imports": {
+          "three": "https://cdn.jsdelivr.net/npm/three@0.161.0/build/three.module.js",
           "jsm/": "https://cdn.jsdelivr.net/npm/three@0.161.0/examples/jsm/"
         }
-			}
-		</script>
+      }
+    </script>
+
+    <script type="text/javascript" src="../dat.gui.min.js"></script>
   </head>
+
   <body>
+
+    <div class="scroll" id="top-left">
+
+      <div class="tracker-ui" style="margin-top: 0;">
+        <!-- Room Name -->
+        <h3 class="row">
+          <span>Room:</span>
+          <span id="ui-room-name" class="bold">--</span>
+        </h3>
+        
+        <div class="content" id="ui-content">
+          <!-- Room ID -->
+          <div class="row">
+              <span class="label">ID:</span>
+              <span id="ui-room-id" class="bold">--</span>
+          </div>
+
+          <!-- Room Floor -->
+          <div class="row">
+              <span class="label">Floor:</span>
+              <span id="ui-room-floor" class="bold">--</span>
+          </div>
+
+          <div id="iot-data">
+            <!-- Room Temperature -->
+            <div class="row border">
+                <span class="label">Temperature:</span>
+                <span id="ui-iot-temp" class="bold">">??</span>
+            </div>
+
+            <!-- Room AC & Light State -->
+            <div class="row">
+                <span class="label">AC State:</span>
+                <span id="ui-iot-ac" class="bold">--</span>
+            
+                <span class="label">Lights State:</span>
+                <span id="ui-iot-lights" class="bold">--</span>
+            </div>
+          </div>
+
+          <!-- Time & Coordinates -->
+          <div class="row border">
+              <span class="label">Time:</span>
+              <span id="ui-iot-time" class="bold value">??</span>
+          </div>
+
+          <div class="row">
+              <span class="label">Coordinates:</span>
+              <span id="ui-coords" class="bold value">??</span>
+          </div>
+        </div>
+      </div> 
+
+      <div class= "tracker-ui">
+        <h3>Simulation Controls</h3> 
+
+        <div class="content" id="sim-content">
+        
+        </div>
+        
+      </div>
+
+      <div class="tracker-ui">
+
+        <h3>Model Controls</h3> 
+
+        <div class="content" id="ui-content">
+          <div class="row">
+            <span class="label">Zoom:</span>
+            <span id="ui-room-name">Scroll Wheel/Pinch</span>
+          </div>
+          <div class="row">
+              <span class="label">Move:</span>
+              <span id="ui-room-id">Right Click & Pan</span>
+          </div>
+
+          <div class="row">
+              <span class="label">Rotate:</span>
+              <span id="ui-room-floor">Left Click & Pan</span>
+          </div>
+
+          <div class="border" id="cam-content">
+
+          </div>
+        </div>
+        
+
+      </div>
+
+      <div class="tracker-ui">
+        <h3>Display Type</h3> 
+
+        <div class="content" id="ui-content">
+          <div class="row" style="display: block;">
+            <input type="radio" id="sec_view" name="view" value="sec">
+            <label for="sec_view">Security Admin</label>
+          </div>
+
+          <div class="row" style="display: block;">
+            <input type="radio" id="fac_view" name="view" value="fac">
+            <label for="fac_view">Facilities Admin</label>
+          </div>
+
+          <div class="row" style="display: block;">
+            <input type="radio" id="all_view" name="view" value="all" checked>
+            <label for="all_view">All</label>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="tracker-ui row" id="occupancy">
+
+      <span id="ui-iot-occu-header">Occupancy Count:</span>
+      <span id="ui-iot-occupancy" class="bold value">Detecting...</span>
+
+    </div>
+
+    <!-- <video class="tracker-ui" id="homeless" autoplay unmute src="./others/homeless.mp4" type="video/mp4">
+    </video> -->
+
+    <div class="crosshair"></div>
+
     <script type="module" src="index.js"></script>
+
   </body>
+
 </html>
