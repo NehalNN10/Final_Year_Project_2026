@@ -78,7 +78,7 @@ export function setupGUI(frameUpdateCallback) {
             params.x = 0; 
             params.z = 0; 
             params.rotation = 0; 
-            camera.position.set(-20, 20);
+            camera.position.set(-10, 15);
             camera.lookAt(0, 0, 0); 
             controls.target.set(0, 0, 0);
         }

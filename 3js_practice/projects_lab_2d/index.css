@@ -353,8 +353,9 @@ input[type="radio"] + label {
 
 
 #homeless{
+    position: absolute;
     bottom: 20px;
-    left: 20px;
+    right: 20px;
     width: 30em;
     font-size: 1.15rem;
 }
