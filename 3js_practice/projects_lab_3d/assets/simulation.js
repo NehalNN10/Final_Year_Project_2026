@@ -33,7 +33,7 @@ export const uiElements = {
     uiName: document.getElementById('ui-room-name'),
     uiID: document.getElementById('ui-room-id'),
     uiFloor: document.getElementById('ui-room-floor'),
-    uiCoords: document.getElementById('ui-coords'),
+    // uiCoords: document.getElementById('ui-coords'),
     uiIot: document.getElementById('iot-data')
 };
 
@@ -150,9 +150,9 @@ export function renderFrame(index) {
             uiElements.uiID.innerText = info.id;
             uiElements.uiFloor.innerText = info.floor;
             
-            if (uiElements.uiCoords) {
-                uiElements.uiCoords.innerText = `${intersectionPoint.x.toFixed(1)}, ${intersectionPoint.z.toFixed(1)}`;
-            }
+            // if (uiElements.uiCoords) {
+            //     uiElements.uiCoords.innerText = `${intersectionPoint.x.toFixed(1)}, ${intersectionPoint.z.toFixed(1)}`;
+            // }
             
             // Color Logic
             const color = (info.id === "N/A") ? "#ff4444" : "#00ff88";
@@ -163,29 +163,19 @@ export function renderFrame(index) {
         } else {
             // No: We are looking at the sky/void
             // Keep the previous info or show nothing
-            uiElements.uiCoords.innerText = "--, --";
+            // uiElements.uiCoords.innerText = "--, --";
         }
     }
 }
 
 export function getRoomInfo(x, z) {
-    const inLeftWing = (x >= -9.1 && x <= -2.4) && (z >= -9.35 && z <= 9.35);
-    
-    const inRightWing = (x >= -2.4 && x <= 9.1) && (z >= -9.35 && z <= 5.35);
-
-    if (inLeftWing || inRightWing) {
-        return { 
-            name: "Projects Lab", 
-            id: "C-007", 
-            floor: "Lower Ground" 
-        };
+    if (z >= -9.1 && z <= -2.4 && x >= -9.35 && x <= 9.35) {
+        return { name: "Projects Lab", id: "C-007", floor: "Lower Ground" };
     }
-
-    return { 
-        name: "Outside Bounds", 
-        id: "N/A", 
-        floor: "N/A" 
-    };
+    else if (z >= -2.4 && z <= 9.1 && x >= -5.35 && x <= 9.35) {
+         return { name: "Projects Lab", id: "C-007", floor: "Lower Ground" };
+    }
+    return { name: "Outside Bounds", id: "N/A", floor: "N/A" };
 }
 
 export async function loadSimulationData(onLoadComplete) {
