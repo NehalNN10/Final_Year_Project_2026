@@ -236,7 +236,7 @@ body { margin: 0; overflow: hidden; }
     z-index: 100;
     width: 20%;
     max-width: 400px;
-    min-width: 300px;
+    min-width: 320px;
     max-height: 96vh;
     overflow-y: auto;
     overflow-x: hidden;

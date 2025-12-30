@@ -1,15 +1,73 @@
 import * as THREE from "three";
 import { scene } from "./scene.js";
+import { GLTFLoader } from "jsm/loaders/GLTFLoader.js";
+
+const loader = new GLTFLoader();
+
+export function createObject(z, x, rot, object){
+    loader.load(
+        object,
+        function (gltf) {
+            const model = gltf.scene;
+
+            model.position.set(x, 0, z);
+            model.scale.set(1, 1, 1); 
+            model.rotation.y = rot; 
+
+            model.traverse((child) => {
+                if (child.isMesh) {
+                    child.castShadow = true;
+                    child.receiveShadow = true;
+                }
+            });
+
+            scene.add(model);
+        }
+    );
+}
+
+// const loader = new GLTFLoader();
+
+// loader.load(
+//     './files/model.glb', // 1. Path to your file
+//     function (gltf) {
+//         const model = gltf.scene;
+
+//         // 2. Transform the model
+//         model.position.set(0, 0.5, 0); // X, Y, Z
+//         model.scale.set(1, 1, 1);      // Scale it if it's too big/small
+//         model.rotation.y = Math.PI / 2; // Rotate if needed
+
+//         // 3. Optional: Force the model to be bright (if lighting is still tricky)
+//         model.traverse((child) => {
+//             if (child.isMesh) {
+//                 // Determine if you want shadows
+//                 child.castShadow = true;
+//                 child.receiveShadow = true;
+//             }
+//         });
+
+//         scene.add(model);
+//         console.log("Model loaded successfully!");
+//     },
+//     function (xhr) {
+//         // Optional: Loading progress
+//         console.log((xhr.loaded / xhr.total * 100) + '% loaded');
+//     },
+//     function (error) {
+//         console.error('An error happened loading the model:', error);
+//     }
+// );
 
 export const materials = {
-    floor: new THREE.MeshBasicMaterial({ color: 0x447c5a, side: THREE.DoubleSide }),
-    wall: new THREE.MeshBasicMaterial({ color: 0x999999, side: THREE.DoubleSide }),
-    wood: new THREE.MeshBasicMaterial({ color: 0x462416, side: THREE.DoubleSide }),
-    white: new THREE.MeshBasicMaterial({ color: 0xffffffff, side: THREE.DoubleSide }),
-    glass: new THREE.MeshBasicMaterial({ color: 0x888888, side: THREE.DoubleSide, transparent: true, opacity: 0.3 }),
-    pillar: new THREE.MeshBasicMaterial({ color: 0xd1b100, side: THREE.DoubleSide }),
-    bench: new THREE.MeshBasicMaterial({ color: 0x000000, side: THREE.DoubleSide }),
-    buggy: new THREE.MeshBasicMaterial({ color: 0x880000, side: THREE.DoubleSide })
+    floor: new THREE.MeshStandardMaterial({ color: 0x447c5a, side: THREE.DoubleSide }),
+    wall: new THREE.MeshStandardMaterial({ color: 0x999999, side: THREE.DoubleSide }),
+    wood: new THREE.MeshStandardMaterial({ color: 0x462416, side: THREE.DoubleSide }),
+    white: new THREE.MeshStandardMaterial({ color: 0xffffffff, side: THREE.DoubleSide }),
+    glass: new THREE.MeshStandardMaterial({ color: 0x888888, side: THREE.DoubleSide, transparent: true, opacity: 0.3 }),
+    pillar: new THREE.MeshStandardMaterial({ color: 0xd1b100, side: THREE.DoubleSide }),
+    bench: new THREE.MeshStandardMaterial({ color: 0x000000, side: THREE.DoubleSide }),
+    buggy: new THREE.MeshStandardMaterial({ color: 0x880000, side: THREE.DoubleSide })
 };
 
 export function createFloor(w, h, z, x, material) {
@@ -33,10 +91,10 @@ export function createWall(w, h, x, z, material) {
     return mesh;
 }
 
-export function createObject(w, h, z, x, material) {
-    const geo = new THREE.BoxGeometry(w, 1, h);
+export function createObject2(w, h, z, x, material) {
+    const geo = new THREE.BoxGeometry(w, 0.5, h);
     const mesh = new THREE.Mesh(geo, material);
-    mesh.position.set(x, 1/2, z);
+    mesh.position.set(x, 0.5/2, z);
     scene.add(mesh);
     return mesh;
 }
@@ -80,6 +138,10 @@ export function createMarker(z, x, color, radius = 0.1, label = '') {
     return group;
 }
 
+export const models = {
+    white_table: './models/table.glb',
+}
+
 export const worldObjects = {
 
     floor1: createFloor(14, 11.5, 3, 2, materials.floor),
@@ -104,22 +166,31 @@ export const worldObjects = {
     doorz2: createWall(5.5, wallThickness, -0.25, 8.75 + wallThickness/2,  materials.glass),
     wallz3: createWall(6.5 + wallThickness, wallThickness, 5.75 + wallThickness/2, 8.75 + wallThickness/2, materials.wall),
 
-    pillar: createWall(1, 1, 1.75, 2.5, materials.pillar),
-    table_p1: createObject(1, 4.5, -1, 2.5, materials.white),
-    table_p2: createObject(1, 4.5, 5.5, 2.5, materials.white),
+    pillar: createWall(1, 1, 2.5, 1.75, materials.pillar),
+    table_p11: createObject(0.5, 2.5, Math.PI / 2, models.white_table),
+    table_p12: createObject(-1, 2.5, Math.PI / 2, models.white_table),
+    table_p13: createObject(-2.5, 2.5, Math.PI / 2, models.white_table),
+    table_p21: createObject(4, 2.5, Math.PI / 2, models.white_table),
+    table_p22: createObject(5.5, 2.5, Math.PI / 2, models.white_table),
+    table_p23: createObject(7, 2.5, Math.PI / 2, models.white_table),
 
-    table_v1: createObject(3, 1, -4, 6, materials.white),
-    table_v2: createObject(3, 1, -1, 6, materials.white),
-    table_v3: createObject(3, 1, 1.75, 6, materials.white),
-    table_v4: createObject(3, 1, 4.55, 6, materials.white),
-    table_v5: createObject(3, 1, 7.35, 6, materials.white),
+    table_v11: createObject(-4, 5.25, 0, models.white_table),
+    table_v12: createObject(-4, 6.75, 0, models.white_table),
+    table_v21: createObject(-1, 5.25, 0, models.white_table),
+    table_v22: createObject(-1, 6.75, 0, models.white_table),
+    table_v31: createObject(1.75, 5.25, 0, models.white_table),
+    table_v32: createObject(1.75, 6.75, 0, models.white_table),
+    table_v41: createObject(4.55, 5.25, 0, models.white_table),
+    table_v42: createObject(4.55, 6.75, 0, models.white_table),
+    table_v51: createObject(7.35, 5.25, 0, models.white_table),
+    table_v52: createObject(7.35, 6.75, 0, models.white_table),
 
-    workbench_v1: createObject(1.8, 4.75, -1.1, 0.12, materials.bench),
-    workbench_v2: createObject(1.8, 4.75, 4.65, 0.12, materials.bench),
-    workbench_v3: createObject(1.8, 4.75, -1.1, -3.15, materials.bench),
-    workbench_v4: createObject(1.8, 4.75, 4.65, -3.15, materials.bench),
+    workbench_v1: createObject2(1.8, 4.75, -1.1, 0.12, materials.bench),
+    workbench_v2: createObject2(1.8, 4.75, 4.65, 0.12, materials.bench),
+    workbench_v3: createObject2(1.8, 4.75, -1.1, -3.15, materials.bench),
+    workbench_v4: createObject2(1.8, 4.75, 4.65, -3.15, materials.bench),
 
-    shelf: createObject(1.05, 0.6, -3.8, 0.3, materials.table),
+    shelf: createObject2(1.05, 0.6, -3.8, 0.3, materials.table),
 
-    buggy: createObject(1.8, 0.8, -8, -5, materials.buggy),
+    buggy: createObject2(1.8, 0.8, -8, -5, materials.buggy),
 };

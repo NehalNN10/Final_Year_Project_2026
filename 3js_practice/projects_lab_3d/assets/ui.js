@@ -60,10 +60,6 @@ export function setupGUI(frameUpdateCallback) {
             
             // 1. Scene Changes
             scene.background = new THREE.Color(params.darkMode ? 0x131314 : 0xffffff);
-            const doorMat = params.darkMode ? materials.glass : materials.bench; 
-            if(worldObjects.doorx3) worldObjects.doorx3.material = doorMat;
-            if(worldObjects.doorz1) worldObjects.doorz1.material = doorMat;
-            if(worldObjects.doorz2) worldObjects.doorz2.material = doorMat;
 
             // 2. UI Text Change
             const label = params.darkMode ? "Light Mode" : "Dark Mode";
@@ -75,14 +71,14 @@ export function setupGUI(frameUpdateCallback) {
                 updateButtonColor(darkMode, '#ffffff', '#000000');
             } else {
                 // Active Dark Mode -> Make Button Dark
-                updateButtonColor(darkMode, '#000', '#ffffff');
+                updateButtonColor(darkMode, '#000000', '#ffffff');
             }
         },
         resetView: () => { 
             params.x = 0; 
             params.z = 0; 
             params.rotation = 0; 
-            camera.position.set(0, 20, 0.1); 
+            camera.position.set(-20, 20);
             camera.lookAt(0, 0, 0); 
             controls.target.set(0, 0, 0);
         }
