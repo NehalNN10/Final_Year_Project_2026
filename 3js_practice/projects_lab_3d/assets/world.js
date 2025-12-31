@@ -140,6 +140,7 @@ export function createMarker(z, x, color, radius = 0.1, label = '') {
 
 export const models = {
     white_table: './models/table.glb',
+    workbench: './models/workbench.glb',
 }
 
 export const worldObjects = {
@@ -185,10 +186,22 @@ export const worldObjects = {
     table_v51: createObject(7.35, 5.25, 0, models.white_table),
     table_v52: createObject(7.35, 6.75, 0, models.white_table),
 
-    workbench_v1: createObject2(1.8, 4.75, -1.1, 0.12, materials.bench),
-    workbench_v2: createObject2(1.8, 4.75, 4.65, 0.12, materials.bench),
-    workbench_v3: createObject2(1.8, 4.75, -1.1, -3.15, materials.bench),
-    workbench_v4: createObject2(1.8, 4.75, 4.65, -3.15, materials.bench),
+    workbench_v11: createObject(-2.285, -0.33, Math.PI / 2, models.workbench),
+    workbench_v12: createObject(0.085, -0.33, Math.PI / 2, models.workbench),
+    workbench_v13: createObject(-2.285, 0.57, -Math.PI / 2, models.workbench),
+    workbench_v14: createObject(0.085, 0.57, -Math.PI / 2, models.workbench),
+    workbench_v21: createObject(3.465, -0.33, Math.PI / 2, models.workbench),
+    workbench_v22: createObject(5.835, -0.33, Math.PI / 2, models.workbench),
+    workbench_v23: createObject(3.465, 0.57, -Math.PI / 2, models.workbench),
+    workbench_v24: createObject(5.835, 0.57, -Math.PI / 2, models.workbench),
+    workbench_v31: createObject(-2.285, -3.6, Math.PI / 2, models.workbench),
+    workbench_v32: createObject(0.085, -3.6, Math.PI / 2, models.workbench),
+    workbench_v33: createObject(-2.285, -2.7, -Math.PI / 2, models.workbench),
+    workbench_v34: createObject(0.085, -2.7, -Math.PI / 2, models.workbench),
+    workbench_v31: createObject(3.465, -3.6, Math.PI / 2, models.workbench),
+    workbench_v32: createObject(5.835, -3.6, Math.PI / 2, models.workbench),
+    workbench_v33: createObject(3.465, -2.7, -Math.PI / 2, models.workbench),
+    workbench_v34: createObject(5.835, -2.7, -Math.PI / 2, models.workbench),
 
     shelf: createObject2(1.05, 0.6, -3.8, 0.3, materials.table),
 
