@@ -14,7 +14,7 @@ const aspect = w / h;
 const near = 1;
 const far = 200;
 export const camera = new THREE.PerspectiveCamera(fov, aspect, near, far);
-camera.position.set(-20, 20);
+camera.position.set(-10, 15);
 
 export const scene = new THREE.Scene();
 scene.background = new THREE.Color(0x131314);
@@ -40,4 +40,4 @@ controls.minY = 0.1;
 scene.add(camera);
 
 const axesHelper = new THREE.AxesHelper(5);
-// scene.add(axesHelper);
+scene.add(axesHelper);

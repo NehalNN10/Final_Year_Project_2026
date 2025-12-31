@@ -64,7 +64,7 @@ export const materials = {
     wall: new THREE.MeshStandardMaterial({ color: 0x999999, side: THREE.DoubleSide }),
     wood: new THREE.MeshStandardMaterial({ color: 0x462416, side: THREE.DoubleSide }),
     white: new THREE.MeshStandardMaterial({ color: 0xffffffff, side: THREE.DoubleSide }),
-    glass: new THREE.MeshStandardMaterial({ color: 0x888888, side: THREE.DoubleSide, transparent: true, opacity: 0.3 }),
+    glass: new THREE.MeshBasicMaterial({ color: 0x888888, side: THREE.DoubleSide, transparent: true, opacity: 0.3 }),
     pillar: new THREE.MeshStandardMaterial({ color: 0xd1b100, side: THREE.DoubleSide }),
     bench: new THREE.MeshStandardMaterial({ color: 0x000000, side: THREE.DoubleSide }),
     buggy: new THREE.MeshStandardMaterial({ color: 0x880000, side: THREE.DoubleSide })
