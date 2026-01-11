@@ -80,7 +80,7 @@ export function createFloor(w, h, z, x, material) {
     return mesh
 }
 
-export const wallThickness = 0.35;
+export const wallThickness = 0.15;
 export const wallHeight = 2;
 
 export function createWall(w, h, x, z, material) {
@@ -141,6 +141,8 @@ export function createMarker(z, x, color, radius = 0.1, label = '') {
 export const models = {
     white_table: './models/table.glb',
     workbench: './models/workbench.glb',
+    pillar: './models/pillar.glb',
+    donut: './models/donut.glb',
 }
 
 export const worldObjects = {
@@ -167,7 +169,7 @@ export const worldObjects = {
     doorz2: createWall(5.5, wallThickness, -0.25, 8.75 + wallThickness/2,  materials.glass),
     wallz3: createWall(6.5 + wallThickness, wallThickness, 5.75 + wallThickness/2, 8.75 + wallThickness/2, materials.wall),
 
-    pillar: createWall(1, 1, 2.5, 1.75, materials.pillar),
+    pillar: createObject(1.75, 2.5, 0, models.pillar),
     table_p11: createObject(0.5, 2.5, Math.PI / 2, models.white_table),
     table_p12: createObject(-1, 2.5, Math.PI / 2, models.white_table),
     table_p13: createObject(-2.5, 2.5, Math.PI / 2, models.white_table),
@@ -202,6 +204,7 @@ export const worldObjects = {
     workbench_v32: createObject(5.835, -3.6, Math.PI / 2, models.workbench),
     workbench_v33: createObject(3.465, -2.7, -Math.PI / 2, models.workbench),
     workbench_v34: createObject(5.835, -2.7, -Math.PI / 2, models.workbench),
+    // donut: createObject(-6, 4.5, 0, models.donut),
 
     shelf: createObject2(1.05, 0.6, -3.8, 0.3, materials.table),
 
