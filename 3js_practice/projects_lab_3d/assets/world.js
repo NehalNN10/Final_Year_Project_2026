@@ -4,15 +4,22 @@ import { GLTFLoader } from "jsm/loaders/GLTFLoader.js";
 
 const loader = new GLTFLoader();
 
-export function createObject(z, x, rot, object){
+export function createObject(z, x, rot, objectUrl) {
+    const group = new THREE.Group();
+
+    group.position.set(x, 0, z);
+    group.rotation.y = rot;
+
+    scene.add(group);
+
     loader.load(
-        object,
+        objectUrl,
         function (gltf) {
             const model = gltf.scene;
 
-            model.position.set(x, 0, z);
-            model.scale.set(1, 1, 1); 
-            model.rotation.y = rot; 
+            model.position.set(0, 0, 0);
+            model.rotation.set(0, 0, 0); 
+            model.scale.set(1, 1, 1);
 
             model.traverse((child) => {
                 if (child.isMesh) {
@@ -21,9 +28,15 @@ export function createObject(z, x, rot, object){
                 }
             });
 
-            scene.add(model);
+            group.add(model);
+        },
+        undefined, 
+        function (error) {
+            console.error('Error loading:', objectUrl, error);
         }
     );
+
+    return group;
 }
 
 // const loader = new GLTFLoader();
@@ -102,8 +115,7 @@ export function createObject2(w, h, z, x, material) {
 export function createMarker(z, x, color, radius = 0.1, label = '') {
     const geom = new THREE.SphereGeometry(radius, 12, 8);
     const mat = new THREE.MeshBasicMaterial({ color });
-    const mesh = new THREE.Mesh(geom, mat);
-    mesh.rotation.x = -Math.PI / 2;
+    const mesh = createObject(z, x, Math.PI, models.roblox);
     mesh.position.set(x, radius, z);
     mesh.position.y= 0.5;
 
@@ -126,7 +138,7 @@ export function createMarker(z, x, color, radius = 0.1, label = '') {
     const smat = new THREE.SpriteMaterial({ map: tex, transparent: true });
     const sprite = new THREE.Sprite(smat);
     sprite.scale.set(0.8, 0.4, 1);  
-    sprite.position.set(x, radius + 0.4, z);
+    sprite.position.set(x, radius + 1, z);
 
     const group = new THREE.Group();
     group.add(mesh);
@@ -144,6 +156,7 @@ export const models = {
     pillar: './models/pillar.glb',
     donut: './models/donut.glb',
     camera: './models/camera.glb',
+    roblox: './models/roblox.glb'  
 }
 
 export const worldObjects = {
@@ -212,9 +225,9 @@ export const worldObjects = {
     workbench_v33: createObject(3.465, -2.7, -Math.PI / 2, models.workbench),
     workbench_v34: createObject(5.835, -2.7, -Math.PI / 2, models.workbench),
 
-    cam1: createObject(-8.65, 9, Math.PI, models.camera),
-    cam2: createObject(-8.65, -1.5, -Math.PI/2, models.camera),
-    cam3: createObject(8.5, -5, 0, models.camera),
+    cam1: createObject(-8.25, 9, Math.PI, models.camera),
+    cam2: createObject(-8.75, -1.5, -Math.PI/2, models.camera),
+    cam3: createObject(8.25, -5, 0, models.camera),
     // donut: createObject(-6, 4.5, 0, models.donut),
 
     shelf: createObject2(1.05, 0.6, -3.8, 0.3, materials.table),
