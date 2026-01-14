@@ -34,9 +34,12 @@ export function createObject(z, x, rot, objectUrl) {
         function (error) {
             console.error('Error loading:', objectUrl, error);
         }
+
     );
 
     return group;
+
+    
 }
 
 // const loader = new GLTFLoader();
@@ -73,7 +76,7 @@ export function createObject(z, x, rot, objectUrl) {
 // );
 
 export const materials = {
-    floor: new THREE.MeshStandardMaterial({ color: 0x447c5a, side: THREE.DoubleSide }),
+    floor: new THREE.MeshMatcapMaterial({ color: 0x447c5a, side: THREE.DoubleSide }),
     wall: new THREE.MeshStandardMaterial({ color: 0x999999, side: THREE.DoubleSide }),
     wood: new THREE.MeshStandardMaterial({ color: 0x462416, side: THREE.DoubleSide }),
     white: new THREE.MeshStandardMaterial({ color: 0xffffffff, side: THREE.DoubleSide }),
@@ -99,6 +102,10 @@ export const wallHeight = 2;
 export function createWall(w, h, x, z, material, l=wallHeight, y=wallHeight/2) {
     const geo = new THREE.BoxGeometry(w, l, h);
     const mesh = new THREE.Mesh(geo, material);
+    if (material != materials.glass) {
+        mesh.receiveShadow = true; // Floors must RECEIVE shadows
+        mesh.castShadow = true; // Floors usually don't need to cast shadows
+    }
     mesh.position.set(x, y, z);
     scene.add(mesh);
     return mesh;
@@ -108,6 +115,10 @@ export function createObject2(w, h, z, x, material) {
     const geo = new THREE.BoxGeometry(w, 0.5, h);
     const mesh = new THREE.Mesh(geo, material);
     mesh.position.set(x, 0.5/2, z);
+    if (material != materials.glass) {
+        mesh.receiveShadow = true; // Floors must RECEIVE shadows
+        mesh.castShadow = true; // Floors usually don't need to cast shadows
+    }
     scene.add(mesh);
     return mesh;
 }
@@ -156,13 +167,15 @@ export const models = {
     pillar: './models/pillar.glb',
     donut: './models/donut.glb',
     camera: './models/camera.glb',
-    roblox: './models/roblox.glb'  
+    roblox: './models/roblox.glb',
+    floor: './models/floor.glb'
 }
 
 export const worldObjects = {
 
-    floor1: createFloor(14, 11.5, 3, 2, materials.floor),
-    floor2: createFloor(18, 6, -5.75, 0, materials.floor),
+    // floor1: createFloor(14, 11.5, 3, 2, materials.floor),
+    // floor2: createFloor(18, 6, -5.75, 0, materials.floor),
+    floor: createObject(0, 0, Math.PI, models.floor),
 
     wallx1: createWall(wallThickness, 6.5, 9 + wallThickness/2, -5.5, materials.wall),
     doorx1: createWall(wallThickness, 1, 9 + wallThickness/2, -1.75, materials.wood),
