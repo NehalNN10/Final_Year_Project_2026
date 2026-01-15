@@ -2,6 +2,7 @@ import * as THREE from "three";
 import { createMarker } from "./world.js";
 import { camera, controls} from "./scene.js";
 
+
 export const playback = {
     frame: 0,
     maxFrames: 1200,
@@ -245,6 +246,6 @@ export async function loadSimulationData(onLoadComplete) {
 }
 
 // const dummy = createMarker(-5, -4.3, "red", 0.1);
-const cam1 = createMarker(-8.65, 9, "white", 0.1, "Camera 1");
-const cam2 = createMarker(-8.65, -1.5, "white", 0.1, "Camera 2");
-const cam3 = createMarker(8.5, -5, "white", 0.1, "Camera 3");
+// const cam1 = createMarker(-8.65, 9, "white", 0.1, "Camera 1");
+// const cam2 = createMarker(-8.65, -1.5, "white", 0.1, "Camera 2");
+// const cam3 = createMarker(8.5, -5, "white", 0.1, "Camera 3");

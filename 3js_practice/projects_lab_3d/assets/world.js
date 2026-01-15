@@ -1,18 +1,25 @@
 import * as THREE from "three";
-import { scene } from "./scene.js";
+import { camera, scene } from "./scene.js";
 import { GLTFLoader } from "jsm/loaders/GLTFLoader.js";
 
 const loader = new GLTFLoader();
 
-export function createObject(z, x, rot, object){
+export function createObject(z, x, rot, objectUrl) {
+    const group = new THREE.Group();
+
+    group.position.set(x, 0, z);
+    group.rotation.y = rot;
+
+    scene.add(group);
+
     loader.load(
-        object,
+        objectUrl,
         function (gltf) {
             const model = gltf.scene;
 
-            model.position.set(x, 0, z);
-            model.scale.set(1, 1, 1); 
-            model.rotation.y = rot; 
+            model.position.set(0, 0, 0);
+            model.rotation.set(0, 0, 0); 
+            model.scale.set(1, 1, 1);
 
             model.traverse((child) => {
                 if (child.isMesh) {
@@ -21,9 +28,18 @@ export function createObject(z, x, rot, object){
                 }
             });
 
-            scene.add(model);
+            group.add(model);
+        },
+        undefined, 
+        function (error) {
+            console.error('Error loading:', objectUrl, error);
         }
+
     );
+
+    return group;
+
+    
 }
 
 // const loader = new GLTFLoader();
@@ -60,7 +76,7 @@ export function createObject(z, x, rot, object){
 // );
 
 export const materials = {
-    floor: new THREE.MeshStandardMaterial({ color: 0x447c5a, side: THREE.DoubleSide }),
+    floor: new THREE.MeshMatcapMaterial({ color: 0x447c5a, side: THREE.DoubleSide }),
     wall: new THREE.MeshStandardMaterial({ color: 0x999999, side: THREE.DoubleSide }),
     wood: new THREE.MeshStandardMaterial({ color: 0x462416, side: THREE.DoubleSide }),
     white: new THREE.MeshStandardMaterial({ color: 0xffffffff, side: THREE.DoubleSide }),
@@ -83,10 +99,14 @@ export function createFloor(w, h, z, x, material) {
 export const wallThickness = 0.15;
 export const wallHeight = 2;
 
-export function createWall(w, h, x, z, material) {
-    const geo = new THREE.BoxGeometry(w, wallHeight, h);
+export function createWall(w, h, x, z, material, l=wallHeight, y=wallHeight/2) {
+    const geo = new THREE.BoxGeometry(w, l, h);
     const mesh = new THREE.Mesh(geo, material);
-    mesh.position.set(x, wallHeight/2, z);
+    if (material != materials.glass) {
+        mesh.receiveShadow = true; // Floors must RECEIVE shadows
+        mesh.castShadow = true; // Floors usually don't need to cast shadows
+    }
+    mesh.position.set(x, y, z);
     scene.add(mesh);
     return mesh;
 }
@@ -95,6 +115,10 @@ export function createObject2(w, h, z, x, material) {
     const geo = new THREE.BoxGeometry(w, 0.5, h);
     const mesh = new THREE.Mesh(geo, material);
     mesh.position.set(x, 0.5/2, z);
+    if (material != materials.glass) {
+        mesh.receiveShadow = true; // Floors must RECEIVE shadows
+        mesh.castShadow = true; // Floors usually don't need to cast shadows
+    }
     scene.add(mesh);
     return mesh;
 }
@@ -102,8 +126,7 @@ export function createObject2(w, h, z, x, material) {
 export function createMarker(z, x, color, radius = 0.1, label = '') {
     const geom = new THREE.SphereGeometry(radius, 12, 8);
     const mat = new THREE.MeshBasicMaterial({ color });
-    const mesh = new THREE.Mesh(geom, mat);
-    mesh.rotation.x = -Math.PI / 2;
+    const mesh = createObject(z, x, Math.PI, models.roblox);
     mesh.position.set(x, radius, z);
     mesh.position.y= 0.5;
 
@@ -126,7 +149,7 @@ export function createMarker(z, x, color, radius = 0.1, label = '') {
     const smat = new THREE.SpriteMaterial({ map: tex, transparent: true });
     const sprite = new THREE.Sprite(smat);
     sprite.scale.set(0.8, 0.4, 1);  
-    sprite.position.set(x, radius + 0.4, z);
+    sprite.position.set(x, radius + 1, z);
 
     const group = new THREE.Group();
     group.add(mesh);
@@ -143,31 +166,41 @@ export const models = {
     workbench: './models/workbench.glb',
     pillar: './models/pillar.glb',
     donut: './models/donut.glb',
+    camera: './models/camera.glb',
+    roblox: './models/roblox.glb',
+    floor: './models/floor.glb'
 }
 
 export const worldObjects = {
 
-    floor1: createFloor(14, 11.5, 3, 2, materials.floor),
-    floor2: createFloor(18, 6, -5.75, 0, materials.floor),
-    
+    // floor1: createFloor(14, 11.5, 3, 2, materials.floor),
+    // floor2: createFloor(18, 6, -5.75, 0, materials.floor),
+    floor: createObject(0, 0, Math.PI, models.floor),
+
     wallx1: createWall(wallThickness, 6.5, 9 + wallThickness/2, -5.5, materials.wall),
     doorx1: createWall(wallThickness, 1, 9 + wallThickness/2, -1.75, materials.wood),
     wallx2: createWall(wallThickness, 5.5, 9 + wallThickness/2, 1.5, materials.wall),
     doorx2: createWall(wallThickness, 1, 9 + wallThickness/2, 4.75, materials.wood),
     wallx3: createWall(wallThickness, 3.5, 9 + wallThickness/2, 7, materials.wall),
-
     wallx4: createWall(wallThickness, 6 + wallThickness, -9 - wallThickness/2, -5.75 + wallThickness/2, materials.wall),
     wallx5: createWall(wallThickness, 4, -5 - wallThickness/2, -0.75, materials.wall),
     doorx3: createWall(wallThickness, 1, -5 - wallThickness/2, 1.75, materials.glass),
     wallx6: createWall(wallThickness, 6.5, -5 - wallThickness/2, 5.5, materials.wall),
 
-    wallz1: createWall(18 + wallThickness*2, wallThickness, 0, -8.75 - wallThickness/2, materials.wall),
+    wallz1: createWall(18 + wallThickness*2, wallThickness, 0, -8.75 - wallThickness/2, materials.wall, 4, 2),
 
     doorz1: createWall(4 - wallThickness, wallThickness, -7 - wallThickness/2, -2.75 + wallThickness/2, materials.glass),
 
     wallz2: createWall(2 + wallThickness, wallThickness, -4 - wallThickness/2, 8.75 + wallThickness/2, materials.wall),
-    doorz2: createWall(5.5, wallThickness, -0.25, 8.75 + wallThickness/2,  materials.glass),
+    doorz2: createWall(5.5, wallThickness, -0.25, 8.75 + wallThickness/2, materials.glass),
     wallz3: createWall(6.5 + wallThickness, wallThickness, 5.75 + wallThickness/2, 8.75 + wallThickness/2, materials.wall),
+
+    wallxp: createWall(wallThickness, 17.5, 9 + wallThickness/2, 0, materials.wall, 2, 3),
+    wallxm: createWall(wallThickness, 11.5, -5 - wallThickness/2, 3, materials.wall, 2, 3),
+    wallxn: createWall(wallThickness, 6 + wallThickness, -9 - wallThickness/2, -5.75 + wallThickness/2, materials.wall, 2, 3),
+
+    wallzn: createWall(4 - wallThickness, wallThickness, -7 - wallThickness/2, -2.75 + wallThickness/2, materials.wall, 2, 3),
+    wallzp: createWall(14 + wallThickness*2, wallThickness, 2, 8.75 + wallThickness/2, materials.wall, 2, 3),
 
     pillar: createObject(1.75, 2.5, 0, models.pillar),
     table_p11: createObject(0.5, 2.5, Math.PI / 2, models.white_table),
@@ -204,9 +237,17 @@ export const worldObjects = {
     workbench_v32: createObject(5.835, -3.6, Math.PI / 2, models.workbench),
     workbench_v33: createObject(3.465, -2.7, -Math.PI / 2, models.workbench),
     workbench_v34: createObject(5.835, -2.7, -Math.PI / 2, models.workbench),
+
+    cam1: createObject(-8.25, 9, Math.PI, models.camera),
+    cam2: createObject(-8.75, -1.5, -Math.PI/2, models.camera),
+    cam3: createObject(8.25, -5, 0, models.camera),
     // donut: createObject(-6, 4.5, 0, models.donut),
 
     shelf: createObject2(1.05, 0.6, -3.8, 0.3, materials.table),
 
     buggy: createObject2(1.8, 0.8, -8, -5, materials.buggy),
 };
+
+// const cam1 = createMarker(-8.65, 9, "white", 0.1, "Camera 1");
+// const cam2 = createMarker(-8.65, -1.5, "white", 0.1, "Camera 2");
+// const cam3 = createMarker(8.5, -5, "white", 0.1, "Camera 3");
