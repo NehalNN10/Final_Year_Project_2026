@@ -45,14 +45,14 @@ let trackMarkers = new Map();
 
 export function renderFrame(index) {
 
-    const view = document.querySelector('input[name="view"]:checked').value;
+    const role = document.getElementById('role').textContent.trim();
     
     trackMarkers.forEach(m => m.visible = false);
 
     if (index < globalTrackFrames.length) {
         const realFrameNumber = globalTrackFrames[index];
         const detections = globalTrackData.get(realFrameNumber) || [];
-        if (view != "fac") {
+        if (role != "facility") {
             detections.forEach(d => {
                 const marker = trackMarkers.get(d.id);
                 if (marker) {
@@ -65,7 +65,7 @@ export function renderFrame(index) {
     
         if (uiElements.uiOccupancy && uiElements.uiOccuHeader) {
             const l = detections.length;
-            if (view == "fac"){
+            if (role == "facility"){
                 uiElements.uiOccuHeader.innerText = "Status: ";
                 uiElements.uiOccupancy.innerText = (l > 0) ? "Occupied" : "Vacant";
                 uiElements.uiOccupancy.style.color = (l > 0) ? "#ff4444" : "#00ff88";
@@ -81,7 +81,7 @@ export function renderFrame(index) {
     if (index < globalIoTData.length) {
         const row = globalIoTData[index];
         
-        if (view == "sec") uiElements.uiIot.style.display = "none";
+        if (role == "security") uiElements.uiIot.style.display = "none";
         else {
             uiElements.uiIot.style.display = "block";
 
@@ -120,7 +120,7 @@ export function renderFrame(index) {
         // }
         // if (uiElements.uiOccupancy && uiElements.uiOccuHeader) {
         //     const l = row['occu'];
-        //     if (view == "fac"){
+        //     if (view == "facility"){
         //         uiElements.uiOccuHeader.innerText = "Status: ";
         //         uiElements.uiOccupancy.innerText = (l > 0) ? "Occupied" : "Vacant";
         //         uiElements.uiOccupancy.style.color = (l > 0) ? "#ff4444" : "#00ff88";

@@ -7,7 +7,7 @@
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=League+Spartan:wght@100..900&display=swap" rel="stylesheet">
-    <link rel="stylesheet" href="index.css" />
+    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}" />
 
     <title>HU Digital Twin</title>
 
@@ -20,7 +20,7 @@
       }
     </script>
 
-    <script type="text/javascript" src="../dat.gui.min.js"></script>
+    <script type="text/javascript" src="{{ url_for('static', filename='dat.gui.min.js') }}"></script>
   </head>
 
   <body>
@@ -113,7 +113,7 @@
 
       </div>
 
-      <div class="tracker-ui">
+      <!-- <div class="tracker-ui">
         <h3>Display Type</h3> 
 
         <div class="content" id="ui-content">
@@ -132,7 +132,11 @@
             <label for="all_view">All</label>
           </div>
         </div>
-      </div>
+      </div> -->
+
+      <span id="role" style="display: none">
+        {{ session.get('role', 'guest') }}
+      </span>
     </div>
 
     <div class="tracker-ui row" id="occupancy">
@@ -147,7 +151,7 @@
 
     <div class="crosshair"></div>
 
-    <script type="module" src="index.js"></script>
+    <script type="module" src="{{ url_for('static', filename='model.js') }}"></script>
 
   </body>
 
