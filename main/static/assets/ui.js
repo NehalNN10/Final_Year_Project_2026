@@ -109,10 +109,10 @@ export function setupGUI(frameUpdateCallback) {
 
     const resetCam = gui_cam.add(funcs, 'resetView').name("Reset Camera");
 
-    darkMode = gui_cam.add(funcs, 'dark').name("Light Mode");
+    // darkMode = gui_cam.add(funcs, 'dark').name("Light Mode");
 
     const resetBtn = resetCam.domElement.parentNode.parentNode;
-    const darkBtn = darkMode.domElement.parentNode.parentNode;
+    // const darkBtn = darkMode.domElement.parentNode.parentNode;
 
     const setSideBySideCam = (row) => {
         row.style.width = "50%";
@@ -125,8 +125,8 @@ export function setupGUI(frameUpdateCallback) {
         row.style.justifyContent = "center";
     };
 
-    setSideBySideCam(resetBtn);
-    setSideBySideCam(darkBtn);
+    // setSideBySideCam(resetBtn);
+    // setSideBySideCam(darkBtn);
 
     const speed = gui_sim.add(playback, 'speed', 0.1, 5, 0.1).name("Speed").listen();
     
