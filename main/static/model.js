@@ -11,6 +11,33 @@ frameController = guiRefs.frameController;
 const SIMULATION_FPS = 10; 
 let lastTime = 0;
 
+const container = document.getElementById('model-container');
+
+// 2. Attach the renderer to it
+if (container) {
+    container.appendChild(renderer.domElement);
+} else {
+    console.error("Missing #canvas-container in HTML");
+}
+
+// 3. Smart Resizing (Handles window resize AND flex layout changes)
+const resizeObserver = new ResizeObserver(() => {
+    if (!container) return;
+    
+    const width = container.clientWidth;
+    const height = container.clientHeight;
+    
+    // Only update if dimensions are valid
+    if (width > 0 && height > 0) {
+        renderer.setSize(width, height);
+        camera.aspect = width / height;
+        camera.updateProjectionMatrix();
+    }
+});
+
+// Start watching the container
+resizeObserver.observe(container);
+
 loadSimulationData(() => {
     if (frameController) {
         frameController.max(playback.maxFrames);

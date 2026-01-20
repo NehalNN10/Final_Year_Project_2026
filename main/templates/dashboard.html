@@ -8,17 +8,25 @@
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=League+Spartan:wght@100..900&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+
+    <title>HU Digital Twin - Facilities Dashboard</title>
+
   </head>
 <body>
-    <div class="tracker-ui" style="text-align: center; position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%);">
-        
-        <div class="row">
-            <h1>Dashboard</h1>
-        </div>
-        <div class="row" style="margin-top: 20px;">
-            <button class="btn" onclick="window.location.href='/model'">Model</button>
-        </div>
+
+<body>
+  <header>
+    <div style="flex: 1;">
+      <h1>HU Digital Twin </h1>
     </div>
+    <div style="flex: 2;"> 
+      <div style="display: flex; flex-direction: row; justify-content: space-evenly">
+        <button class="header selected" onclick="window.location.href='/dashboard'">Home</button>
+        <button class="header" onclick="window.location.href='/model'">Model</button>
+        <button class="header" onclick="window.location.href='/'">Log Out</button>
+      </div>
+    </div>
+  </header>
 </body>
 </html>
 

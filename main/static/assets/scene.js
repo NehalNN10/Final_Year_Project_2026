@@ -2,8 +2,8 @@ import * as THREE from "three";
 import { OrbitControls } from "jsm/controls/OrbitControls.js";
 import { RGBELoader } from 'jsm/loaders/RGBELoader.js';
 
-export const w = window.innerWidth;
-export const h = window.innerHeight;
+export const w = window.innerWidth - 420;
+export const h = window.innerHeight - 100;
 
 export const renderer = new THREE.WebGLRenderer({ antialias: true });
 renderer.setSize(w, h);
