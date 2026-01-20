@@ -24,12 +24,30 @@ export const floorPlane = new THREE.Plane(new THREE.Vector3(0, 1, 0), 0);
 // Create a variable to hold the result
 export const intersectionPoint = new THREE.Vector3();
 
+function displayCurrentDateTime() {
+    const now = new Date();
+  
+    const options = { 
+        weekday: 'short', // "Mon"
+        month: 'short',   // "Jan"
+        day: 'numeric',   // "19"
+        year: 'numeric'   // "2026"
+    };
+
+    // Format the date using the 'en-US' locale
+    const formattedDate = now.toLocaleDateString('en-US', options);
+    
+    uiElements.uiDate.innerHTML = formattedDate;
+}
+
+
 export const uiElements = {
     uiOccupancy: document.getElementById('ui-iot-occupancy'),
     uiOccuHeader: document.getElementById('ui-iot-occu-header'),
     uiTemp: document.getElementById('ui-iot-temp'),
     uiAC: document.getElementById('ui-iot-ac'),
     uiLights: document.getElementById('ui-iot-lights'),
+    uiDate: document.getElementById('ui-iot-date'),
     uiTime: document.getElementById('ui-iot-time'),
     uiName: document.getElementById('ui-room-name'),
     uiID: document.getElementById('ui-room-id'),
@@ -66,12 +84,12 @@ export function renderFrame(index) {
         if (uiElements.uiOccupancy && uiElements.uiOccuHeader) {
             const l = detections.length;
             if (role == "facility"){
-                uiElements.uiOccuHeader.innerText = "Status: ";
+                uiElements.uiOccuHeader.innerText = "Occupancy: ";
                 uiElements.uiOccupancy.innerText = (l > 0) ? "Occupied" : "Vacant";
                 uiElements.uiOccupancy.style.color = (l > 0) ? "#ff4444" : "#00ff88";
             }
             else {
-                uiElements.uiOccuHeader.innerText = "Occupancy Count: ";
+                uiElements.uiOccuHeader.innerText = "Occupancy: ";
                 uiElements.uiOccupancy.innerText = l;
                 uiElements.uiOccupancy.style.color = (l > 20) ? "#ff4444" : ( l === 0 ? "#fff" : "#00ff88");
             }
@@ -98,15 +116,19 @@ export function renderFrame(index) {
             
             if (uiElements.uiAC) {
                 const ac = row['ac']; 
-                uiElements.uiAC.innerText = ac;
+                uiElements.uiAC.innerText = (ac === "On") ? "• ON" : "- OFF";
                 uiElements.uiAC.style.color = (ac === "On") ? "#00ff88" : "#ff4444";
             }
 
             if (uiElements.uiLights) {
                 const l = row['lights'];
-                uiElements.uiLights.innerText = l;
+                uiElements.uiLights.innerText = (l === "On") ? "• ON" : "- OFF";
                 uiElements.uiLights.style.color = (l === "On") ? "#00ff88" : "#ff4444";
             }
+        }
+
+        if (uiElements.uiDate) {
+           displayCurrentDateTime();
         }
             
         if (uiElements.uiTime) {
@@ -157,9 +179,10 @@ export function renderFrame(index) {
             
             // Color Logic
             const color = (info.id === "N/A") ? "#ff4444" : "#00ff88";
+            const whiteColor = (info.id === "N/A") ? "#ff4444" : "#ffffff";
             uiElements.uiName.style.color = color;
-            uiElements.uiID.style.color = color;
-            uiElements.uiFloor.style.color = color; // Fix: uiFloor was declared but not colored
+            uiElements.uiID.style.color = whiteColor
+            uiElements.uiFloor.style.color = whiteColor // Fix: uiFloor was declared but not colored
 
         } else {
             // No: We are looking at the sky/void

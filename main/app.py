@@ -21,12 +21,8 @@ class Role(db.Model):
     name = db.Column(db.String(80), unique=True, nullable=False)
     facilities_email = db.Column(db.Boolean, nullable=False)
 
-@app.route('/')
-def home():
-    return render_template('index.html')
-
-@app.route('/login', methods=['GET', 'POST'])
-def login():
+@app.route('/', methods=['GET', 'POST'])
+def index():
     error = None  # Initialize error message
     if request.method == 'POST':
         user_id = request.form['user_id']
@@ -45,13 +41,20 @@ def login():
             session['user_id'] = id.id
             role = Role.query.get(id.role_id)
             session['role'] = role.name  # Store only the role name, not the object
-            return redirect(url_for('dashboard'))  # Redirect to the dashboard or home page
-
-    return render_template('login.html', error=error)
+            if role.name == 'facility':
+                return redirect(url_for('facility_home'))
+            return redirect(url_for('dashboard'))  # Redirect to the facility_home or home page
+    
+    
+    return render_template('index.html', error=error)
 
 @app.route('/model')
 def model():
     return render_template('model.html', role=session.get('role'))
+
+@app.route('/facility_home')
+def facility_home():
+    return render_template('facility_home.html')
 
 @app.route('/dashboard')
 def dashboard():
