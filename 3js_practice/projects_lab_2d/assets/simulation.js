@@ -9,8 +9,9 @@ export const playback = {
     speed: 1
 };
 
-// const tracker = './files/mapped_tracks_angle_03.csv';
-const tracker = './files/mapped_tracks_angle_01.csv';
+const tracker = './files/mapped_tracks_cam3_2.csv';
+// const tracker = './files/mapped_tracks_angle_01.csv';
+// const tracker = './files/tracks_output.csv';
 // const tracker = './files/mapped_tracks_angle_01_try_2.csv';
 const iot = './files/iot.csv'
 
@@ -194,7 +195,8 @@ export async function loadSimulationData(onLoadComplete) {
                         let hash = 0;
                         for (let i = 0; i < id.length; i++) hash = id.charCodeAt(i) + ((hash << 5) - hash);
                         const color = new THREE.Color(`hsl(${Math.abs(hash) % 360}, 70%, 50%)`);
-                        const marker = createMarker(0, 0, color.getHex(), 0.2, id);
+                        // const marker = createMarker(0, 0, color.getHex(), 0.2, id);
+                        const marker = createMarker(0, 0, color.getHex(), 0.1, id);
                         marker.visible = false;
                         trackMarkers.set(id, marker);
                     }
@@ -227,7 +229,7 @@ export async function loadSimulationData(onLoadComplete) {
     if (onLoadComplete) onLoadComplete();
 }
 
-// const dummy = createMarker(-5, -4.3, "red", 0.1);
+const dummy = createMarker(8.75, -1.5, "red", 0.1);
 const cam1 = createMarker(-8.65, 9, "white", 0.1, "Camera 1");
 const cam2 = createMarker(-8.65, -1.5, "white", 0.1, "Camera 2");
 const cam3 = createMarker(8.5, -5, "white", 0.1, "Camera 3");
