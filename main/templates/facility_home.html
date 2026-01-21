@@ -33,7 +33,12 @@
   </div>
 
   <div class="main-home tracker-ui">
-    <h2>Rooms Real-Time Data</h2>
+    <div class="row">
+      <h2>Rooms Real-Time Data</h2>
+      <h2> ⏰ <span id="time"></span></h2>
+    </div>
+    
+
     
     <table style="width: 100%; margin-top: 20px; border-collapse: collapse;">
       <tr>
@@ -47,10 +52,10 @@
       <tr>
         <td>C-007</td>
         <td>Projects Lab</td>
-        <td>Occupied</td>
-        <td>22 °C</td>
-        <td>On</td>
-        <td>On</td>
+        <td><span class='fill' id="occ">??</span></td>
+        <td><span class='fill' id="temp">??</span></td>
+        <td><span class='fill' id="ac">??</span></td>
+        <td><span class='fill' id="lights">??</span></td>
       </tr>
 
       {% for room in rooms %}
@@ -71,5 +76,7 @@
         </li>
       {% endfor %}
     </ul>
+
+    <script type="module" src="{{ url_for('static', filename='facility_home.js') }}"></script>
 </body>
 </html>

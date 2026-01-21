@@ -2,6 +2,8 @@ import * as THREE from "three";
 import { createMarker } from "./world.js";
 import { camera, controls} from "./scene.js";
 
+const FPS = 10; 
+const LOOP_DURATION = 120; // Match model.js
 
 export const playback = {
     frame: 0,
@@ -131,8 +133,22 @@ export function renderFrame(index) {
            displayCurrentDateTime();
         }
             
+        // --- NEW CODE START: TIME CALCULATION ---
         if (uiElements.uiTime) {
-            uiElements.uiTime.innerText = ((row['timestamp'] || index)/10).toFixed(1) + "s";
+            const now = new Date();
+            const nowSeconds = Math.floor(now.getTime() / 1000);
+            
+            // 1. Find the start of the CURRENT 2-minute cycle
+            // (Current Time minus the remainder of 120)
+            const secondsIntoCycle = nowSeconds % LOOP_DURATION;
+            const cycleStartTime = new Date(now.getTime() - (secondsIntoCycle * 1000));
+            
+            // 2. Add the frame's time to that start point
+            // If we are at Frame 10 (1s), we add 1s to the cycle start
+            const frameTime = new Date(cycleStartTime.getTime() + (index / FPS) * 1000);
+            
+            uiElements.uiTime.innerText = frameTime.toLocaleTimeString(); 
+            
         }
 
         // if (uiElements.uiOccupancy) {

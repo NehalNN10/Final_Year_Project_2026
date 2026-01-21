@@ -31,7 +31,11 @@
       </div>
       <div style="flex: 2;"> 
         <div style="display: flex; flex-direction: row; justify-content: space-evenly">
-          <button class="header" onclick="window.location.href='/facility_home'">Home</button>
+          {% if session.get('role') == 'facility' %}
+            <button class="header" onclick="window.location.href='/facility_home'">Home</button>
+          {% else %}
+            <button class="header" onclick="window.location.href='/dashboard'">Home</button>
+          {% endif %}
           <button class="header selected" onclick="window.location.href='/model'">Model</button>
           <button class="header" onclick="window.location.href='/'">Log Out</button>
         </div>
@@ -40,130 +44,128 @@
     </header>
 
     <div class="main">
-      <div class="model">
-        <div class="scroll" id="top-left">
-          
 
-          <div class="tracker-ui" style="margin-top: 20px;">
-            <!-- Room Name -->
-            <h3 class="row">
+      <div id="model-container">
+        <div class="crosshair"></div>
+        </div> 
+      <script type="module" src="{{ url_for('static', filename='model.js') }}"></script>
+      <div class="scroll" id="float">
+        
+
+        <div class="tracker-ui" style="margin-top: 20px;">
+          <!-- Room Name -->
+          <h3 class="row">
+            <span>
+              <span>📍</span>
+              <span id="ui-room-name" class="bold">--</span>
+            </span>
+          </h3>
+          
+          <div class="content" id="ui-content">
+
+            <!-- Room ID -->
+            <div class="row">
+                <span id="ui-room-id">--</span>
+                <span id="ui-room-floor">--</span>
+            </div>
+
+            <!-- Time & Coordinates -->
+            <div class="row">
               <span>
-                <span>📍</span>
-                <span id="ui-room-name" class="bold">--</span>
+                <span> 📅 </span>
+                <span id="ui-iot-date">??</span>
               </span>
-            </h3>
-            
-            <div class="content" id="ui-content">
+              <span>
+                <span> ⏰ </span>
+                <span id="ui-iot-time" class="bold value">??</span>
+              </span>
+            </div>
 
-              <!-- Room ID -->
-              <div class="row">
-                  <span id="ui-room-id">--</span>
-                  <span id="ui-room-floor">--</span>
-              </div>
+            <div class="row border" id="occupancy">
 
-              <!-- Time & Coordinates -->
+              <span id="ui-iot-occu-header">Occupancy:</span>
+              <span id="ui-iot-occupancy" class="bold value">Detecting...</span>
+
+            </div>
+        
+            <div id="iot-data">
+              <!-- Room Temperature -->
               <div class="row">
                 <span>
-                  <span> 📅 </span>
-                  <span id="ui-iot-date">??</span>
+                  <span class="label"> 🌡️ Temperature:</span>
+                  <span id="ui-iot-temp" class="bold">">??</span>
                 </span>
+              </div>
+
+              <!-- Room AC & Light State -->
+              <div class="row">
                 <span>
-                  <span> ⏰ </span>
-                  <span id="ui-iot-time" class="bold value">??</span>
+                  <span class="label"> ❄️ AC State:</span>
+                  <span id="ui-iot-ac" class="bold">--</span>
+                </span>
+
+                <span>
+                  <span class="label"> 💡 Lights State:</span>
+                  <span id="ui-iot-lights" class="bold">--</span>
                 </span>
               </div>
+            </div>
 
-              <div class="row border" id="occupancy">
+            <!-- <div class="row">
+                <span class="label">Coordinates:</span>
+                <span id="ui-coords" class="bold value">??</span>
+            </div> -->
+          </div>
+        </div> 
 
-                <span id="ui-iot-occu-header">Occupancy:</span>
-                <span id="ui-iot-occupancy" class="bold value">Detecting...</span>
+        <div class= "tracker-ui" style="display: none;">
+          <h3>Simulation Controls</h3> 
 
-              </div>
+          <div class="content" id="sim-content">
           
-              <div id="iot-data">
-                <!-- Room Temperature -->
-                <div class="row">
-                  <span>
-                    <span class="label"> 🌡️ Temperature:</span>
-                    <span id="ui-iot-temp" class="bold">">??</span>
-                  </span>
-                </div>
-
-                <!-- Room AC & Light State -->
-                <div class="row">
-                  <span>
-                    <span class="label"> ❄️ AC State:</span>
-                    <span id="ui-iot-ac" class="bold">--</span>
-                  </span>
-
-                  <span>
-                    <span class="label"> 💡 Lights State:</span>
-                    <span id="ui-iot-lights" class="bold">--</span>
-                  </span>
-                </div>
-              </div>
-
-              <!-- <div class="row">
-                  <span class="label">Coordinates:</span>
-                  <span id="ui-coords" class="bold value">??</span>
-              </div> -->
-            </div>
-          </div> 
-
-          <div class= "tracker-ui">
-            <h3>Simulation Controls</h3> 
-
-            <div class="content" id="sim-content">
-            
-            </div>
-            
           </div>
-
-          <div class="tracker-ui">
-
-            <h3>Model Controls</h3> 
-
-            <div class="content" id="ui-content">
-              <div class="row">
-                <span class="label">Zoom:</span>
-                <span id="ui-room-name">Scroll Wheel/Pinch</span>
-              </div>
-              <div class="row">
-                  <span class="label">Move:</span>
-                  <span id="ui-room-id">Right Click & Pan</span>
-              </div>
-
-              <div class="row">
-                  <span class="label">Rotate:</span>
-                  <span id="ui-room-floor">Left Click & Pan</span>
-              </div>
-
-              <div class="border" id="cam-content">
-
-              </div>
-            </div>
-            
-
-          </div>
-
-          <span id="role" style="display: none">
-            {{ session.get('role', 'guest') }}
-          </span>
+          
         </div>
 
+        <div class="tracker-ui">
 
-        <!-- <video class="tracker-ui" id="homeless" autoplay unmute src="./others/homeless.mp4" type="video/mp4">
-        </video> -->
+          <h3>Model Controls</h3> 
 
-        <div id="model-container">
-          <!-- <div class="tracker-ui row occupancy" id="occupancy">
+          <div class="content" id="ui-content">
+            <div class="row">
+              <span class="label">Zoom:</span>
+              <span id="ui-room-name">Scroll Wheel/Pinch</span>
+            </div>
+            <div class="row">
+                <span class="label">Move:</span>
+                <span id="ui-room-id">Right Click & Pan</span>
+            </div>
 
-            <span id="ui-iot-occu-header">Occupancy Count:</span>
-            <span id="ui-iot-occupancy" class="bold value">Detecting...</span>
+            <div class="row">
+                <span class="label">Rotate:</span>
+                <span id="ui-room-floor">Left Click & Pan</span>
+            </div>
 
-          </div> -->
-          <div class="crosshair"></div>
-        </div> <script type="module" src="{{ url_for('static', filename='model.js') }}"></script>
+            <div class="border" id="cam-content">
+
+            </div>
+
+            <div class="row">
+              <button class="track-btn" id="replay-btn">Model Replay</button>
+            </div>
+          </div>
+          
+
+        </div>
+        
+        <div style="display: none">
+          <span id="role">
+            {{ session.get('role', 'guest') }}
+          </span>
+          <span id="live">
+            true
+          </span>
+        </div>
       </div>
     </div>
 

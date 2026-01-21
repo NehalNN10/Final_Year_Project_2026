@@ -47,8 +47,8 @@ export function setupGUI(frameUpdateCallback) {
     let darkMode;
 
     const funcs = { 
-        rewind: () => { playback.frame -= 50; if(playback.frame < 0) playback.frame = 0; },
-        ff: () => { playback.frame += 50; },
+        rewind: () => { playback.frame -= 50; if(playback.frame < 0) playback.frame = 0; renderFrame(Math.floor(playback.frame));},
+        ff: () => { playback.frame += 50; if (playback.frame > playback.maxFrames) playback.frame = playback.maxFrames; renderFrame(Math.floor(playback.frame));},
         play: () => { 
             playback.playing = !playback.playing; 
             const label = playback.playing ? "Pause" : "Play";
