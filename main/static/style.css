@@ -126,7 +126,7 @@ body { margin: 0; overflow: hidden; font-family: 'League Spartan', sans-serif !i
 
 .btn {
     font-family: 'League Spartan', sans-serif !important;
-    background: rgba(0, 0, 0, 0.8);
+    background: none;
     font-size: 2rem;
     width: 100% !important;
     display: flex !important;
@@ -141,6 +141,34 @@ body { margin: 0; overflow: hidden; font-family: 'League Spartan', sans-serif !i
 }
 
 .btn:hover {
+    border-color: #00ff88 !important;
+    color: #00ff88 !important;
+    font-weight: bold;
+}
+
+.fill {
+    padding: 10px;
+    border-radius: 20px;
+}
+
+.track-btn {
+    background: none;
+    font-size: 1.3rem;
+    width: 100% !important;
+    display: flex !important;
+    justify-content: center !important;
+    align-items: center;
+    border-radius: 5px;
+    border: 1px solid #555;
+    color: #fff !important;
+    padding: 0px 0;
+    margin-left: 5px;
+    margin-right: 2px;
+    transition: all 0.3s ease;
+    height: 38px !important;
+}
+
+.track-btn:hover {
     border-color: #00ff88 !important;
     color: #00ff88 !important;
     font-weight: bold;
@@ -409,6 +437,22 @@ header {
     pointer-events: none;
     flex-shrink: 0;      /* Prevent sidebar from squishing */
     z-index: 10;
+}
+
+#float {
+    position: absolute;
+    top: 120px;
+    left: 20px;
+    z-index: 100;
+    width: 30%;
+    max-width: 420px;
+    min-width: 420px;
+    height: calc(100vh - 100px);
+    overflow-y: auto;
+    overflow-x: hidden;
+    background: transparent; 
+    border: none;
+    pointer-events: none;
 }
 
 #top-left::-webkit-scrollbar {

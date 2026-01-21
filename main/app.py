@@ -43,7 +43,7 @@ def index():
             session['role'] = role.name  # Store only the role name, not the object
             if role.name == 'facility':
                 return redirect(url_for('facility_home'))
-            return redirect(url_for('dashboard'))  # Redirect to the facility_home or home page
+            return redirect(url_for('dashboard'), )  # Redirect to the facility_home or home page
     
     
     return render_template('index.html', error=error)
@@ -52,13 +52,17 @@ def index():
 def model():
     return render_template('model.html', role=session.get('role'))
 
+@app.route('/model_replay')
+def model_replay():
+    return render_template('model_replay.html', role=session.get('role'))
+
 @app.route('/facility_home')
 def facility_home():
-    return render_template('facility_home.html')
+    return render_template('facility_home.html', role=session.get('role'))
 
 @app.route('/dashboard')
 def dashboard():
-    return render_template('dashboard.html')
+    return render_template('dashboard.html', role=session.get('role'))
 
 # Serve files from static/files directory
 @app.route('/files/<path:filename>')

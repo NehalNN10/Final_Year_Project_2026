@@ -38,3 +38,10 @@ This repository contains the code and documentation for our final year project, 
 
 - **Frontend**: Three.js, JavaScript
 - **Computer Vision**: OpenCV, Python
+
+### Running 3D Model
+
+- Go to Terminal
+- Run these commands:
+- - cd main
+- - py app.py
