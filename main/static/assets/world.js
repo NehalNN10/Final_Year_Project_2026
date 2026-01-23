@@ -4,7 +4,76 @@ import { GLTFLoader } from "jsm/loaders/GLTFLoader.js";
 
 const loader = new GLTFLoader();
 
+// 1. The Asset Pool (Stores loaded GLTFs)
+const assets = {}; 
+
+// 2. Export worldObjects as an empty object initially (Populated later)
+// This keeps ui.js happy since it imports this reference.
+export const worldObjects = {};
+
+export const models = {
+    white_table: './models/table.glb',
+    workbench:   './models/workbench.glb',
+    pillar:      './models/pillar.glb',
+    donut:       './models/donut.glb',
+    camera:      './models/camera.glb',
+    roblox:      './models/roblox.glb',
+    floor:       './models/floor.glb'
+};
+
+// 2. Load Function: Loads everything once and saves to 'assets'
+export async function loadAssets() {
+    const loadModel = (url) => {
+        return new Promise((resolve, reject) => {
+            loader.load(url, (gltf) => {
+                // Optimize: Enable shadows on the template once
+                gltf.scene.traverse(c => {
+                    if (c.isMesh) {
+                        c.castShadow = true;
+                        c.receiveShadow = true;
+                    }
+                });
+                resolve(gltf.scene);
+            }, undefined, reject);
+        });
+    };
+
+    console.log("Loading 3D Assets...");
+    const promises = Object.entries(models).map(async ([key, url]) => {
+        // Store in assets object
+        assets[url] = await loadModel(url); 
+    });
+
+    await Promise.all(promises);
+    console.log("All Assets Loaded!");
+}
+
+// 3. Create Object: Now uses the POOL instead of downloading
 export function createObject(z, x, rot, objectUrl) {
+    const template = assets[objectUrl];
+
+    if (!template) {
+        console.error(`Model not loaded: ${objectUrl}`);
+        return new THREE.Group();
+    }
+
+    const group = new THREE.Group();
+    // clone(true) is the key! It copies the loaded model instantly.
+    const model = template.clone(true); 
+
+    group.position.set(x, 0, z);
+    group.rotation.y = rot;
+    
+    // Reset internal model offsets
+    model.position.set(0, 0, 0);
+    model.rotation.set(0, 0, 0);
+
+    group.add(model);
+    scene.add(group);
+    return group;
+}
+
+export function createObjectMarker(z, x, rot, objectUrl) {
     const group = new THREE.Group();
 
     group.position.set(x, 0, z);
@@ -75,105 +144,79 @@ export function createObject(z, x, rot, objectUrl) {
 //     }
 // );
 
-export const materials = {
-    floor: new THREE.MeshMatcapMaterial({ color: 0x447c5a, side: THREE.DoubleSide }),
-    wall: new THREE.MeshStandardMaterial({ color: 0x999999, side: THREE.DoubleSide }),
-    wood: new THREE.MeshStandardMaterial({ color: 0x462416, side: THREE.DoubleSide }),
-    white: new THREE.MeshStandardMaterial({ color: 0xffffffff, side: THREE.DoubleSide }),
-    glass: new THREE.MeshBasicMaterial({ color: 0x888888, side: THREE.DoubleSide, transparent: true, opacity: 0.3 }),
-    pillar: new THREE.MeshStandardMaterial({ color: 0xd1b100, side: THREE.DoubleSide }),
-    bench: new THREE.MeshStandardMaterial({ color: 0x000000, side: THREE.DoubleSide }),
-    buggy: new THREE.MeshStandardMaterial({ color: 0x880000, side: THREE.DoubleSide })
-};
-
-export function createFloor(w, h, z, x, material) {
-    const floorGeometry1 = new THREE.PlaneGeometry(w, h);
-    const mesh = new THREE.Mesh(floorGeometry1, material);
-    mesh.rotation.x = -Math.PI / 2;
-    mesh.position.z = z
-    mesh.position.x = x
-    scene.add(mesh);
-    return mesh
-}
-
-export const wallThickness = 0.15;
-export const wallHeight = 2;
-
-export function createWall(w, h, x, z, material, l=wallHeight, y=wallHeight/2) {
-    const geo = new THREE.BoxGeometry(w, l, h);
-    const mesh = new THREE.Mesh(geo, material);
-    if (material != materials.glass) {
-        mesh.receiveShadow = true; // Floors must RECEIVE shadows
-        mesh.castShadow = true; // Floors usually don't need to cast shadows
-    }
-    mesh.position.set(x, y, z);
-    scene.add(mesh);
-    return mesh;
-}
-
-export function createObject2(w, h, z, x, material) {
-    const geo = new THREE.BoxGeometry(w, 0.5, h);
-    const mesh = new THREE.Mesh(geo, material);
-    mesh.position.set(x, 0.5/2, z);
-    if (material != materials.glass) {
-        mesh.receiveShadow = true; // Floors must RECEIVE shadows
-        mesh.castShadow = true; // Floors usually don't need to cast shadows
-    }
-    scene.add(mesh);
-    return mesh;
-}
-
 export function createMarker(z, x, color, radius = 0.1, label = '') {
-    const geom = new THREE.SphereGeometry(radius, 12, 8);
-    const mat = new THREE.MeshBasicMaterial({ color });
-    const mesh = createObject(z, x, Math.PI, models.roblox);
-    mesh.position.set(x, radius, z);
-    mesh.position.y= 0.5;
+    // This creates the "Template" marker for the pool
+    const meshGroup = createObjectMarker(z, x, Math.PI, models.roblox);
+    meshGroup.position.y = 0.5;
 
-    let alpha = label === '' ? 0 : 0.15;
-
-    const canvas = document.createElement('canvas');
-    const size = 256;
-    canvas.width = canvas.height = size;
-    const ctx = canvas.getContext('2d');
-    ctx.fillStyle = `rgba(255,255,255,${alpha})`;
-    ctx.fillRect(0, 0, size, size);
-    ctx.fillStyle = '#000';
-    ctx.font = '100px League Spartan';
-    ctx.textAlign = 'center';
-    ctx.textBaseline = 'middle';
-    ctx.fillText(label, size / 2, size / 2);
-
-    const tex = new THREE.CanvasTexture(canvas);
-    tex.minFilter = THREE.LinearFilter;
-    const smat = new THREE.SpriteMaterial({ map: tex, transparent: true });
+    const smat = new THREE.SpriteMaterial({ color: 0xffffff, transparent: true });
     const sprite = new THREE.Sprite(smat);
     sprite.scale.set(0.8, 0.4, 1);  
-    sprite.position.set(x, radius + 1, z);
+    sprite.position.set(0, radius + 1, 0); 
 
     const group = new THREE.Group();
-    group.add(mesh);
+    group.add(meshGroup);
     group.add(sprite);
     scene.add(group);
-
-    group.marker = mesh;
-    group.label = sprite;
+    
     return group;
 }
 
-export const models = {
-    white_table: './models/table.glb',
-    workbench: './models/workbench.glb',
-    pillar: './models/pillar.glb',
-    donut: './models/donut.glb',
-    camera: './models/camera.glb',
-    roblox: './models/roblox.glb',
-    floor: './models/floor.glb'
+export function updateMarker(markerGroup, x, z, id) {
+    // A. Move (Fast)
+    markerGroup.visible = true;
+    markerGroup.position.set(x, 0, z); // Swap X/Z to match your coords
+
+    // B. Color Update (Mesh)
+    let hash = 0;
+    for (let i = 0; i < id.length; i++) hash = id.charCodeAt(i) + ((hash << 5) - hash);
+    const color = new THREE.Color(`hsl(${Math.abs(hash) % 360}, 70%, 50%)`);
+
+    const meshGroup = markerGroup.children[0];
+    if (meshGroup) {
+        meshGroup.traverse((child) => {
+            if (child.isMesh) {
+                if (!child.material.userData.isClone) {
+                    child.material = child.material.clone();
+                    child.material.userData.isClone = true;
+                }
+                if (!child.material.color.equals(color)) {
+                    child.material.color.set(color);
+                }
+            }
+        });
+    }
+
+    // C. Text Update (Sprite) - Only if ID changed
+    if (markerGroup.userData.currentId === id) return;
+    markerGroup.userData.currentId = id;
+
+    const sprite = markerGroup.children[1];
+    if (sprite) {
+        if (sprite.material.map) sprite.material.map.dispose();
+
+        const canvas = document.createElement('canvas');
+        const size = 256;
+        canvas.width = canvas.height = size;
+        const ctx = canvas.getContext('2d');
+        ctx.fillStyle = `rgba(255,255,255,0.15)`;
+        ctx.fillRect(0, 0, size, size);
+        ctx.fillStyle = '#000';
+        ctx.font = '100px League Spartan'; 
+        ctx.textAlign = 'center';
+        ctx.textBaseline = 'middle';
+        ctx.fillText(id, size / 2, size / 2);
+
+        const tex = new THREE.CanvasTexture(canvas);
+        tex.minFilter = THREE.LinearFilter;
+        sprite.material.map = tex;
+    }
 }
 
-export const worldObjects = {
-
-    // floor1: createFloor(14, 11.5, 3, 2, materials.floor),
+export function buildWorld() {
+    // We assign to the exported 'worldObjects' so ui.js can see them
+    Object.assign(worldObjects, {
+        // floor1: createFloor(14, 11.5, 3, 2, materials.floor),
     // floor2: createFloor(18, 6, -5.75, 0, materials.floor),
     floor: createObject(0, 0, Math.PI, models.floor),
 
@@ -246,8 +289,37 @@ export const worldObjects = {
     shelf: createObject2(1.05, 0.6, -3.8, 0.3, materials.table),
 
     buggy: createObject2(1.8, 0.8, -8, -5, materials.buggy),
+
+    });
+}
+
+export const materials = {
+    floor: new THREE.MeshMatcapMaterial({ color: 0x447c5a, side: THREE.DoubleSide }),
+    wall: new THREE.MeshStandardMaterial({ color: 0x999999, side: THREE.DoubleSide }),
+    wood: new THREE.MeshStandardMaterial({ color: 0x462416, side: THREE.DoubleSide }),
+    white: new THREE.MeshStandardMaterial({ color: 0xffffffff, side: THREE.DoubleSide }),
+    glass: new THREE.MeshBasicMaterial({ color: 0x888888, side: THREE.DoubleSide, transparent: true, opacity: 0.3 }),
+    pillar: new THREE.MeshStandardMaterial({ color: 0xd1b100, side: THREE.DoubleSide }),
+    bench: new THREE.MeshStandardMaterial({ color: 0x000000, side: THREE.DoubleSide }),
+    buggy: new THREE.MeshStandardMaterial({ color: 0x880000, side: THREE.DoubleSide })
 };
 
-// const cam1 = createMarker(-8.65, 9, "white", 0.1, "Camera 1");
-// const cam2 = createMarker(-8.65, -1.5, "white", 0.1, "Camera 2");
-// const cam3 = createMarker(8.5, -5, "white", 0.1, "Camera 3");
+export const wallThickness = 0.15;
+export const wallHeight = 2;
+
+export function createWall(w, h, x, z, material, l=wallHeight, y=wallHeight/2) {
+    const geo = new THREE.BoxGeometry(w, l, h);
+    const mesh = new THREE.Mesh(geo, material);
+    if (material != materials.glass) { mesh.receiveShadow = true; mesh.castShadow = true; }
+    mesh.position.set(x, y, z);
+    scene.add(mesh);
+    return mesh;
+}
+export function createObject2(w, h, z, x, material) {
+    const geo = new THREE.BoxGeometry(w, 0.5, h);
+    const mesh = new THREE.Mesh(geo, material);
+    mesh.position.set(x, 0.5/2, z);
+    if (material != materials.glass) { mesh.receiveShadow = true; mesh.castShadow = true; }
+    scene.add(mesh);
+    return mesh;
+}
