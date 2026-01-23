@@ -455,13 +455,13 @@ header {
     pointer-events: none;
 }
 
-#top-left::-webkit-scrollbar {
+#top-left::-webkit-scrollbar, #float::-webkit-scrollbar, tracker-ui::-webkit-scrollbar {
     width: 7px;
 }
-#top-left::-webkit-scrollbar-track {
+#top-left::-webkit-scrollbar-track, #float::-webkit-scrollbar-track, tracker-ui::-webkit-scrollbar-track {
     background: rgba(0,0,0,0.1); 
 }
-#top-left::-webkit-scrollbar-thumb {
+#top-left::-webkit-scrollbar-thumb, #float::-webkit-scrollbar-thumb, tracker-ui::-webkit-scrollbar-thumb {
     background: #00ff88; 
     border-radius: 3px;
 }
