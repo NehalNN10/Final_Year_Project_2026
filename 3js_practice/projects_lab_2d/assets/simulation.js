@@ -194,10 +194,11 @@ export async function loadSimulationData(onLoadComplete) {
 
                     if (!trackMarkers.has(id)) {
                         let hash = 0;
+                        const PERSON_COLOR = 0x00ff88; 
                         for (let i = 0; i < id.length; i++) hash = id.charCodeAt(i) + ((hash << 5) - hash);
-                        const color = new THREE.Color(`hsl(${Math.abs(hash) % 360}, 70%, 50%)`);
+                        // const color = new THREE.Color(`hsl(${Math.abs(hash) % 360}, 70%, 50%)`);
                         // const marker = createMarker(0, 0, color.getHex(), 0.2, id);
-                        const marker = createMarker(0, 0, "blue", 0.15, id);
+                        const marker = createMarker(0, 0, PERSON_COLOR, 0.1);
                         marker.visible = false;
                         trackMarkers.set(id, marker);
                     }
@@ -230,7 +231,7 @@ export async function loadSimulationData(onLoadComplete) {
     if (onLoadComplete) onLoadComplete();
 }
 
-const dummy = createMarker(8.75, -1.5, "red", 0.1);
-const cam1 = createMarker(-8.65, 9, "white", 0.1, "Camera 1");
-const cam2 = createMarker(-8.65, -1.5, "white", 0.1, "Camera 2");
-const cam3 = createMarker(8.5, -5, "white", 0.1, "Camera 3");
+// const dummy = createMarker(8.75, -1.5, "red", 0.1);
+// const cam1 = createMarker(-8.65, 9, "white", 0.1, "Camera 1");
+// const cam2 = createMarker(-8.65, -1.5, "white", 0.1, "Camera 2");
+// const cam3 = createMarker(8.5, -5, "white", 0.1, "Camera 3");
