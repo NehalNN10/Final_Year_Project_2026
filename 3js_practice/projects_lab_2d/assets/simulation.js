@@ -1,15 +1,18 @@
 import * as THREE from "three";
 import { createMarker } from "./world.js";
 import { camera, controls } from "./scene.js";
-
+//1200
 export const playback = {
     frame: 0,
-    maxFrames: 1200,
+    maxFrames: 2400,
     playing: true,
     speed: 1
 };
 
-const tracker = './files/tracks_output_cam1_allframes.csv';
+const tracker = './files/combined_frames.csv';
+//'./files/combined_flicker_free.csv';
+
+//'./files/tracks_output_cam2_allframes.csv';
 //mapped_tracks_cam1_manal
 // const tracker = './files/mapped_tracks_angle_01.csv';
 // const tracker = './files/tracks_output.csv';
@@ -34,7 +37,7 @@ let globalTrackFrames = [];
 let globalTrackData = new Map(); 
 let globalIoTData = []; 
 let trackMarkers = new Map();
-
+let globalId = 1;
 export function renderFrame(index) {
 
     const view = document.querySelector('input[name="view"]:checked').value;
@@ -46,7 +49,9 @@ export function renderFrame(index) {
         const detections = globalTrackData.get(realFrameNumber) || [];
         if (view != "fac") {
             detections.forEach(d => {
+                
                 const marker = trackMarkers.get(d.id);
+               
                 if (marker) {
                     marker.position.x = d.z; 
                     marker.position.z = d.x;
@@ -178,31 +183,35 @@ export async function loadSimulationData(onLoadComplete) {
             const idIdx = headers.findIndex(h => h.includes('id') || h.includes('track'));
             const xIdx = headers.findIndex(h => h.includes('three_x') || h === 'x');
             const zIdx = headers.findIndex(h => h.includes('three_z') || h === 'z');
+            const camIdx = headers.findIndex(h => h.includes('camera'));
 
             if (frameIdx > -1 && xIdx > -1 && zIdx > -1) {
                 tLines.slice(1).forEach(line => {
                     const cols = line.split(',');
                     const frame = parseInt(cols[frameIdx]);
-                    const id = cols[idIdx];
+                    const id = `${cols[idIdx]}_${cols[camIdx]}`;
+                    //alert(id);
+                    //cols[idIdx];
                     const x = parseFloat(cols[xIdx]);
                     const z = parseFloat(cols[zIdx]);
-                    
+            
                     if (isNaN(frame) || isNaN(x) || isNaN(z)) return;
 
                     if (!globalTrackData.has(frame)) globalTrackData.set(frame, []);
                     globalTrackData.get(frame).push({ id, x, z });
 
                     if (!trackMarkers.has(id)) {
-                        let hash = 0;
+                        //let hash = 0;
                         const PERSON_COLOR = 0x00ff88; 
-                        for (let i = 0; i < id.length; i++) hash = id.charCodeAt(i) + ((hash << 5) - hash);
-                        // const color = new THREE.Color(`hsl(${Math.abs(hash) % 360}, 70%, 50%)`);
-                        // const marker = createMarker(0, 0, color.getHex(), 0.2, id);
-                        const marker = createMarker(0, 0, PERSON_COLOR, 0.1);
+                    // for (let i = 0; i < id.length; i++) hash = id.charCodeAt(i) + ((hash << 5) - hash);
+                    // const color = new THREE.Color(`hsl(${Math.abs(hash) % 360}, 70%, 50%)`);
+                    // const marker = createMarker(0, 0, color.getHex(), 0.2, id);
+                        const marker = createMarker(0, 0, PERSON_COLOR, 0.15);
                         marker.visible = false;
                         trackMarkers.set(id, marker);
                     }
-                });
+                }
+            );
                 globalTrackFrames = Array.from(globalTrackData.keys()).sort((a, b) => a - b);
             }
         }
@@ -230,8 +239,15 @@ export async function loadSimulationData(onLoadComplete) {
     
     if (onLoadComplete) onLoadComplete();
 }
-
-// const dummy = createMarker(8.75, -1.5, "red", 0.1);
+//const dummy = createMarker(1.3, -2.25, "red", 0.1);
 // const cam1 = createMarker(-8.65, 9, "white", 0.1, "Camera 1");
 // const cam2 = createMarker(-8.65, -1.5, "white", 0.1, "Camera 2");
 // const cam3 = createMarker(8.5, -5, "white", 0.1, "Camera 3");
+
+
+
+
+
+
+
+
