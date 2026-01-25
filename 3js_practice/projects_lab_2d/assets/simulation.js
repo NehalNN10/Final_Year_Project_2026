@@ -9,7 +9,7 @@ export const playback = {
     speed: 1
 };
 
-const tracker = './files/mapped_tracks_cam3_2.csv';
+const tracker = './files/tracks_output.csv';
 // const tracker = './files/mapped_tracks_angle_01.csv';
 // const tracker = './files/tracks_output.csv';
 // const tracker = './files/mapped_tracks_angle_01_try_2.csv';
