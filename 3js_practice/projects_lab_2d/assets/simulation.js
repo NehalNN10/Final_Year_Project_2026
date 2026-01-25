@@ -9,7 +9,8 @@ export const playback = {
     speed: 1
 };
 
-const tracker = './files/tracks_output.csv';
+const tracker = './files/tracks_output_cam1_allframes.csv';
+//mapped_tracks_cam1_manal
 // const tracker = './files/mapped_tracks_angle_01.csv';
 // const tracker = './files/tracks_output.csv';
 // const tracker = './files/mapped_tracks_angle_01_try_2.csv';
@@ -196,7 +197,7 @@ export async function loadSimulationData(onLoadComplete) {
                         for (let i = 0; i < id.length; i++) hash = id.charCodeAt(i) + ((hash << 5) - hash);
                         const color = new THREE.Color(`hsl(${Math.abs(hash) % 360}, 70%, 50%)`);
                         // const marker = createMarker(0, 0, color.getHex(), 0.2, id);
-                        const marker = createMarker(0, 0, color.getHex(), 0.1, id);
+                        const marker = createMarker(0, 0, "blue", 0.15, id);
                         marker.visible = false;
                         trackMarkers.set(id, marker);
                     }
