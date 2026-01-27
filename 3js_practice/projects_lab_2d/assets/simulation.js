@@ -9,7 +9,7 @@ export const playback = {
     speed: 1
 };
 
-const tracker = './files/tracks_output.csv';
+const tracker = './files/combined_frames.csv';
 //'./files/combined_flicker_free.csv';
 
 //'./files/tracks_output_cam2_allframes.csv';
