@@ -1,7 +1,7 @@
 import pandas as pd
 
 # Load CSV files
-df1 = pd.read_csv("C:/Users/USER/Documents/Final_Year_Project_2026/3js_practice/projects_lab_2d/files/tracks_output.csv")
+df1 = pd.read_csv("C:/Users/USER/Documents/Final_Year_Project_2026/3js_practice/projects_lab_2d/temp_files/tracks_output.csv")
 df2 = pd.read_csv("C:/Users/USER/Downloads/fyp outputs/tracks_output_cam2_allframes.csv")
 df3 = pd.read_csv("C:/Users/USER/Downloads/fyp outputs/clamped_tracks_manal_angle3.csv")
 
