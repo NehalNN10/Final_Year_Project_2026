@@ -1,2 +1,5 @@
-flask
-flask_sqlalchemy
+flask==2.0.3
+werkzeug==2.0.3
+flask_sqlalchemy==2.5.1
+flask_mongoengine==1.0.0
+mongoengine==0.27.0

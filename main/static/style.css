@@ -24,7 +24,7 @@ body { margin: 0; overflow: hidden; font-family: 'League Spartan', sans-serif !i
 .dg .cr.function {
     border-left: none !important;
     border-bottom: none !important;
-    font-size: 1.3rem;
+    font-size: 1rem;
 }
 
 .dg .cr.function .property-name {
@@ -56,7 +56,7 @@ body { margin: 0; overflow: hidden; font-family: 'League Spartan', sans-serif !i
 .dg .cr.number {
     border-left: none !important;
     border-bottom: none !important;
-    font-size: 1.3rem;
+    font-size: 1rem;
     height: auto !important;
 }
 
@@ -127,7 +127,7 @@ body { margin: 0; overflow: hidden; font-family: 'League Spartan', sans-serif !i
 .btn {
     font-family: 'League Spartan', sans-serif !important;
     background: none;
-    font-size: 2rem;
+    font-size: 1.6rem;
     width: 100% !important;
     display: flex !important;
     justify-content: center !important;
@@ -153,7 +153,7 @@ body { margin: 0; overflow: hidden; font-family: 'League Spartan', sans-serif !i
 
 .track-btn {
     background: none;
-    font-size: 1.3rem;
+    font-size: 1rem;
     width: 100% !important;
     display: flex !important;
     justify-content: center !important;
@@ -177,7 +177,7 @@ body { margin: 0; overflow: hidden; font-family: 'League Spartan', sans-serif !i
 input[type="text"], input[type="password"] {
     font-family: 'League Spartan', sans-serif !important;
     background: rgba(0, 0, 0, 0.8);
-    font-size: 1.8rem;
+    font-size: 1.4rem;
     display: flex !important;
     justify-content: center !important;
     align-items: center;
@@ -200,10 +200,9 @@ input[type="text"]:hover, input[type="password"]:hover {
     margin-top: 10px;
     border-radius: 8px;
     font-family: 'League Spartan';
-    font-size: 1.3rem;
+    font-size: 1rem;
     pointer-events: none;
     border: 1px solid #444;
-    z-index: 100;
     pointer-events: auto !important; /* CRITICAL: Allows clicking the header */
     transition: all 0.3s ease;
     overflow: hidden; /* Needed for the slide animation */
@@ -214,10 +213,7 @@ h2, p, h3, h4, h5, h6 {
     margin: 10px 0;
 }
 .main-home {
-    margin-top: 40px !important;
-    margin-left: 60px;
-    margin-right: 60px;
-    padding: 30px !important;
+    padding: 50px 4vw !important;
 }
 
 table {
@@ -261,7 +257,7 @@ tr {
 .tracker-ui h3 { 
     margin-top: 0; 
     margin-bottom: 15px;
-    font-size: 1.8rem; padding-bottom: 7px; 
+    font-size: 1.4rem; padding-bottom: 7px; 
     cursor: pointer;
     user-select: none;
     display: flex;
@@ -278,7 +274,7 @@ tr {
 
 .tracker-ui h3::after {
     content: '▼';
-    font-size: 1.8rem;
+    font-size: 1.4rem;
     transition: transform 0.3s ease;
 
 }
@@ -356,10 +352,6 @@ button {
     border: none;
 }
 
-.main {
-    margin-top: 100px;
-
-}
 #model-container {
     width: 100%;
     height: 100%;
@@ -371,7 +363,7 @@ button {
 
 .header {
     text-decoration: none;
-    font-size: 2rem;
+    font-size: 1.3rem;
     padding: 15px;
     color: white;
     /* border: 0px solid transparent; */
@@ -385,21 +377,19 @@ button {
 }
 
 h1 {
-    font-size: 3rem;
+    font-size: 2.1rem;
     margin: 0;
     color: white;
 }
 
-header {
+.main-nav {
     display: flex;
     flex-direction: row;
     align-items: center;
     justify-content: space-between;
     background-color: rgba(0, 0, 0, 0.8);
-    padding-left: 25px;
-    height: 100px;
+    padding: 0.5rem 2rem;
     border-bottom: 2px solid #00ff88;
-    position: fixed;
     top: 0;
     width: 100%;
     z-index: 150;
@@ -409,8 +399,8 @@ header {
 }   
 
 .header2 {
-    margin-top: 100px;
-    height: 70px;
+    padding: 0.5rem 2rem;
+    font-size: 1.8rem;
     background-color: #ffffff;
     color: #000000;
     display: flex;
@@ -441,12 +431,10 @@ header {
 
 #float {
     position: absolute;
-    top: 120px;
+    top: calc(3.5rem + 20px);
     left: 20px;
     z-index: 100;
-    width: 30%;
-    max-width: 420px;
-    min-width: 420px;
+    width: 21rem;
     height: calc(100vh - 100px);
     overflow-y: auto;
     overflow-x: hidden;
@@ -474,7 +462,7 @@ header {
     width: auto;
     padding-left: 30px;
     padding-right: 30px;
-    font-size: 3rem;
+    font-size: 2.5rem;
     font-weight: bold;
     color: white;
     justify-content: center;
