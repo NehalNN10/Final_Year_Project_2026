@@ -25,13 +25,13 @@
 
   <body>
 
-    <header>
+    <div class="main-nav">
       <div style="flex: 1;">
         <h1>HU Digital Twin</h1>
       </div>
       <div style="flex: 2;"> 
         <div style="display: flex; flex-direction: row; justify-content: space-evenly">
-          {% if session.get('role') == 'facility' %}
+          {% if session.get('department') == 'Facilities' %}
             <button class="header" onclick="window.location.href='/facility_home'">Home</button>
           {% else %}
             <button class="header" onclick="window.location.href='/dashboard'">Home</button>
@@ -41,7 +41,7 @@
         </div>
       </div>
       
-    </header>
+    </div>
 
     <div class="main">
 
@@ -159,8 +159,8 @@
         </div>
         
         <div style="display: none">
-          <span id="role">
-            {{ session.get('role', 'guest') }}
+          <span id="department">
+            {{ session.get('department', 'guest') }}
           </span>
           <span id="live">
             true

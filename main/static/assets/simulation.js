@@ -65,14 +65,14 @@ let trackMarkers = new Map();
 
 export function renderFrame(index) {
 
-    const role = document.getElementById('role').textContent.trim();
+    const department = document.getElementById('department').textContent.trim();
     
     trackMarkers.forEach(m => m.visible = false);
 
     if (index < globalTrackFrames.length) {
         const realFrameNumber = globalTrackFrames[index];
         const detections = globalTrackData.get(realFrameNumber) || [];
-        if (role != "facility") {
+        if (department != "Facilities") {
             detections.forEach(d => {
                 const marker = trackMarkers.get(d.id);
                 if (marker) {
@@ -85,7 +85,7 @@ export function renderFrame(index) {
     
         if (uiElements.uiOccupancy && uiElements.uiOccuHeader) {
             const l = detections.length;
-            if (role == "facility"){
+            if (department == "Facilities"){
                 uiElements.uiOccuHeader.innerText = "Occupancy: ";
                 uiElements.uiOccupancy.innerText = (l > 0) ? "Occupied" : "Vacant";
                 uiElements.uiOccupancy.style.color = (l > 0) ? "#ff4444" : "#00ff88";
@@ -101,7 +101,7 @@ export function renderFrame(index) {
     if (index < globalIoTData.length) {
         const row = globalIoTData[index];
         
-        if (role == "security") uiElements.uiIot.style.display = "none";
+        if (department == "Security") uiElements.uiIot.style.display = "none";
         else {
             uiElements.uiIot.style.display = "block";
 
@@ -158,7 +158,7 @@ export function renderFrame(index) {
         // }
         // if (uiElements.uiOccupancy && uiElements.uiOccuHeader) {
         //     const l = row['occu'];
-        //     if (view == "facility"){
+        //     if (view == "Facilities"){
         //         uiElements.uiOccuHeader.innerText = "Status: ";
         //         uiElements.uiOccupancy.innerText = (l > 0) ? "Occupied" : "Vacant";
         //         uiElements.uiOccupancy.style.color = (l > 0) ? "#ff4444" : "#00ff88";
