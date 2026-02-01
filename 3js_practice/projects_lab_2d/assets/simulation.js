@@ -9,7 +9,8 @@ export const playback = {
   speed: 1,
 };
 
-const tracker = './temp_files/tracks_output2.csv';
+const tracker = './files/combined_frames_2.csv';
+//tracks_output_wc_try1.csv';
 //'./files/combined_flicker_free.csv';
 
 //'./files/tracks_output_cam2_allframes.csv';
@@ -191,17 +192,17 @@ export async function loadSimulationData(onLoadComplete) {
             const idIdx = headers.findIndex(h => h.includes('id') || h.includes('track'));
             const xIdx = headers.findIndex(h => h.includes('three_x') || h === 'x');
             const zIdx = headers.findIndex(h => h.includes('three_z') || h === 'z');
-            //const camIdx = headers.findIndex(h => h.includes('camera'));
+            const camIdx = headers.findIndex(h => h.includes('camera'));
             //const countIdx = headers.findIndex(h => h.includes('count'));
 
             if (frameIdx > -1 && xIdx > -1 && zIdx > -1) {
                 tLines.slice(1).forEach(line => {
                     const cols = line.split(',');
                     const frame = parseInt(cols[frameIdx]);
-                    //const id = `${cols[idIdx]}_${cols[camIdx]}`;
+                    const id = `${cols[idIdx]}_${cols[camIdx]}`;
                     //alert(id);
                     //cols[idIdx];
-                    const id = parseInt(cols[idIdx]);
+                    //const id = parseInt(cols[idIdx]);
                     const x = parseFloat(cols[xIdx]);
                     const z = parseFloat(cols[zIdx]);
                     // const count = parseInt(cols[countIdx]);
@@ -225,7 +226,7 @@ export async function loadSimulationData(onLoadComplete) {
           if (!trackMarkers.has(id)) {
             const PERSON_COLOR = 0x00ff88;
             // create marker with the track id as label for debugging
-            const marker = createMarker(0, 0, PERSON_COLOR, 0.15, id);
+            const marker = createMarker(0, 0, PERSON_COLOR, 0.15);
             marker.visible = false;
             trackMarkers.set(id, marker);
           }
@@ -264,7 +265,7 @@ export async function loadSimulationData(onLoadComplete) {
 
   if (onLoadComplete) onLoadComplete();
 }
-const dummy = createMarker(9, 7.5, "red", 0.1);
+//const dummy = createMarker(9, 7.5, "red", 0.1);
 // const cam1 = createMarker(-8.65, 9, "white", 0.1, "Camera 1");
 // const cam2 = createMarker(-8.65, -1.5, "white", 0.1, "Camera 2");
 // const cam3 = createMarker(8.5, -5, "white", 0.1, "Camera 3");
