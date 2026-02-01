@@ -17,7 +17,7 @@ const tracker = './temp_files/tracks_output2.csv';
 // const tracker = './files/mapped_tracks_angle_01.csv';
 // const tracker = './files/tracks_output.csv';
 // const tracker = './files/mapped_tracks_angle_01_try_2.csv';
-const iot = "./temp_files/iot.csv";
+const iot = "./files/iot.csv";
 
 export const uiElements = {
   uiOccupancy: document.getElementById("ui-iot-occupancy"),
@@ -264,7 +264,7 @@ export async function loadSimulationData(onLoadComplete) {
 
   if (onLoadComplete) onLoadComplete();
 }
-// const dummy = createMarker(7.75, 3, "red", 0.1);
+const dummy = createMarker(9, 7.5, "red", 0.1);
 // const cam1 = createMarker(-8.65, 9, "white", 0.1, "Camera 1");
 // const cam2 = createMarker(-8.65, -1.5, "white", 0.1, "Camera 2");
 // const cam3 = createMarker(8.5, -5, "white", 0.1, "Camera 3");
