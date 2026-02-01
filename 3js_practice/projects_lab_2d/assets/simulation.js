@@ -19,6 +19,7 @@ const tracker = './files/combined_frames_2.csv';
 // const tracker = './files/tracks_output.csv';
 // const tracker = './files/mapped_tracks_angle_01_try_2.csv';
 const iot = "./files/iot.csv";
+const track_count = "./files/combined_count_output.csv"
 
 export const uiElements = {
   uiOccupancy: document.getElementById("ui-iot-occupancy"),
@@ -36,10 +37,10 @@ export const uiElements = {
 
 let globalTrackFrames = []; 
 let globalTrackData = new Map();
-let globalCountData = new Map();
+let globalCountData = [];
 let globalIoTData = []; 
 let trackMarkers = new Map();
-let globalCount = 18;
+
 export function renderFrame(index) {
   const view = document.querySelector('input[name="view"]:checked').value;
 
@@ -64,8 +65,10 @@ export function renderFrame(index) {
     
         if (uiElements.uiOccupancy && uiElements.uiOccuHeader) {
             //globalCount += count;
-            const l = globalCount;
-
+            const row = globalCountData[index];
+            // globalCount += parseInt(row["count"]);
+            const l = parseInt(row["count"]);
+            
             
             if (view == "fac"){
                 uiElements.uiOccuHeader.innerText = "Status: ";
@@ -135,6 +138,19 @@ export function renderFrame(index) {
     //         uiElements.uiOccupancy.style.color = (l > 20) ? "#ff4444" : ( l === 0 ? "#fff" : "#00ff88");
     //     }
     // }
+    // if (uiElements.uiOccupancy && uiElements.uiOccuHeader) {
+    //         const l = row['occu'];
+    //         if (department == "Facilities"){
+    //             uiElements.uiOccuHeader.innerText = "Status: ";
+    //             uiElements.uiOccupancy.innerText = (l > 0) ? "Occupied" : "Vacant";
+    //             uiElements.uiOccupancy.style.color = (l > 0) ? "#ff4444" : "#00ff88";
+    //         }
+    //         else {
+    //             uiElements.uiOccuHeader.innerText = "Occupancy Count: ";
+    //             uiElements.uiOccupancy.innerText = l;
+    //             uiElements.uiOccupancy.style.color = (l > 20) ? "#ff4444" : ( l === 0 ? "#fff" : "#00ff88");
+    //         }
+    //       }
   }
 
   if (uiElements.uiName && uiElements.uiID && uiElements.uiFloor) {
@@ -262,7 +278,26 @@ export async function loadSimulationData(onLoadComplete) {
   }
 
   // playback.maxFrames = Math.max(globalTrackFrames.length, globalIoTData.length) - 1;
+  try {
+    const iResp = await fetch(track_count);
+    if (iResp.ok) {
+      const iText = await iResp.text();
+      const iRows = iText
+        .split("\n")
+        .map((r) => r.trim())
+        .filter((r) => r);
+      const headers = iRows[0].split(",").map((h) => h.trim().toLowerCase());
 
+      globalCountData = iRows.slice(1).map((row) => {
+        const vals = row.split(",");
+        const obj = {};
+        headers.forEach((h, i) => (obj[h] = vals[i]));
+        return obj;
+      });
+    }
+  } catch (e) {
+    console.error("Error loading Count", e);
+  }
   if (onLoadComplete) onLoadComplete();
 }
 //const dummy = createMarker(9, 7.5, "red", 0.1);
