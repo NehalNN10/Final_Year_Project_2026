@@ -9,7 +9,7 @@ export const playback = {
   speed: 1,
 };
 
-const tracker = './temp_files/tracks_output_with_count_1.csv';
+const tracker = './temp_files/tracks_output2.csv';
 //'./files/combined_flicker_free.csv';
 
 //'./files/tracks_output_cam2_allframes.csv';
@@ -47,7 +47,7 @@ export function renderFrame(index) {
     if (index < globalTrackFrames.length) {
         const realFrameNumber = globalTrackFrames[index];
         const detections = globalTrackData.get(realFrameNumber) || [];
-        const count = globalCountData.get(realFrameNumber) || 0;
+        //const count = globalCountData.get(realFrameNumber) || 0;
         if (view != "fac") {
             detections.forEach(d => {
                 
@@ -62,7 +62,7 @@ export function renderFrame(index) {
         }
     
         if (uiElements.uiOccupancy && uiElements.uiOccuHeader) {
-            globalCount += count;
+            //globalCount += count;
             const l = globalCount;
 
             
@@ -192,7 +192,7 @@ export async function loadSimulationData(onLoadComplete) {
             const xIdx = headers.findIndex(h => h.includes('three_x') || h === 'x');
             const zIdx = headers.findIndex(h => h.includes('three_z') || h === 'z');
             //const camIdx = headers.findIndex(h => h.includes('camera'));
-            const countIdx = headers.findIndex(h => h.includes('count'));
+            //const countIdx = headers.findIndex(h => h.includes('count'));
 
             if (frameIdx > -1 && xIdx > -1 && zIdx > -1) {
                 tLines.slice(1).forEach(line => {
@@ -204,11 +204,11 @@ export async function loadSimulationData(onLoadComplete) {
                     const id = parseInt(cols[idIdx]);
                     const x = parseFloat(cols[xIdx]);
                     const z = parseFloat(cols[zIdx]);
-                    const count = parseInt(cols[countIdx]);
-                    if (!globalCountData.has(frame)) {
-                        globalCountData.set(frame, 0);
-                    }
-                    globalCountData.set(frame, globalCountData.get(frame) + count);
+                    // const count = parseInt(cols[countIdx]);
+                    // if (!globalCountData.has(frame)) {
+                    //     globalCountData.set(frame, 0);
+                    // }
+                    // globalCountData.set(frame, globalCountData.get(frame) + count);
                     if (isNaN(frame) || isNaN(x) || isNaN(z)) return;
 
                     if (!globalTrackData.has(frame)) globalTrackData.set(frame, []);
