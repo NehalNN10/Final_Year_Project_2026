@@ -9,10 +9,7 @@ export const playback = {
   speed: 1,
 };
 
-// const tracker = './files/combined_frames.csv';
-// const tracker = './temp_files/tracks_output_cam1_allframes.csv';
-// const tracker = "./temp_files/nehal_tracks_output.csv";
-const tracker = "./temp_files/nehal_tracks_output (1).csv";
+const tracker = './temp_files/tracks_output_with_count_1.csv';
 //'./files/combined_flicker_free.csv';
 
 //'./files/tracks_output_cam2_allframes.csv';
@@ -36,47 +33,52 @@ export const uiElements = {
   uiIot: document.getElementById("iot-data"),
 };
 
-let globalTrackFrames = [];
+let globalTrackFrames = []; 
 let globalTrackData = new Map();
-let globalIoTData = [];
+let globalCountData = new Map();
+let globalIoTData = []; 
 let trackMarkers = new Map();
-let globalId = 1;
+let globalCount = 18;
 export function renderFrame(index) {
   const view = document.querySelector('input[name="view"]:checked').value;
 
   trackMarkers.forEach((m) => (m.visible = false));
 
-  if (index < globalTrackFrames.length) {
-    const realFrameNumber = globalTrackFrames[index];
-    const detections = globalTrackData.get(realFrameNumber) || [];
-    if (view != "fac") {
-      detections.forEach((d) => {
-        const marker = trackMarkers.get(d.id);
-        // print(d);
-
-        if (marker) {
-          marker.position.x = d.z;
-          marker.position.z = d.x;
-          // marker.id = d.tracker_id;
-          marker.visible = true;
+    if (index < globalTrackFrames.length) {
+        const realFrameNumber = globalTrackFrames[index];
+        const detections = globalTrackData.get(realFrameNumber) || [];
+        const count = globalCountData.get(realFrameNumber) || 0;
+        if (view != "fac") {
+            detections.forEach(d => {
+                
+                const marker = trackMarkers.get(d.id);
+               
+                if (marker) {
+                    marker.position.x = d.z; 
+                    marker.position.z = d.x;
+                    marker.visible = true;
+                }
+            });
         }
-      });
-    }
+    
+        if (uiElements.uiOccupancy && uiElements.uiOccuHeader) {
+            globalCount += count;
+            const l = globalCount;
 
-    if (uiElements.uiOccupancy && uiElements.uiOccuHeader) {
-      const l = detections.length;
-      if (view == "fac") {
-        uiElements.uiOccuHeader.innerText = "Status: ";
-        uiElements.uiOccupancy.innerText = l > 0 ? "Occupied" : "Vacant";
-        uiElements.uiOccupancy.style.color = l > 0 ? "#ff4444" : "#00ff88";
-      } else {
-        uiElements.uiOccuHeader.innerText = "Occupancy Count: ";
-        uiElements.uiOccupancy.innerText = l;
-        uiElements.uiOccupancy.style.color =
-          l > 20 ? "#ff4444" : l === 0 ? "#fff" : "#00ff88";
-      }
+            
+            if (view == "fac"){
+                uiElements.uiOccuHeader.innerText = "Status: ";
+                uiElements.uiOccupancy.innerText = (l > 0) ? "Occupied" : "Vacant";
+                uiElements.uiOccupancy.style.color = (l > 0) ? "#ff4444" : "#00ff88";
+            }
+            else {
+                uiElements.uiOccuHeader.innerText = "Occupancy Count: ";
+                uiElements.uiOccupancy.innerText = l;
+                //l;
+                uiElements.uiOccupancy.style.color = (l > 20) ? "#ff4444" : ( l === 0 ? "#fff" : "#00ff88");
+            }
+        }
     }
-  }
 
   if (index < globalIoTData.length) {
     const row = globalIoTData[index];
@@ -183,32 +185,42 @@ export async function loadSimulationData(onLoadComplete) {
     const tText = await tResp.text();
     const tLines = tText.split("\n").filter((l) => l.trim());
 
-    if (tLines.length > 1) {
-      const headers = tLines[0].split(",").map((h) => h.trim().toLowerCase());
-      const frameIdx = headers.indexOf("frame");
-      const idIdx = headers.findIndex(
-        // (h) => h.includes("id") || h.includes("track"),
-        (h) => h === "track_id",
-      );
-      const xIdx = headers.findIndex((h) => h.includes("three_x") || h === "x");
-      const zIdx = headers.findIndex((h) => h.includes("three_z") || h === "z");
-      const camIdx = headers.findIndex((h) => h.includes("camera"));
+        if (tLines.length > 1) {
+            const headers = tLines[0].split(',').map(h => h.trim().toLowerCase());
+            const frameIdx = headers.indexOf('frame');
+            const idIdx = headers.findIndex(h => h.includes('id') || h.includes('track'));
+            const xIdx = headers.findIndex(h => h.includes('three_x') || h === 'x');
+            const zIdx = headers.findIndex(h => h.includes('three_z') || h === 'z');
+            //const camIdx = headers.findIndex(h => h.includes('camera'));
+            const countIdx = headers.findIndex(h => h.includes('count'));
 
-      if (frameIdx > -1 && xIdx > -1 && zIdx > -1) {
-        tLines.slice(1).forEach((line) => {
-          const cols = line.split(",");
-          const frame = parseInt(cols[frameIdx]);
-          const id = parseInt(cols[idIdx]);
-          // const id = `${cols[idIdx]}_${cols[camIdx]}`;
-          //alert(id);
-          //cols[idIdx];
-          const x = parseFloat(cols[xIdx]);
-          const z = parseFloat(cols[zIdx]);
+            if (frameIdx > -1 && xIdx > -1 && zIdx > -1) {
+                tLines.slice(1).forEach(line => {
+                    const cols = line.split(',');
+                    const frame = parseInt(cols[frameIdx]);
+                    //const id = `${cols[idIdx]}_${cols[camIdx]}`;
+                    //alert(id);
+                    //cols[idIdx];
+                    const id = parseInt(cols[idIdx]);
+                    const x = parseFloat(cols[xIdx]);
+                    const z = parseFloat(cols[zIdx]);
+                    const count = parseInt(cols[countIdx]);
+                    if (!globalCountData.has(frame)) {
+                        globalCountData.set(frame, 0);
+                    }
+                    globalCountData.set(frame, globalCountData.get(frame) + count);
+                    if (isNaN(frame) || isNaN(x) || isNaN(z)) return;
 
-          if (isNaN(frame) || isNaN(x) || isNaN(z)) return;
+                    if (!globalTrackData.has(frame)) globalTrackData.set(frame, []);
 
-          if (!globalTrackData.has(frame)) globalTrackData.set(frame, []);
-          globalTrackData.get(frame).push({ id, x, z });
+                    globalTrackData.get(frame).push({ id, x, z });
+                    
+                    //globalCountData.set(frame, count);
+                    // if (!globalCountData.has(frame)) {
+                    //     globalCountData.set(frame, 0);
+                    // }
+                    // globalCountData.set(frame, globalCountData.get(frame) + count);
+
 
           if (!trackMarkers.has(id)) {
             const PERSON_COLOR = 0x00ff88;
