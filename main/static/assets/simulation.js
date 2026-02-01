@@ -83,19 +83,19 @@ export function renderFrame(index) {
             });
         }
     
-        if (uiElements.uiOccupancy && uiElements.uiOccuHeader) {
-            const l = detections.length;
-            if (department == "Facilities"){
-                uiElements.uiOccuHeader.innerText = "Occupancy: ";
-                uiElements.uiOccupancy.innerText = (l > 0) ? "Occupied" : "Vacant";
-                uiElements.uiOccupancy.style.color = (l > 0) ? "#ff4444" : "#00ff88";
-            }
-            else {
-                uiElements.uiOccuHeader.innerText = "Occupancy: ";
-                uiElements.uiOccupancy.innerText = l;
-                uiElements.uiOccupancy.style.color = (l > 20) ? "#ff4444" : ( l === 0 ? "#fff" : "#00ff88");
-            }
-        }
+        // if (uiElements.uiOccupancy && uiElements.uiOccuHeader) {
+        //     const l = detections.length;
+        //     if (department == "Facilities"){
+        //         uiElements.uiOccuHeader.innerText = "Occupancy: ";
+        //         uiElements.uiOccupancy.innerText = (l > 0) ? "Occupied" : "Vacant";
+        //         uiElements.uiOccupancy.style.color = (l > 0) ? "#ff4444" : "#00ff88";
+        //     }
+        //     else {
+        //         uiElements.uiOccuHeader.innerText = "Occupancy: ";
+        //         uiElements.uiOccupancy.innerText = l;
+        //         uiElements.uiOccupancy.style.color = (l > 20) ? "#ff4444" : ( l === 0 ? "#fff" : "#00ff88");
+        //     }
+        // }
     }
 
     if (index < globalIoTData.length) {
@@ -156,19 +156,19 @@ export function renderFrame(index) {
         //     uiElements.uiOccupancy.innerText = l;
         //     uiElements.uiOccupancy.style.color = (l > 20) ? "#ff4444" : ( l === 0 ? "#fff" : "#00ff88");
         // }
-        // if (uiElements.uiOccupancy && uiElements.uiOccuHeader) {
-        //     const l = row['occu'];
-        //     if (view == "Facilities"){
-        //         uiElements.uiOccuHeader.innerText = "Status: ";
-        //         uiElements.uiOccupancy.innerText = (l > 0) ? "Occupied" : "Vacant";
-        //         uiElements.uiOccupancy.style.color = (l > 0) ? "#ff4444" : "#00ff88";
-        //     }
-        //     else {
-        //         uiElements.uiOccuHeader.innerText = "Occupancy Count: ";
-        //         uiElements.uiOccupancy.innerText = l;
-        //         uiElements.uiOccupancy.style.color = (l > 20) ? "#ff4444" : ( l === 0 ? "#fff" : "#00ff88");
-        //     }
-        // }
+        if (uiElements.uiOccupancy && uiElements.uiOccuHeader) {
+            const l = row['occu'];
+            if (department == "Facilities"){
+                uiElements.uiOccuHeader.innerText = "Status: ";
+                uiElements.uiOccupancy.innerText = (l > 0) ? "Occupied" : "Vacant";
+                uiElements.uiOccupancy.style.color = (l > 0) ? "#ff4444" : "#00ff88";
+            }
+            else {
+                uiElements.uiOccuHeader.innerText = "Occupancy Count: ";
+                uiElements.uiOccupancy.innerText = l;
+                uiElements.uiOccupancy.style.color = (l > 20) ? "#ff4444" : ( l === 0 ? "#fff" : "#00ff88");
+            }
+        }
     }
     
     if (uiElements.uiName && uiElements.uiID && uiElements.uiFloor) {
