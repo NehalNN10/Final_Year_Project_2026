@@ -9,8 +9,8 @@ export const playback = {
   speed: 1,
 };
 
-// const tracker = "./temp_files/tracks_output2.csv";
-const tracker = "./temp_files/tracks_output_with_count.csv";
+const tracker = './files/combined_frames_2.csv';
+//tracks_output_wc_try1.csv';
 //'./files/combined_flicker_free.csv';
 
 //'./files/tracks_output_cam2_allframes.csv';
@@ -19,6 +19,7 @@ const tracker = "./temp_files/tracks_output_with_count.csv";
 // const tracker = './files/tracks_output.csv';
 // const tracker = './files/mapped_tracks_angle_01_try_2.csv';
 const iot = "./files/iot.csv";
+const track_count = "./files/combined_count_output.csv"
 
 export const uiElements = {
   uiOccupancy: document.getElementById("ui-iot-occupancy"),
@@ -39,7 +40,7 @@ let globalTrackData = new Map();
 let globalCountData = new Map();
 let globalIoTData = [];
 let trackMarkers = new Map();
-let globalCount = 18;
+
 export function renderFrame(index) {
   const view = document.querySelector('input[name="view"]:checked').value;
 
@@ -138,6 +139,19 @@ export function renderFrame(index) {
     //         uiElements.uiOccupancy.style.color = (l > 20) ? "#ff4444" : ( l === 0 ? "#fff" : "#00ff88");
     //     }
     // }
+    // if (uiElements.uiOccupancy && uiElements.uiOccuHeader) {
+    //         const l = row['occu'];
+    //         if (department == "Facilities"){
+    //             uiElements.uiOccuHeader.innerText = "Status: ";
+    //             uiElements.uiOccupancy.innerText = (l > 0) ? "Occupied" : "Vacant";
+    //             uiElements.uiOccupancy.style.color = (l > 0) ? "#ff4444" : "#00ff88";
+    //         }
+    //         else {
+    //             uiElements.uiOccuHeader.innerText = "Occupancy Count: ";
+    //             uiElements.uiOccupancy.innerText = l;
+    //             uiElements.uiOccupancy.style.color = (l > 20) ? "#ff4444" : ( l === 0 ? "#fff" : "#00ff88");
+    //         }
+    //       }
   }
 
   if (uiElements.uiName && uiElements.uiID && uiElements.uiFloor) {
@@ -232,7 +246,7 @@ export async function loadSimulationData(onLoadComplete) {
           if (!trackMarkers.has(id)) {
             const PERSON_COLOR = 0x00ff88;
             // create marker with the track id as label for debugging
-            const marker = createMarker(0, 0, PERSON_COLOR, 0.15, id);
+            const marker = createMarker(0, 0, PERSON_COLOR, 0.15);
             marker.visible = false;
             trackMarkers.set(id, marker);
           }
@@ -268,10 +282,29 @@ export async function loadSimulationData(onLoadComplete) {
   }
 
   // playback.maxFrames = Math.max(globalTrackFrames.length, globalIoTData.length) - 1;
+  try {
+    const iResp = await fetch(track_count);
+    if (iResp.ok) {
+      const iText = await iResp.text();
+      const iRows = iText
+        .split("\n")
+        .map((r) => r.trim())
+        .filter((r) => r);
+      const headers = iRows[0].split(",").map((h) => h.trim().toLowerCase());
 
+      globalCountData = iRows.slice(1).map((row) => {
+        const vals = row.split(",");
+        const obj = {};
+        headers.forEach((h, i) => (obj[h] = vals[i]));
+        return obj;
+      });
+    }
+  } catch (e) {
+    console.error("Error loading Count", e);
+  }
   if (onLoadComplete) onLoadComplete();
 }
-const dummy = createMarker(9, 7.5, "red", 0.1);
+//const dummy = createMarker(9, 7.5, "red", 0.1);
 // const cam1 = createMarker(-8.65, 9, "white", 0.1, "Camera 1");
 // const cam2 = createMarker(-8.65, -1.5, "white", 0.1, "Camera 2");
 // const cam3 = createMarker(8.5, -5, "white", 0.1, "Camera 3");

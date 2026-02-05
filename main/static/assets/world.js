@@ -199,13 +199,13 @@ export function updateMarker(markerGroup, x, z, id) {
         const size = 256;
         canvas.width = canvas.height = size;
         const ctx = canvas.getContext('2d');
-        ctx.fillStyle = `rgba(255,255,255,0.15)`;
-        ctx.fillRect(0, 0, size, size);
-        ctx.fillStyle = '#000';
-        ctx.font = '100px League Spartan'; 
-        ctx.textAlign = 'center';
-        ctx.textBaseline = 'middle';
-        ctx.fillText(id, size / 2, size / 2);
+        // ctx.fillStyle = `rgba(0,0,0,0.15)`;
+        // ctx.fillRect(0, 0, size, size);
+        // ctx.fillStyle = '#000';
+        // ctx.font = '100px League Spartan'; 
+        // ctx.textAlign = 'center';
+        // ctx.textBaseline = 'middle';
+        // ctx.fillText(id, size / 2, size / 2);
 
         const tex = new THREE.CanvasTexture(canvas);
         tex.minFilter = THREE.LinearFilter;

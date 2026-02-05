@@ -13,7 +13,7 @@ export const playback = {
 };
 
 // const tracker = './files/mapped_tracks_angle_03.csv';
-const tracker = './files/mapped_tracks_angle_01.csv';
+const tracker = './files/stabilized_tracks.csv';
 // const tracker = './files/mapped_tracks_angle_01_try_2.csv';
 const iot = './files/iot.csv'
 
