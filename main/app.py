@@ -2,7 +2,7 @@ from flask import Flask, render_template, send_from_directory, request, redirect
 from flask_sqlalchemy import SQLAlchemy
 from werkzeug.security import generate_password_hash, check_password_hash
 from flask import Flask, render_template, session
-from models import db, Role, User, Rooms, SecurityEmails, RoomSensor, OccupancyCoordinates, RoomOccupancy # Import your DB and Models
+from models import db, Role, User, Rooms, SecurityEmails, RoomData # Import your DB and Models
 import os
 from dotenv import load_dotenv
 
@@ -51,7 +51,8 @@ def index():
 
 @app.route('/model')
 def model():
-    return render_template('model.html', department=session.get('department'))
+    data = list(RoomData.objects.as_pymongo())
+    return render_template('model.html', department=session.get('department'), data=data)
 
 @app.route('/model_replay')
 def model_replay():
