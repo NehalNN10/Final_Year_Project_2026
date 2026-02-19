@@ -1,8 +1,13 @@
 import * as THREE from "three";
 import { camera, scene } from "./scene.js";
 import { GLTFLoader } from "jsm/loaders/GLTFLoader.js";
+import { DRACOLoader } from "jsm/loaders/DRACOLoader.js";
+
+const dracoLoader = new DRACOLoader();
+dracoLoader.setDecoderPath('/static/draco/');
 
 const loader = new GLTFLoader();
+loader.setDRACOLoader(dracoLoader);
 
 // 1. The Asset Pool (Stores loaded GLTFs)
 const assets = {}; 
@@ -12,12 +17,11 @@ const assets = {};
 export const worldObjects = {};
 
 export const models = {
-    white_table: './models/table.glb',
-    workbench:   './models/workbench.glb',
-    pillar:      './models/pillar.glb',
-    donut:       './models/donut.glb',
-    camera:      './models/camera.glb',
-    roblox:      './models/roblox.glb',
+    white_table: './models/table-draco.glb',
+    workbench:   './models/workbench-draco.glb',
+    pillar:      './models/pillar-draco.glb',
+    camera:      './models/camera-draco.glb',
+    roblox:      './models/roblox-draco.glb',
     floor:       './models/floor.glb'
 };
 
