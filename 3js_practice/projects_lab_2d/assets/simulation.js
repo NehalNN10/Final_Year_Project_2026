@@ -5,11 +5,12 @@ import { camera, controls } from "./scene.js";
 export const playback = {
   frame: 0,
   maxFrames: 2400,
+  // maxFrames: 36000,
   playing: true,
   speed: 1,
 };
 
-const tracker = './files/combined_frames_2.csv';
+const tracker = './files/tracks_output_ang2_hour.csv';
 //tracks_output_wc_try1.csv';
 //'./files/combined_flicker_free.csv';
 
@@ -292,11 +293,14 @@ export async function loadSimulationData(onLoadComplete) {
         .filter((r) => r);
       const headers = iRows[0].split(",").map((h) => h.trim().toLowerCase());
 
-      globalCountData = iRows.slice(1).map((row) => {
+      // avoid overwriting globalCountData into an Array
+      iRows.slice(1).forEach((row) => {
         const vals = row.split(",");
-        const obj = {};
-        headers.forEach((h, i) => (obj[h] = vals[i]));
-        return obj;
+        const frameNum = parseInt(vals[headers.indexOf("frame")]);
+        const countNum = parseInt(vals[headers.indexOf("count")]);
+        if (!isNaN(frameNum) && !isNaN(countNum)) {
+          globalCountData.set(frameNum, countNum);
+        }
       });
     }
   } catch (e) {
