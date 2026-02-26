@@ -190,26 +190,24 @@
 
   <!-- Emergency Modal -->
   <div class="modal-overlay" id="emergencyModal">
-    <div class="modal-content">
+    <div class="tracker-ui modal">
       <div class="modal-header">
         🚨 EMERGENCY ALERT 🚨
       </div>
-      <div class="modal-body">
-        <p>Please provide details about the emergency situation:</p>
-      </div>
+      <p style="margin-bottom: 20px">Please provide details about the emergency situation:</p>
       <form id="emergencyForm">
-        <div class="form-group">
-          <label for="roomNumber">Room Number</label>
+        <div class="row">
+          <h4 for="roomNumber">Room Number</h4>
           <input type="text" id="roomNumber" name="roomNumber" required />
         </div>
 
-        <div class="form-group">
-          <label for="occupancy">Current Occupancy</label>
+        <div class="row">
+          <h4 for="occupancy">Current Occupancy</h4>
           <input type="number" id="occupancy" name="occupancy" min="0" required />
         </div>
 
         <!-- <div class="form-group">
-          <label for="emergencyType">Emergency Type</label>
+          <h4 for="emergencyType">Emergency Type</h4>
           <select id="emergencyType" name="emergencyType" required>
             <option value="">-- Select Type --</option>
             <option value="occupancy_alert">Occupancy Alert</option>
@@ -219,12 +217,12 @@
           </select>
         </div> -->
 
-        <div class="form-group">
-          <label for="description">Description</label>
-          <textarea id="description" name="description" rows="3"></textarea>
+        <div class="row">
+          <h4 for="description">Description</h4>
+          <input type="text" id="description" name="description" required />
         </div>
 
-        <div class="modal-actions">
+        <div class="row">
           <button type="button" class="modal-btn btn-cancel" onclick="closeEmergencyModal()">Cancel</button>
           <button type="submit" class="modal-btn btn-send-emergency">Send Emergency Alert</button>
         </div>

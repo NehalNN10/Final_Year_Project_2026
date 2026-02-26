@@ -174,10 +174,10 @@ body { margin: 0; overflow: hidden; font-family: 'League Spartan', sans-serif !i
     font-weight: bold;
 }
 
-input[type="text"], input[type="password"] {
+input[type="text"], input[type="password"], input[type="number"], textarea {
     font-family: 'League Spartan', sans-serif !important;
     background: rgba(0, 0, 0, 0.8);
-    font-size: 1.4rem;
+    font-size: 1rem;
     display: flex !important;
     justify-content: center !important;
     align-items: center;
@@ -567,7 +567,7 @@ input[type="radio"] + label {
     height: 100%;
     background-color: rgba(0, 0, 0, 0.7);
     z-index: 999;
-    animation: fadeIn 0.3s ease-in-out;
+    animation: 0.3s ease-in-out;
 }
 
 .modal-overlay.active {
@@ -585,14 +585,15 @@ input[type="radio"] + label {
     }
 }
 
-.modal-content {
-    background: linear-gradient(135deg, #1a1a2e 0%, #16213e 100%);
+.modal {
+    
     border: 2px solid #00ff88;
     border-radius: 10px;
     padding: 40px;
     max-width: 500px;
     width: 90%;
     box-shadow: 0 0 50px rgba(0, 255, 136, 0.3);
+    background: #000000;
     animation: slideUp 0.3s ease-in-out;
 }
 
@@ -613,11 +614,6 @@ input[type="radio"] + label {
     color: #ff3333;
     margin-bottom: 20px;
     text-align: center;
-}
-
-.modal-body {
-    color: #ccc;
-    margin-bottom: 20px;
 }
 
 .form-group {
