@@ -83,14 +83,34 @@ def send_alert():
         occupancy_count = data.get('occupancy_count')
         emergency_type = data.get('emergency_type')
         description = data.get('description', '')
+
+        # determine recipients based on configured security emails
+        recipients = []
+        if room_number:
+            # rooms are stored by room_id
+            room_obj = Rooms.objects(room_id=room_number).first()
+            if room_obj:
+                for se in SecurityEmails.objects(room=room_obj):
+                    if se.user and se.user.email:
+                        recipients.append(se.user.email)
+        # fallback if no specific recipients found
+        if not recipients:
+            default = os.getenv('DEFAULT_EMERGENCY_RECIPIENT')
+            if default:
+                recipients.append(default)
+
+        if not recipients:
+            # still nothing to send to
+            raise ValueError('No recipient email configured for this room or DEFAULT_EMERGENCY_RECIPIENT not set.')
+
+        # send email(s)
+        for rcpt in recipients:
+            send_emergency_alert(room_number, occupancy_count, rcpt, description)
+
+        # log emergency (optional - you can store in database)
+        print(f"Emergency Alert Sent - Room: {room_number}, Occupancy: {occupancy_count}, Type: {emergency_type}, recipients={recipients}")
         
-        # Call the emergency alert function
-        send_emergency_alert(room_number, occupancy_count)
-        
-        # Log emergency (optional - you can store in database)
-        print(f"Emergency Alert Sent - Room: {room_number}, Occupancy: {occupancy_count}, Type: {emergency_type}")
-        
-        return jsonify({'success': True, 'message': 'Emergency alert sent successfully!'}), 200
+        return jsonify({'success': True, 'message': 'Emergency alert sent successfully!', 'recipients': recipients}), 200
     except Exception as e:
         print(f"Error sending emergency alert: {e}")
         return jsonify({'success': False, 'error': str(e)}), 400
