@@ -13,8 +13,6 @@
 
   </head>
 <body>
-
-<body>
   <div class="main-nav">
     <div style="flex: 1;">
       <h1>HU Digital Twin </h1>
@@ -194,24 +192,24 @@
   <div class="modal-overlay" id="emergencyModal">
     <div class="modal-content">
       <div class="modal-header">
-        🚨 EMERGENCY ALERT
+        🚨 EMERGENCY ALERT 🚨
       </div>
       <div class="modal-body">
         <p>Please provide details about the emergency situation:</p>
       </div>
       <form id="emergencyForm">
         <div class="form-group">
-          <label for="roomNumber">Room Number *</label>
-          <input type="text" id="roomNumber" name="roomNumber" placeholder="e.g., C-007, E-121" required />
+          <label for="roomNumber">Room Number</label>
+          <input type="text" id="roomNumber" name="roomNumber" required />
         </div>
 
         <div class="form-group">
-          <label for="occupancy">Current Occupancy *</label>
-          <input type="number" id="occupancy" name="occupancy" placeholder="Number of people" min="0" required />
+          <label for="occupancy">Current Occupancy</label>
+          <input type="number" id="occupancy" name="occupancy" min="0" required />
         </div>
 
-        <div class="form-group">
-          <label for="emergencyType">Emergency Type *</label>
+        <!-- <div class="form-group">
+          <label for="emergencyType">Emergency Type</label>
           <select id="emergencyType" name="emergencyType" required>
             <option value="">-- Select Type --</option>
             <option value="occupancy_alert">Occupancy Alert</option>
@@ -219,11 +217,11 @@
             <option value="health_emergency">Health Emergency</option>
             <option value="other">Other</option>
           </select>
-        </div>
+        </div> -->
 
         <div class="form-group">
           <label for="description">Description</label>
-          <textarea id="description" name="description" placeholder="Provide additional details..." rows="3"></textarea>
+          <textarea id="description" name="description" rows="3"></textarea>
         </div>
 
         <div class="modal-actions">

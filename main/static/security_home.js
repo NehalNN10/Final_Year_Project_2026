@@ -107,6 +107,11 @@ function closeEmergencyModal() {
     document.getElementById('emergencyForm').reset();
 }
 
+// module scripts don't expose functions to the global scope by default;
+// make them available for inline handlers
+window.openEmergencyModal = openEmergencyModal;
+window.closeEmergencyModal = closeEmergencyModal;
+
 // Close modal when clicking outside the modal content
 document.addEventListener('DOMContentLoaded', function() {
     const modal = document.getElementById('emergencyModal');
@@ -148,7 +153,7 @@ document.addEventListener('DOMContentLoaded', function() {
             } catch (error) {
                 console.error('Error sending emergency alert:', error);
                 alert('❌ Error sending emergency alert');
-                    }
+            }
         });
     }
 });

@@ -7,13 +7,12 @@ from datetime import datetime
 
 load_dotenv()
 
-def send_emergency_alert(room_number, occupancy_count):
+def send_emergency_alert(room_number, occupancy_count, recipient, description=None):
     # Credentials
     username = os.getenv("SMTP_USERNAME") 
     password = os.getenv("SMTP_PASSWORD")
     
     sender = 'nh07884@st.habib.edu.pk'
-    recipient = 'shawaizniazi917@gmail.com'
     
     # Generate current timestamp
     timestamp = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
@@ -32,6 +31,7 @@ def send_emergency_alert(room_number, occupancy_count):
     
     This is an automated emergency notification from the Digital Twin System.
     
+    Emergency Details: {description if description else "No additional details provided."}
     Room Number: {room_number}
     Current Occupancy: {occupancy_count}
     Timestamp: {timestamp}
@@ -133,7 +133,7 @@ def send_emergency_alert(room_number, occupancy_count):
 
     # Validate credentials before sending the email
     if not username or not password:
-      print("❌ SMTP_USERNAME or SMTP_PASSWORD not set in environment; cannot send email.")
+      print("SMTP_USERNAME or SMTP_PASSWORD not set in environment; cannot send email.")
       print("Set these in your .env or environment variables and try again.")
       return
 
