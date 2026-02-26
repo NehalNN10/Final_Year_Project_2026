@@ -13,14 +13,14 @@ def send_emergency_alert(room_number, occupancy_count):
     password = os.getenv("SMTP_PASSWORD")
     
     sender = 'nh07884@st.habib.edu.pk'
-    recipient = 'nehalnaeem13@gmail.com'
+    recipient = 'shawaizniazi917@gmail.com'
     
     # Generate current timestamp
     timestamp = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
 
     # Use 'alternative' so the email client chooses HTML, but falls back to plain text if needed
     msg = MIMEMultipart('alternative')
-    msg['Subject'] = f'🚨 EMERGENCY ALERT: Occupancy Detected in {room_number}'
+    msg['Subject'] = f'🚨 EMERGENCY ALERT 🚨 Occupancy Detected in {room_number}'
     msg['From'] = sender
     msg['To'] = recipient
 
@@ -131,6 +131,12 @@ def send_emergency_alert(room_number, occupancy_count):
     msg.attach(part1)
     msg.attach(part2)
 
+    # Validate credentials before sending the email
+    if not username or not password:
+      print("❌ SMTP_USERNAME or SMTP_PASSWORD not set in environment; cannot send email.")
+      print("Set these in your .env or environment variables and try again.")
+      return
+
     # Send the email
     try:
         print("Connecting to SMTP server...")
@@ -141,9 +147,9 @@ def send_emergency_alert(room_number, occupancy_count):
         mailServer.login(username, password)
         mailServer.sendmail(sender, recipient, msg.as_string())
         mailServer.close()
-        print(f"✅ Emergency alert sent successfully to {recipient}!")
+        print(f"Emergency alert sent successfully to {recipient}!")
     except Exception as e:
-        print(f"❌ Failed to send email: {e}")
+        print(f"Failed to send email: {e}")
 
 # ==========================================
 # TEST THE FUNCTION
