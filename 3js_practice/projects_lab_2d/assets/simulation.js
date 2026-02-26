@@ -10,7 +10,7 @@ export const playback = {
   speed: 1,
 };
 
-const tracker = './files/tracks_output_ang2_hour.csv';
+const tracker = './files/combined_frames_2.csv';
 //tracks_output_wc_try1.csv';
 //'./files/combined_flicker_free.csv';
 
