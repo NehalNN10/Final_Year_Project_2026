@@ -46,7 +46,7 @@ with app.app_context():
     User(
         user_id='mk07899',
         email='mk07899@st.habib.edu.pk',
-        password=generate_password_hash('YoGurt67'),
+        password=generate_password_hash('MSK>NNH100'),
         role=Role.objects(name='Security Officer').first()
     ).save()
 
@@ -63,12 +63,12 @@ with app.app_context():
     ).save()
 
     SecurityEmails(
-        room='C-006',
+        room=Rooms.objects(room_id='C-006').first(),
         user=User.objects(user_id='nh07884').first()
     ).save()
 
     SecurityEmails(
-        room='C-007',
+        room=Rooms.objects(room_id='C-007').first(),
         user=User.objects(user_id='mk07899').first()
     ).save()
 

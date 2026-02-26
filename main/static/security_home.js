@@ -131,9 +131,11 @@ document.addEventListener('DOMContentLoaded', function() {
             const formData = {
                 room_number: document.getElementById('roomNumber').value,
                 occupancy_count: document.getElementById('occupancy').value,
-                emergency_type: document.getElementById('emergencyType').value,
+                // emergency_type: document.getElementById('emergencyType').value,
                 description: document.getElementById('description').value
             };
+
+            console.log('Submitting emergency alert:', formData);
 
             try {
                 // Send emergency alert to backend
@@ -146,13 +148,19 @@ document.addEventListener('DOMContentLoaded', function() {
                 });
 
                 const result = await response.json();
+                console.log('Response:', response.status, result);
                 
                 if (response.ok) {
+                    console.log('✅ Emergency alert sent successfully!');
+                    alert('✅ Emergency alert sent successfully!\n\nRecipients: ' + result.recipients.join(', '));
                     closeEmergencyModal();
-                } 
+                } else {
+                    console.error('❌ Error:', result.error);
+                    alert('❌ Error sending emergency alert:\n' + result.error);
+                }
             } catch (error) {
-                console.error('Error sending emergency alert:', error);
-                alert('❌ Error sending emergency alert');
+                console.error('❌ Error sending emergency alert:', error);
+                alert('❌ Error sending emergency alert:\n' + error.message);
             }
         });
     }

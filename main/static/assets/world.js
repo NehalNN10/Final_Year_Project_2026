@@ -3,11 +3,11 @@ import { camera, scene } from "./scene.js";
 import { GLTFLoader } from "jsm/loaders/GLTFLoader.js";
 import { DRACOLoader } from "jsm/loaders/DRACOLoader.js";
 
-const dracoLoader = new DRACOLoader();
-dracoLoader.setDecoderPath('/static/draco/');
+// const dracoLoader = new DRACOLoader();
+// dracoLoader.setDecoderPath('/static/draco/');
 
-const loader = new GLTFLoader();
-loader.setDRACOLoader(dracoLoader);
+// const loader = new GLTFLoader();
+// loader.setDRACOLoader(dracoLoader);
 
 // 1. The Asset Pool (Stores loaded GLTFs)
 const assets = {}; 
@@ -22,7 +22,7 @@ export const models = {
     pillar:      './models/pillar-draco.glb',
     camera:      './models/camera-draco.glb',
     roblox:      './models/roblox-draco.glb',
-    floor:       './models/floor.glb'
+    floor:       './models/floor-draco.glb'
 };
 
 // 2. Load Function: Loads everything once and saves to 'assets'
