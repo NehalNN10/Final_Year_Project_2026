@@ -33,8 +33,8 @@
   </div>
 
   <div class="main-home scroll" style="max-height: calc(100vh - 10rem); overflow-y: auto;">
-    <div class="row" style="width: 100%; align-items: normal !important; margin-top: 0px; overflow-y: hidden;">
-      <div class="tracker-ui scroll" style="flex: 1; margin: 0 20px 0 0; height: 67.5vh !important; overflow-y: auto;">
+    <div class="row boxes">
+      <div class="tracker-ui scroll outer box">
         <div class="row" style="margin-top: 0px !important">
           <h2>AC Alert</h2>
         </div>
@@ -146,7 +146,7 @@
         </div>
       </div>
 
-      <div class="tracker-ui scroll" style="flex: 1; margin: 0 20px 0 0; height: 67.5vh !important; overflow-y: auto;">
+      <div class="tracker-ui scroll outer box">
         <div class="row" style="margin-top: 0px !important">
           <h2>Lights Alert</h2>
         </div>
@@ -216,7 +216,7 @@
         </div>
       </div>
 
-      <div class="tracker-ui scroll" style="flex: 1; margin: 0px; height: 67.5vh !important; overflow-y: auto;">
+      <div class="tracker-ui scroll outer box">
         <div class="row" style="margin-top: 0px !important;">
           <h2>Temperature Alert</h2>
         </div>
@@ -308,48 +308,50 @@
       </div>
     </div>
 
-    <div class="tracker-ui scroll" style="flex: 1; margin-top: 20px; margin-bottom: 40px; max-height: 67.5vh; overflow-y: auto;">
-      <div class="row" style="margin-top: 0px !important">
-        <h2>Rooms Real-Time Data</h2>
-        <h2> ⏰ <span id="time"></span></h2>
-      </div>
-    
-      <table class="scroll" style="width: 100%; margin-top: 10px; border-collapse: collapse; ">
-        <tr>
-          <th style="width: 8%;">Room ID</th>
-          <th style="width: 40%">Room Name</th>
-          <th style="width: 13%">Occupancy</th>
-          <th style="width: 13%">Temperature</th>
-          <th style="width: 13%">AC Status</th>
-          <th style="width: 13%">Light Status</th>
-        </tr>
-        <tr>
-          <td>C-007</td>
-          <td>Projects Lab</td>
-          <td><span class='fill' id="occ">??</span></td>
-          <td><span class='fill' id="temp">??</span></td>
-          <td><span class='fill' id="ac">??</span></td>
-          <td><span class='fill' id="lights">??</span></td>
-        </tr>
+    <div class="row boxes">
+      <div class="tracker-ui scroll outer box">
+        <div class="row" style="margin-top: 0px !important">
+          <h2>Rooms Real-Time Data</h2>
+          <h2> ⏰ <span id="time"></span></h2>
+        </div>
+      
+        <table class="scroll" style="width: 100%; margin-top: 10px; border-collapse: collapse; ">
+          <tr>
+            <th style="width: 8%;">Room ID</th>
+            <th style="width: 40%">Room Name</th>
+            <th style="width: 13%">Occupancy</th>
+            <th style="width: 13%">Temperature</th>
+            <th style="width: 13%">AC Status</th>
+            <th style="width: 13%">Light Status</th>
+          </tr>
+          <tr>
+            <td>C-007</td>
+            <td>Projects Lab</td>
+            <td><span class='fill' id="occ">??</span></td>
+            <td><span class='fill' id="temp">??</span></td>
+            <td><span class='fill' id="ac">??</span></td>
+            <td><span class='fill' id="lights">??</span></td>
+          </tr>
 
-        {% for room in rooms %}
-        <tr>
-          <td>{{ room.id }}</td>
-          <td>{{ room.name }}</td>
-          <td>{{ room.temperature }}</td>
-          <td>{{ room.humidity }}</td>
-          <td>{{ room.occupancy }}</td>
-        </tr>
-        {% endfor %}
-      </table>
-      <ul>
-        {% for facility in facilities %}
-          <li>
-            <strong>{{ facility.name }}</strong> - {{ facility.location }}
-            <button onclick="window.location.href='/model?facility_id={{ facility.id }}'">View Model</button>
-          </li>
-        {% endfor %}
-      </ul>
+          {% for room in rooms %}
+          <tr>
+            <td>{{ room.id }}</td>
+            <td>{{ room.name }}</td>
+            <td>{{ room.temperature }}</td>
+            <td>{{ room.humidity }}</td>
+            <td>{{ room.occupancy }}</td>
+          </tr>
+          {% endfor %}
+        </table>
+        <ul>
+          {% for facility in facilities %}
+            <li>
+              <strong>{{ facility.name }}</strong> - {{ facility.location }}
+              <button onclick="window.location.href='/model?facility_id={{ facility.id }}'">View Model</button>
+            </li>
+          {% endfor %}
+        </ul>
+      </div>
     </div>
   </div>
 
