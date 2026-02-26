@@ -55,8 +55,7 @@ def index():
 
 @app.route('/model')
 def model():
-    data = list(RoomData.objects.as_pymongo())
-    return render_template('model.html', department=session.get('department'), role=session.get('role'))
+    return render_template('model.html', department=session.get('department'))
 
 @app.route('/model_replay')
 def model_replay():
@@ -81,7 +80,6 @@ def send_alert():
     try:
         room_number = data.get('room_number')
         occupancy_count = data.get('occupancy_count')
-        emergency_type = data.get('emergency_type')
         description = data.get('description', '')
 
         # determine recipients based on configured security emails
@@ -93,11 +91,6 @@ def send_alert():
                 for se in SecurityEmails.objects(room=room_obj):
                     if se.user and se.user.email:
                         recipients.append(se.user.email)
-        # fallback if no specific recipients found
-        if not recipients:
-            default = os.getenv('DEFAULT_EMERGENCY_RECIPIENT')
-            if default:
-                recipients.append(default)
 
         if not recipients:
             # still nothing to send to
@@ -108,7 +101,7 @@ def send_alert():
             send_emergency_alert(room_number, occupancy_count, rcpt, description)
 
         # log emergency (optional - you can store in database)
-        print(f"Emergency Alert Sent - Room: {room_number}, Occupancy: {occupancy_count}, Type: {emergency_type}, recipients={recipients}")
+        print(f"Emergency Alert Sent - Room: {room_number}, Occupancy: {occupancy_count}, Description: {description}, recipients={recipients}")
         
         return jsonify({'success': True, 'message': 'Emergency alert sent successfully!', 'recipients': recipients}), 200
     except Exception as e:
