@@ -2,10 +2,10 @@ from flask import Flask, render_template, send_from_directory, request, redirect
 from flask_sqlalchemy import SQLAlchemy
 from werkzeug.security import generate_password_hash, check_password_hash
 from flask import Flask, render_template, session
-from models import db, Role, User, Rooms, SecurityEmails, RoomData # Import your DB and Models
+from ZReact.backend.models import db, Role, User, Rooms, SecurityEmails, RoomData # Import your DB and Models
 import os
 from dotenv import load_dotenv
-from smtp import send_emergency_alert
+from ZReact.backend.smtp import send_emergency_alert
 
 load_dotenv()
 

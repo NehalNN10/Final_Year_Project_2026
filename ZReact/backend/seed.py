@@ -1,5 +1,5 @@
 from app import app
-from models import db, User, Role, Rooms, SecurityEmails
+from ZReact.backend.models import db, User, Role, Rooms, SecurityEmails
 from werkzeug.security import generate_password_hash
 
 # Connect to the app context to access the DB
