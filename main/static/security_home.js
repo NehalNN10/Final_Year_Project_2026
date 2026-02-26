@@ -151,16 +151,16 @@ document.addEventListener('DOMContentLoaded', function() {
                 console.log('Response:', response.status, result);
                 
                 if (response.ok) {
-                    console.log('✅ Emergency alert sent successfully!');
-                    alert('✅ Emergency alert sent successfully!\n\nRecipients: ' + result.recipients.join(', '));
+                    console.log('Emergency alert sent successfully!');
+                    alert('Emergency alert sent successfully!\n\nRecipients: ' + result.recipients.join(', '));
                     closeEmergencyModal();
                 } else {
-                    console.error('❌ Error:', result.error);
-                    alert('❌ Error sending emergency alert:\n' + result.error);
+                    console.error('Error:', result.error);
+                    alert('Error sending emergency alert:\n' + result.error);
                 }
             } catch (error) {
-                console.error('❌ Error sending emergency alert:', error);
-                alert('❌ Error sending emergency alert:\n' + error.message);
+                console.error('Error sending emergency alert:', error);
+                alert('Error sending emergency alert:\n' + error.message);
             }
         });
     }

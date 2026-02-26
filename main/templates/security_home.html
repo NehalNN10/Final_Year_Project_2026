@@ -9,7 +9,7 @@
     <link href="https://fonts.googleapis.com/css2?family=League+Spartan:wght@100..900&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
 
-    <title>HU Digital Twin - Facilities Dashboard</title>
+    <title>HU Digital Twin - Security Dashboard</title>
 
   </head>
 <body>
@@ -27,16 +27,16 @@
   </div>
 
   <div class="header2">
-    <span>Facilities Dashboard</span>
+    <span>Security Dashboard</span>
   </div>
 
   <div class="main-home scroll" style="max-height: calc(100vh - 10rem); overflow-y: auto;">
-    <div class="row" style="width: 100%; align-items: normal !important; margin-top: 0px; overflow-y: hidden;">
-      <div class="tracker-ui scroll" style="flex: 1; margin: 0 20px 0 0; max-height: 67.5vh !important; overflow-y: auto;">
+    <div class="row boxes">
+      <div class="tracker-ui scroll outer box">
         <div class="row" style="margin-top: 0px !important">
           <h2>Occupancy Alert</h2>
           {% if session.get('role') == 'Security Admin' %}
-            <button style="padding: 10px 20px; background-color: #ff4444; color: black; border: none; border-radius: 8px; font-weight: bold; cursor: pointer;" onclick="openEmergencyModal()">Send Emergency Alert</button>
+            <button class="track-btn btn-send-emergency" style="width: 20rem !important; height: 3rem !important;" onclick="openEmergencyModal()"> <h2>Send Emergency Alert</h2></button>
             {% endif %}
         </div>
         <div id="ac-alerts">
@@ -147,7 +147,7 @@
         </div>
       </div>
 
-      <div class="tracker-ui scroll" style="flex: 1; margin: 0 20px 0 0; overflow-y: auto;">
+      <div class="tracker-ui scroll outer" style="flex: 1; margin: 0 20px 0 0; overflow-y: auto;">
         <div class="row" style="margin-top: 0px !important">
             <h2>Rooms Real-Time Data</h2>
             <h2> ⏰ <span id="time"></span></h2>
@@ -223,8 +223,8 @@
         </div>
 
         <div class="row">
-          <button type="button" class="modal-btn btn-cancel" onclick="closeEmergencyModal()">Cancel</button>
-          <button type="submit" class="modal-btn btn-send-emergency">Send Emergency Alert</button>
+          <button type="button" class="btn btn-cancel" onclick="closeEmergencyModal()">Cancel</button>
+          <button type="submit" class="btn btn-send-emergency">Send Emergency Alert</button>
         </div>
       </form>
     </div>
