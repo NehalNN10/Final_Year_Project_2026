@@ -43,15 +43,33 @@ with app.app_context():
         role=Role.objects(name='Security Officer').first()
     ).save()
 
+    User(
+        user_id='mk07899',
+        email='mk07899@st.habib.edu.pk',
+        password=generate_password_hash('YoGurt67'),
+        role=Role.objects(name='Security Officer').first()
+    ).save()
+
+    Rooms(
+        room_id='C-006',
+        room_name='Digital Instrumentations Lab',
+        max_occupancy=50
+    ).save()
+
     Rooms(
         room_id='C-007',
         room_name='Projects Lab',
         max_occupancy=50
-    )
+    ).save()
+
+    SecurityEmails(
+        room='C-006',
+        user=User.objects(user_id='nh07884').first()
+    ).save()
 
     SecurityEmails(
         room='C-007',
-        user=User.objects(user_id='nh07884').first()
-    )
+        user=User.objects(user_id='mk07899').first()
+    ).save()
 
     print("Database seeded successfully!")

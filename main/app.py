@@ -1,10 +1,11 @@
-from flask import Flask, render_template, send_from_directory, request, redirect, url_for, session, flash
+from flask import Flask, render_template, send_from_directory, request, redirect, url_for, session, flash, jsonify
 from flask_sqlalchemy import SQLAlchemy
 from werkzeug.security import generate_password_hash, check_password_hash
 from flask import Flask, render_template, session
 from models import db, Role, User, Rooms, SecurityEmails, RoomData # Import your DB and Models
 import os
 from dotenv import load_dotenv
+from smtp import send_emergency_alert
 
 load_dotenv()
 
@@ -41,9 +42,12 @@ def index():
         else:
             # Successful login
             session['user_id'] = str(id.id)
-            session['department'] = id.role.department  # Store only the role name, not the object
+            session['department'] = id.role.department  # Store the department
+            session['role'] = id.role.name  # Store the role name
             if id.role.department == 'Facilities':
                 return redirect(url_for('facility_home'))
+            if id.role.department == 'Security':
+                return redirect(url_for('security_home'))
             return redirect(url_for('dashboard'), )  # Redirect to the facility_home or home page
     
     
@@ -52,19 +56,44 @@ def index():
 @app.route('/model')
 def model():
     data = list(RoomData.objects.as_pymongo())
-    return render_template('model.html', department=session.get('department'), data=data)
+    return render_template('model.html', department=session.get('department'), role=session.get('role'))
 
 @app.route('/model_replay')
 def model_replay():
-    return render_template('model_replay.html', department=session.get('department'))
+    return render_template('model_replay.html', department=session.get('department'), role=session.get('role'))
 
 @app.route('/facility_home')
 def facility_home():
-    return render_template('facility_home.html', department=session.get('department'))
+    return render_template('facility_home.html', department=session.get('department'), role=session.get('role'))
+
+@app.route('/security_home')
+def security_home():
+    return render_template('security_home.html', department=session.get('department'), role=session.get('role'))
 
 @app.route('/dashboard')
 def dashboard():
-    return render_template('dashboard.html', department=session.get('department'))
+    return render_template('dashboard.html', department=session.get('department'), role=session.get('role'))
+
+@app.route('/send_emergency_alert', methods=['POST'])
+def send_alert():
+    data = request.get_json()
+    
+    try:
+        room_number = data.get('room_number')
+        occupancy_count = data.get('occupancy_count')
+        emergency_type = data.get('emergency_type')
+        description = data.get('description', '')
+        
+        # Call the emergency alert function
+        send_emergency_alert(room_number, occupancy_count)
+        
+        # Log emergency (optional - you can store in database)
+        print(f"Emergency Alert Sent - Room: {room_number}, Occupancy: {occupancy_count}, Type: {emergency_type}")
+        
+        return jsonify({'success': True, 'message': 'Emergency alert sent successfully!'}), 200
+    except Exception as e:
+        print(f"Error sending emergency alert: {e}")
+        return jsonify({'success': False, 'error': str(e)}), 400
 
 # Serve files from static/files directory
 @app.route('/files/<path:filename>')

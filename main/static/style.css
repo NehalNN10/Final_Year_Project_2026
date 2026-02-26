@@ -556,3 +556,138 @@ input[type="radio"] + label {
     width: 30em;
     font-size: 1.15rem;
 }
+
+/* Emergency Modal Overlay */
+.modal-overlay {
+    display: none;
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background-color: rgba(0, 0, 0, 0.7);
+    z-index: 999;
+    animation: fadeIn 0.3s ease-in-out;
+}
+
+.modal-overlay.active {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+}
+
+@keyframes fadeIn {
+    from {
+        opacity: 0;
+    }
+    to {
+        opacity: 1;
+    }
+}
+
+.modal-content {
+    background: linear-gradient(135deg, #1a1a2e 0%, #16213e 100%);
+    border: 2px solid #00ff88;
+    border-radius: 10px;
+    padding: 40px;
+    max-width: 500px;
+    width: 90%;
+    box-shadow: 0 0 50px rgba(0, 255, 136, 0.3);
+    animation: slideUp 0.3s ease-in-out;
+}
+
+@keyframes slideUp {
+    from {
+        transform: translateY(50px);
+        opacity: 0;
+    }
+    to {
+        transform: translateY(0);
+        opacity: 1;
+    }
+}
+
+.modal-header {
+    font-size: 28px;
+    font-weight: bold;
+    color: #ff3333;
+    margin-bottom: 20px;
+    text-align: center;
+}
+
+.modal-body {
+    color: #ccc;
+    margin-bottom: 20px;
+}
+
+.form-group {
+    margin-bottom: 15px;
+}
+
+.form-group label {
+    display: block;
+    margin-bottom: 8px;
+    color: #00ff88;
+    font-weight: bold;
+}
+
+.form-group input,
+.form-group select,
+.form-group textarea {
+    width: 100%;
+    padding: 10px;
+    border: 1px solid #555;
+    border-radius: 5px;
+    background-color: #0f0f0f;
+    color: #fff;
+    font-family: 'League Spartan', sans-serif;
+    box-sizing: border-box;
+    transition: border-color 0.3s;
+}
+
+.form-group input:focus,
+.form-group select:focus,
+.form-group textarea:focus {
+    outline: none;
+    border-color: #00ff88;
+    box-shadow: 0 0 10px rgba(0, 255, 136, 0.5);
+}
+
+.modal-actions {
+    display: flex;
+    gap: 10px;
+    justify-content: center;
+}
+
+.modal-btn {
+    padding: 12px 30px;
+    border: none;
+    border-radius: 5px;
+    font-size: 16px;
+    font-weight: bold;
+    cursor: pointer;
+    transition: all 0.3s;
+    font-family: 'League Spartan', sans-serif;
+}
+
+.btn-send-emergency {
+    background-color: #ff3333;
+    color: white;
+}
+
+.btn-send-emergency:hover {
+    background-color: #ff5555;
+    box-shadow: 0 0 20px rgba(255, 51, 51, 0.6);
+}
+
+.btn-cancel {
+    background-color: #333;
+    color: #ccc;
+    border: 1px solid #555;
+}
+
+.btn-cancel:hover {
+    background-color: #444;
+    border-color: #00ff88;
+    color: #00ff88;
+}
