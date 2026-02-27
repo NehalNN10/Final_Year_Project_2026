@@ -1,6 +1,7 @@
 import * as THREE from "three";
 import { camera, scene } from "./scene.js";
 import { GLTFLoader } from "jsm/loaders/GLTFLoader.js";
+// no DRACOLoader needed; using vanilla GLTFLoader
 
 const loader = new GLTFLoader();
 
@@ -15,7 +16,6 @@ export const models = {
     white_table: './models/table.glb',
     workbench:   './models/workbench.glb',
     pillar:      './models/pillar.glb',
-    donut:       './models/donut.glb',
     camera:      './models/camera.glb',
     roblox:      './models/roblox.glb',
     floor:       './models/floor.glb'
