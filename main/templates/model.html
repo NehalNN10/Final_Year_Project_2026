@@ -33,6 +33,8 @@
         <div style="display: flex; flex-direction: row; justify-content: space-evenly">
           {% if session.get('department') == 'Facilities' %}
             <button class="header" onclick="window.location.href='/facility_home'">Home</button>
+          {% elif session.get('department') == 'Security' %}
+            <button class="header" onclick="window.location.href='/security_home'">Home</button>
           {% else %}
             <button class="header" onclick="window.location.href='/dashboard'">Home</button>
           {% endif %}
@@ -52,7 +54,7 @@
       <div class="scroll" id="float">
         
 
-        <div class="tracker-ui" style="margin-top: 20px;">
+        <div class="tracker-ui outer" style="margin-top: 20px;">
           <!-- Room Name -->
           <h3 class="row">
             <span>
@@ -118,7 +120,7 @@
           </div>
         </div> 
 
-        <div class= "tracker-ui" style="display: none;">
+        <div class= "tracker-ui outer" style="display: none;">
           <h3>Simulation Controls</h3> 
 
           <div class="content" id="sim-content">
@@ -127,7 +129,7 @@
           
         </div>
 
-        <div class="tracker-ui">
+        <div class="tracker-ui outer">
 
           <h3>Model Controls</h3> 
 
