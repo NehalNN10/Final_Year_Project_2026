@@ -4,12 +4,12 @@ import { camera, controls } from "./scene.js";
 //1200
 export const playback = {
   frame: 0,
-  maxFrames: 2400,
+  maxFrames: 22000,
   playing: true,
   speed: 1,
 };
 
-const tracker = './files/combined_frames_2.csv';
+const tracker = './temp_files_15min/cam2.csv';
 //tracks_output_wc_try1.csv';
 //'./files/combined_flicker_free.csv';
 
@@ -235,13 +235,14 @@ export async function loadSimulationData(onLoadComplete) {
 
           globalTrackData.get(frame).push({ id, x, z });
 
-          const count =
-            countIdx > -1 && cols[countIdx] !== undefined
-              ? parseInt(cols[countIdx])
-              : NaN;
-          if (!isNaN(count) && !globalCountData.has(frame)) {
-            globalCountData.set(frame, count);
-          }
+          //********this wasnt working********//
+          // const count =
+          //   countIdx > -1 && cols[countIdx] !== undefined
+          //     ? parseInt(cols[countIdx])
+          //     : NaN;
+          // if (!isNaN(count) && !globalCountData.has(frame)) {
+          //   globalCountData.set(frame, count);
+          // }
 
           if (!trackMarkers.has(id)) {
             const PERSON_COLOR = 0x00ff88;
@@ -291,12 +292,22 @@ export async function loadSimulationData(onLoadComplete) {
         .map((r) => r.trim())
         .filter((r) => r);
       const headers = iRows[0].split(",").map((h) => h.trim().toLowerCase());
+      
+      //******this wasnt working*******//
+      // globalCountData = iRows.slice(1).map((row) => {
+      //   const vals = row.split(",");
+      //   const obj = {};
+      //   headers.forEach((h, i) => (obj[h] = vals[i]));
+      //   return obj;
+      // });
 
-      globalCountData = iRows.slice(1).map((row) => {
+      iRows.slice(1).forEach((row) => {
         const vals = row.split(",");
-        const obj = {};
-        headers.forEach((h, i) => (obj[h] = vals[i]));
-        return obj;
+        const frameNum = parseInt(vals[headers.indexOf("frame")]);
+        const countNum = parseInt(vals[headers.indexOf("count")]);
+        if (!isNaN(frameNum) && !isNaN(countNum)) {
+          globalCountData.set(frameNum, countNum);
+        }
       });
     }
   } catch (e) {
