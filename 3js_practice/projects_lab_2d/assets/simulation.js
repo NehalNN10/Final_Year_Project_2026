@@ -18,7 +18,7 @@ const tracker = './temp_files_15min/cam2.csv';
 // const tracker = './files/mapped_tracks_angle_01.csv';
 // const tracker = './files/tracks_output.csv';
 // const tracker = './files/mapped_tracks_angle_01_try_2.csv';
-const iot = "./files/iot.csv";
+const iot = "./temp_files_15min/cs_lab_iot_15min.csv";
 const track_count = "./files/combined_count_output.csv"
 
 export const uiElements = {
@@ -85,8 +85,11 @@ export function renderFrame(index) {
     }
   }
 
-  if (index < globalIoTData.length) {
-    const row = globalIoTData[index];
+  const seconds = Math.floor(index / 25);
+  if (seconds < globalIoTData.length) {
+    //const row = globalIoTData[index];
+    
+    const row = globalIoTData[seconds];
 
     if (view == "sec") uiElements.uiIot.style.display = "none";
     else {
@@ -118,7 +121,7 @@ export function renderFrame(index) {
 
     if (uiElements.uiTime) {
       uiElements.uiTime.innerText =
-        ((row["timestamp"] || index) / 10).toFixed(1) + "s";
+        ((index) / 25).toFixed(1) + "s";
     }
 
     // if (uiElements.uiOccupancy) {
