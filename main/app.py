@@ -5,7 +5,8 @@ from flask import Flask, render_template, session
 from models import db, Role, User, Rooms, SecurityEmails, RoomData # Import your DB and Models
 import os
 from dotenv import load_dotenv
-from smtp import send_emergency_alert
+from smtp_facilities import send_facilities_alert
+from smtp_security import send_emergency_alert
 
 load_dotenv()
 
@@ -106,6 +107,42 @@ def send_alert():
         return jsonify({'success': True, 'message': 'Emergency alert sent successfully!', 'recipients': recipients}), 200
     except Exception as e:
         print(f"Error sending emergency alert: {e}")
+        return jsonify({'success': False, 'error': str(e)}), 400
+    
+@app.route('/send_facilities_alert', methods=['POST'])
+def send_fac_alert():
+    data = request.get_json()
+    
+    try:
+        room_number = data.get('room_number')
+        alert_type = data.get('alert_type')
+        time_since = data.get('time_since')
+        description = data.get('description', '')
+
+        # determine recipients based on configured security emails
+        recipients = []
+        # rooms are stored by room_id
+        # MongoDB on this cluster doesn't support server-side joins, so
+        # query all users then filter by role.department in Python.
+        for officer in User.objects:
+            if officer.role and officer.role.department == 'Facilities':
+                if officer.email and not officer.email.endswith('@none'):
+                    recipients.append(officer.email)
+
+        if not recipients:
+            # still nothing to send to
+            raise ValueError('No recipient email configured or DEFAULT_EMERGENCY_RECIPIENT not set.')
+
+        # send email(s)
+        for rcpt in recipients:
+            send_facilities_alert(room_number, alert_type, time_since, rcpt, description)
+
+        # log emergency (optional - you can store in database)
+        print(f"Facilities Alert Sent - Room: {room_number}, Alert Type: {alert_type}, Time Since: {time_since}, Description: {description}, recipients={recipients}")
+        
+        return jsonify({'success': True, 'message': 'Facilities alert sent successfully!', 'recipients': recipients}), 200
+    except Exception as e:
+        print(f"Error sending facilities alert: {e}")
         return jsonify({'success': False, 'error': str(e)}), 400
 
 # Serve files from static/files directory
