@@ -17,6 +17,7 @@ fyp_venv/
 
 tracking-key.pem
 
-mps_experiments/
+mps_experiments/vids
+mps_experiments/*.pt
 
 3js_practice/projects_lab_2d/files/tracks_output_ang2_hour.csv
