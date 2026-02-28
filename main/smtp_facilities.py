@@ -7,7 +7,7 @@ from datetime import datetime
 
 load_dotenv()
 
-def send_emergency_alert(room_number, occupancy_count, recipient, description=None):
+def send_facilities_alert(room_number, alert_type, time_since, recipient, description=None):
     # Credentials
     username = os.getenv("SMTP_USERNAME") 
     password = os.getenv("SMTP_PASSWORD")
@@ -19,37 +19,41 @@ def send_emergency_alert(room_number, occupancy_count, recipient, description=No
 
     # Use 'alternative' so the email client chooses HTML, but falls back to plain text if needed
     msg = MIMEMultipart('alternative')
-    msg['Subject'] = f'🚨 EMERGENCY ALERT 🚨 Occupancy Detected in {room_number}'
+    msg['Subject'] = f'🚨 FACILITIES ALERT 🚨 Detected in {room_number}'
     msg['From'] = sender
     msg['To'] = recipient
 
     # 1. Plain Text Fallback
     text_content = f"""
-    Dear CSO,
+    Dear Facilities Officer,
     
-    IMMEDIATE ACTION REQUIRED
+    This is an automated facilities notification from the Digital Twin System.
     
-    This is an automated emergency notification from the Digital Twin System.
-    
-    Emergency Details: {description if description else "No additional details provided."}
     Room Number: {room_number}
-    Current Occupancy: {occupancy_count}
+    Resource Alert Type: {alert_type}
+    Time Since Alert: {time_since}
     Timestamp: {timestamp}
-    Status: Occupancy is NOT zero during emergency.
+    Details: {description if description else "No additional details provided."}
     
-    Immediate action is required. Please verify the situation and take necessary measures.
+    Please verify the situation and take necessary measures.
     
     Regards,
     Habib University
     """
 
     # 2. HTML Content
+    # prepare description HTML fragment depending on whether a description was supplied
+    if description:
+        description_html = f"<p style=\"margin:5px 0;\"><strong>Details:</strong> {description}</p>"
+    else:
+        description_html = "<p style=\"margin:5px 0;\"><strong>Details:</strong> No additional details provided.</p>"
+
     html_content = """
     <!DOCTYPE html>
     <html>
     <head>
       <meta charset="UTF-8">
-      <title>Emergency Occupancy Alert</title>
+      <title>Facilities Alert</title>
     </head>
     <body style="margin:0; padding:0; background-color:#f4f4f7; font-family: Arial, Helvetica, sans-serif;">
 
@@ -59,28 +63,16 @@ def send_emergency_alert(room_number, occupancy_count, recipient, description=No
           <td align="center" style="background-color:#40184a; padding:20px;">
             
             <table align="center" width="100%" cellpadding="0" cellspacing="0" style="max-width:600px; margin:auto; background-color:#ffffff;">
-      
-                <tr>
-                    <td>
-                    <table width="100%" cellpadding="0" cellspacing="0" style="background-color:#bd1316; color:white; text-align:center; padding:15px; margin-bottom:20px;">
-                        <tr>
-                        <td style="font-size:18px; font-weight:bold; font-family: Arial, Helvetica, sans-serif;">
-                            IMMEDIATE ACTION REQUIRED
-                        </td>
-                        </tr>
-                    </table>
-                    </td>
-                </tr>
 
         <tr>
           <td style="padding:30px; color:#333333;">
             
             <p style="font-size:16px; margin-top:0;">
-              Dear CSO,
+              Dear Facilities Officer,
             </p>
 
             <p style="font-size:15px; line-height:1.6;">
-              This is an automated emergency notification from the Digital  Twin System.
+              This is an automated facilities notification from the Digital Twin System.
             </p>
 
             <table width="100%" cellpadding="0" cellspacing="0" 
@@ -88,15 +80,16 @@ def send_emergency_alert(room_number, occupancy_count, recipient, description=No
               <tr>
                 <td style="padding:15px;">
                   <p style="margin:5px 0;"><strong>Room Number:</strong> {{room_number}}</p>
-                  <p style="margin:5px 0;"><strong>Current Occupancy:</strong> {{occupancy}}</p>
+                  <p style="margin:5px 0;"><strong>Resource Alert Type:</strong> {{alert_type}}</p>
+                  <p style="margin:5px 0;"><strong>Time Since Alert:</strong> {{time_since}}</p>
                   <p style="margin:5px 0;"><strong>Timestamp:</strong> {{timestamp}}</p>
-                  <p style="margin:5px 0;"><strong>Status:</strong> Occupancy is NOT zero during emergency.</p>
+                  {{description_html}}
                 </td>
               </tr>
             </table>
 
             <p style="font-size:15px; line-height:1.6;">
-              Immediate action is required. Please verify the situation and take necessary measures.
+              Please verify the situation and take necessary measures.
             </p>
 
             <p style="font-size:15px;">
@@ -121,8 +114,10 @@ def send_emergency_alert(room_number, occupancy_count, recipient, description=No
 
     # Inject variables into the HTML string
     html_content = html_content.replace('{{room_number}}', str(room_number))
-    html_content = html_content.replace('{{occupancy}}', str(occupancy_count))
+    html_content = html_content.replace('{{alert_type}}', str(alert_type))
+    html_content = html_content.replace('{{time_since}}', str(time_since))
     html_content = html_content.replace('{{timestamp}}', str(timestamp))
+    html_content = html_content.replace('{{description_html}}', description_html)
 
     # Attach both parts
     part1 = MIMEText(text_content, 'plain')
@@ -155,4 +150,4 @@ def send_emergency_alert(room_number, occupancy_count, recipient, description=No
 # TEST THE FUNCTION
 # ==========================================
 if __name__ == '__main__':
-    send_emergency_alert(room_number="Projects Lab (C-007)", occupancy_count=5)
+    send_alert(room_number="Projects Lab (C-007)", alert_type="Occupancy Alert", time_since="5 minutes", description="The room is over capacity.")
