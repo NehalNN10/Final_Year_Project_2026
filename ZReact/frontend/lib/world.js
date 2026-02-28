@@ -1,6 +1,6 @@
 import * as THREE from "three";
 import { camera, scene } from "./scene.js";
-import { GLTFLoader } from "jsm/loaders/GLTFLoader.js";
+import { GLTFLoader } from "three/examples/jsm/loaders/GLTFLoader.js"; // For GLTF models
 // no DRACOLoader needed; using vanilla GLTFLoader
 
 const loader = new GLTFLoader();
@@ -12,13 +12,19 @@ const assets = {};
 // This keeps ui.js happy since it imports this reference.
 export const worldObjects = {};
 
+// Asset paths are served from the public folder by Next.js.
+// Using a relative path ("./models/…") causes the browser to resolve
+// the URL relative to the current page location, which leads to 404s
+// when the page is not at the project root (e.g. `/model`).
+// Switching to absolute paths ensures the files are always fetched from
+// `/models/...` regardless of the route.
 export const models = {
-    white_table: './models/table.glb',
-    workbench:   './models/workbench.glb',
-    pillar:      './models/pillar.glb',
-    camera:      './models/camera.glb',
-    roblox:      './models/roblox.glb',
-    floor:       './models/floor.glb'
+    white_table: '/models/table.glb',
+    workbench:   '/models/workbench.glb',
+    pillar:      '/models/pillar.glb',
+    camera:      '/models/camera.glb',
+    roblox:      '/models/roblox.glb',
+    floor:       '/models/floor.glb'
 };
 
 // 2. Load Function: Loads everything once and saves to 'assets'
@@ -40,8 +46,13 @@ export async function loadAssets() {
 
     console.log("Loading 3D Assets...");
     const promises = Object.entries(models).map(async ([key, url]) => {
-        // Store in assets object
-        assets[url] = await loadModel(url); 
+        try {
+            // Store in assets object
+            assets[url] = await loadModel(url);
+        } catch (e) {
+            console.error(`Failed to load model ${url}:`, e);
+            throw e;
+        }
     });
 
     await Promise.all(promises);

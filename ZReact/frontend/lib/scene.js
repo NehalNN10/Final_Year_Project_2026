@@ -1,9 +1,9 @@
 import * as THREE from "three";
-import { OrbitControls } from "jsm/controls/OrbitControls.js";
-import { RGBELoader } from 'jsm/loaders/RGBELoader.js';
+import { OrbitControls } from "three/examples/jsm/controls/OrbitControls.js";
+import { RGBELoader } from 'three/examples/jsm/loaders/RGBELoader.js';
 
-export const w = window.innerWidth;
-export const h = window.innerHeight;
+export const w = (typeof window !== 'undefined') ? window.innerWidth : 0;
+export const h = (typeof window !== 'undefined') ? window.innerHeight : 0;
 
 export const renderer = new THREE.WebGLRenderer({ antialias: true });
 renderer.setSize(w, h);
@@ -25,13 +25,13 @@ rgbeLoader.load('./files/qwantani_sunset_puresky_4k.hdr', function(texture) {
 });
 
 const fov = 75;
-const aspect = w / h;
+const aspect = (h > 0) ? w / h : 1;
 const near = 0.1;
 const far = 200;
 export const camera = new THREE.PerspectiveCamera(fov, aspect, near, far);
 camera.position.set(-10, 15);
 
-document.body.appendChild(renderer.domElement);
+// Renderer attachment is handled by initModel; do not touch document here.
 
 // const headlight = new THREE.DirectionalLight(0xffffff, 1);
 // headlight.position.set(0, 0, 1);
@@ -54,14 +54,20 @@ sunLight.shadow.bias = -0.0001; // Removes stripes
 
 scene.add(sunLight);
 
-export const controls = new OrbitControls(camera, renderer.domElement);
-controls.enableDamping = true;
-controls.dampingFactor = 0.05;
-controls.enableRotate = true; 
-controls.screenSpacePanning = false; 
-controls.maxPolarAngle = Math.PI / 2;
-
-scene.add(camera);
+let controlsTemp;
+if (typeof window !== 'undefined') {
+    controlsTemp = new OrbitControls(camera, renderer.domElement);
+    controlsTemp.enableDamping = true;
+    controlsTemp.dampingFactor = 0.05;
+    controlsTemp.enableRotate = true;
+    controlsTemp.screenSpacePanning = false;
+    controlsTemp.maxPolarAngle = Math.PI / 2;
+    scene.add(camera);
+} else {
+    // server-side stub with no-op update
+    controlsTemp = { update: () => {} };
+}
+export const controls = controlsTemp;
 
 const axesHelper = new THREE.AxesHelper(5);
 scene.add(axesHelper);

@@ -1,8 +1,8 @@
 // Import the new functions from world.js
-import { loadAssets, buildWorld } from "./assets/world.js";
-import { renderFrame, playback, loadSimulationData } from "./assets/simulation.js";
-import { setupGUI } from "./assets/ui.js";
-import { scene, camera, renderer, controls } from "./assets/scene.js";
+import { loadAssets, buildWorld } from "./world.js";
+import { renderFrame, playback, loadSimulationData } from "./simulation.js";
+import { setupGUI } from "./ui.js";
+import { scene, camera, renderer, controls } from "./scene.js";
 
 let frameController;
 const guiRefs = setupGUI();

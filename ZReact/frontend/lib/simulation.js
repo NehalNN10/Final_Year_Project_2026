@@ -7,7 +7,7 @@ const LOOP_DURATION = 120; // Match model.js
 
 export const playback = {
     frame: 0,
-    maxFrames: 1200,
+    maxFrames: LOOP_DURATION*FPS,
     playing: true,
     speed: 1
 };
@@ -39,24 +39,32 @@ function displayCurrentDateTime() {
     // Format the date using the 'en-US' locale
     const formattedDate = now.toLocaleDateString('en-US', options);
     
-    uiElements.uiDate.innerHTML = formattedDate;
+    const ui = getUiElements();
+    if (ui.uiDate) ui.uiDate.innerHTML = formattedDate;
 }
 
+function safeGet(id) {
+    return (typeof document !== 'undefined') ? document.getElementById(id) : null;
+}
 
-export const uiElements = {
-    uiOccupancy: document.getElementById('ui-iot-occupancy'),
-    uiOccuHeader: document.getElementById('ui-iot-occu-header'),
-    uiTemp: document.getElementById('ui-iot-temp'),
-    uiAC: document.getElementById('ui-iot-ac'),
-    uiLights: document.getElementById('ui-iot-lights'),
-    uiDate: document.getElementById('ui-iot-date'),
-    uiTime: document.getElementById('ui-iot-time'),
-    uiName: document.getElementById('ui-room-name'),
-    uiID: document.getElementById('ui-room-id'),
-    uiFloor: document.getElementById('ui-room-floor'),
-    // uiCoords: document.getElementById('ui-coords'),
-    uiIot: document.getElementById('iot-data')
-};
+// Instead of capturing DOM elements once at module load (which happens
+// before React renders), provide a getter that queries when needed.
+export function getUiElements() {
+    return {
+        uiOccupancy: safeGet('ui-iot-occupancy'),
+        uiOccuHeader: safeGet('ui-iot-occu-header'),
+        uiTemp: safeGet('ui-iot-temp'),
+        uiAC: safeGet('ui-iot-ac'),
+        uiLights: safeGet('ui-iot-lights'),
+        uiDate: safeGet('ui-iot-date'),
+        uiTime: safeGet('ui-iot-time'),
+        uiName: safeGet('ui-room-name'),
+        uiID: safeGet('ui-room-id'),
+        uiFloor: safeGet('ui-room-floor'),
+        // uiCoords: safeGet('ui-coords'),
+        uiIot: safeGet('iot-data')
+    };
+}
 
 let globalTrackFrames = []; 
 let globalTrackData = new Map(); 
@@ -64,15 +72,25 @@ let globalIoTData = [];
 let trackMarkers = new Map();
 
 export function renderFrame(index) {
-
-    const department = document.getElementById('department').textContent.trim();
+    const uiElements = getUiElements();
     
+    // Get department from DOM (safe way)
+    const deptEl = safeGet('department');
+    const department = deptEl ? deptEl.textContent.trim() : '';
+    
+    // 1. Reset markers
     trackMarkers.forEach(m => m.visible = false);
 
+    // --- TRACKING LOOP ---
     if (index < globalTrackFrames.length) {
         const realFrameNumber = globalTrackFrames[index];
         const detections = globalTrackData.get(realFrameNumber) || [];
-        if (department != "Facilities") {
+        
+        // Save the count for UI use later
+        // currentOccupancy = detections.length; 
+
+        // Update 3D Markers (Red Dots)
+        if (department !== "Facilities") {
             detections.forEach(d => {
                 const marker = trackMarkers.get(d.id);
                 if (marker) {
@@ -82,33 +100,23 @@ export function renderFrame(index) {
                 }
             });
         }
-    
-        // if (uiElements.uiOccupancy && uiElements.uiOccuHeader) {
-        //     const l = detections.length;
-        //     if (department == "Facilities"){
-        //         uiElements.uiOccuHeader.innerText = "Occupancy: ";
-        //         uiElements.uiOccupancy.innerText = (l > 0) ? "Occupied" : "Vacant";
-        //         uiElements.uiOccupancy.style.color = (l > 0) ? "#ff4444" : "#00ff88";
-        //     }
-        //     else {
-        //         uiElements.uiOccuHeader.innerText = "Occupancy: ";
-        //         uiElements.uiOccupancy.innerText = l;
-        //         uiElements.uiOccupancy.style.color = (l > 20) ? "#ff4444" : ( l === 0 ? "#fff" : "#00ff88");
-        //     }
-        // }
     }
 
+    // --- IOT LOOP ---
     if (index < globalIoTData.length) {
         const row = globalIoTData[index];
         
-        if (department == "Security") uiElements.uiIot.style.display = "none";
-        else {
-            uiElements.uiIot.style.display = "block";
+        // Handle Security View (Hide IoT Data)
+        if (department === "Security") {
+            if (uiElements.uiIot) uiElements.uiIot.style.display = "none";
+        } else {
+            if (uiElements.uiIot) uiElements.uiIot.style.display = "block";
 
+            // Temp
             if (uiElements.uiTemp) {
                 const t = parseFloat(row['temp']);
                 uiElements.uiTemp.innerText = t + "°C";
-                
+                // Color logic for Temp...
                 if (t <= 19) uiElements.uiTemp.style.color = "#0088ff";
                 else if (t <= 22) uiElements.uiTemp.style.color = "#00ffff";
                 else if (t <= 27) uiElements.uiTemp.style.color = "#00ff88";
@@ -116,12 +124,14 @@ export function renderFrame(index) {
                 else uiElements.uiTemp.style.color = "#f00";
             }
             
+            // AC
             if (uiElements.uiAC) {
                 const ac = row['ac']; 
                 uiElements.uiAC.innerText = (ac === "On") ? "• ON" : "- OFF";
                 uiElements.uiAC.style.color = (ac === "On") ? "#00ff88" : "#ff4444";
             }
 
+            // Lights
             if (uiElements.uiLights) {
                 const l = row['lights'];
                 uiElements.uiLights.innerText = (l === "On") ? "• ON" : "- OFF";
@@ -129,82 +139,46 @@ export function renderFrame(index) {
             }
         }
 
-        if (uiElements.uiDate) {
-           displayCurrentDateTime();
-        }
-            
-        // --- NEW CODE START: TIME CALCULATION ---
-        if (uiElements.uiTime) {
-            const now = new Date();
-            const nowSeconds = Math.floor(now.getTime() / 1000);
-            
-            // 1. Find the start of the CURRENT 2-minute cycle
-            // (Current Time minus the remainder of 120)
-            const secondsIntoCycle = nowSeconds % LOOP_DURATION;
-            const cycleStartTime = new Date(now.getTime() - (secondsIntoCycle * 1000));
-            
-            // 2. Add the frame's time to that start point
-            // If we are at Frame 10 (1s), we add 1s to the cycle start
-            const frameTime = new Date(cycleStartTime.getTime() + (index / FPS) * 1000);
-            
-            uiElements.uiTime.innerText = frameTime.toLocaleTimeString(); 
-            
-        }
-
-        // if (uiElements.uiOccupancy) {
-        //     const l = row['occu'];
-        //     uiElements.uiOccupancy.innerText = l;
-        //     uiElements.uiOccupancy.style.color = (l > 20) ? "#ff4444" : ( l === 0 ? "#fff" : "#00ff88");
-        // }
         if (uiElements.uiOccupancy && uiElements.uiOccuHeader) {
-            const l = row['occu'];
-            if (department == "Facilities"){
+            const currentOccupancy = row['occu']
+            if (department === "Facilities") {
                 uiElements.uiOccuHeader.innerText = "Status: ";
-                uiElements.uiOccupancy.innerText = (l > 0) ? "Occupied" : "Vacant";
-                uiElements.uiOccupancy.style.color = (l > 0) ? "#ff4444" : "#00ff88";
-            }
-            else {
+                uiElements.uiOccupancy.innerText = (currentOccupancy > 0) ? "Occupied" : "Vacant";
+                uiElements.uiOccupancy.style.color = (currentOccupancy > 0) ? "#ff4444" : "#00ff88"; // Red/Green
+            } else {
+                // Admin/Security View: Exact Count
                 uiElements.uiOccuHeader.innerText = "Occupancy Count: ";
-                uiElements.uiOccupancy.innerText = l;
-                uiElements.uiOccupancy.style.color = (l > 20) ? "#ff4444" : ( l === 0 ? "#fff" : "#00ff88");
+                uiElements.uiOccupancy.innerText = currentOccupancy;
+                // Color scale: Green (0) -> White (Normal) -> Red (Crowded > 20)
+                uiElements.uiOccupancy.style.color = (currentOccupancy > 20) ? "#ff4444" : (currentOccupancy === 0 ? "#00ff88" : "#ffffff");
             }
         }
     }
+
+    // --- UPDATE OCCUPANCY UI ---
+    // We do this outside the loops to ensure we use the tracking count we calculated
     
+
+    // --- TIME & ROOM INFO ---
+    if (uiElements.uiTime) {
+        const now = new Date();
+        uiElements.uiTime.innerText = now.toLocaleTimeString();
+    }
+
     if (uiElements.uiName && uiElements.uiID && uiElements.uiFloor) {
+        const info = getRoomInfo(controls.target.x, controls.target.z);
+        uiElements.uiName.innerText = info.name;
+        uiElements.uiID.innerText = info.id;
+        uiElements.uiFloor.innerText = info.floor;
         
-        // 1. Setup Ray
-        raycaster.setFromCamera(screenCenter, camera);
-
-        // 2. Intersect
-        // We use a temporary variable to check if we actually hit the floor
-        const hit = raycaster.ray.intersectPlane(floorPlane, intersectionPoint);
-
-        // 3. Safety Check: Did we hit the floor?
-        if (hit) {
-            // Yes: Use the updated intersectionPoint
-            const info = getRoomInfo(intersectionPoint.x, intersectionPoint.z);
-
-            uiElements.uiName.innerText = info.name;
-            uiElements.uiID.innerText = info.id;
-            uiElements.uiFloor.innerText = info.floor;
-            
-            // if (uiElements.uiCoords) {
-            //     uiElements.uiCoords.innerText = `${intersectionPoint.x.toFixed(1)}, ${intersectionPoint.z.toFixed(1)}`;
-            // }
-            
-            // Color Logic
-            const color = (info.id === "N/A") ? "#ff4444" : "#00ff88";
-            const whiteColor = (info.id === "N/A") ? "#ff4444" : "#ffffff";
-            uiElements.uiName.style.color = color;
-            uiElements.uiID.style.color = whiteColor
-            uiElements.uiFloor.style.color = whiteColor // Fix: uiFloor was declared but not colored
-
-        } else {
-            // No: We are looking at the sky/void
-            // Keep the previous info or show nothing
-            // uiElements.uiCoords.innerText = "--, --";
-        }
+        // Color Logic
+        const color = (info.id === "N/A") ? "#ff4444" : "#00ff88";
+        const whiteColor = (info.id === "N/A") ? "#ff4444" : "#ffffff";
+        uiElements.uiName.style.color = color;
+        uiElements.uiID.style.color = whiteColor;
+        uiElements.uiFloor.style.color = whiteColor;
+    } else if (uiElements.uiCoords) {
+        uiElements.uiCoords.innerText = "--, --";
     }
 }
 

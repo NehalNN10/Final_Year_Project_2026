@@ -1,10 +1,11 @@
 import * as THREE from "three";
+import * as dat from "dat.gui"; // bring in GUI library
 import { camera, controls, scene } from "./scene.js";
 import { materials, worldObjects } from "./world.js";
 import { playback, renderFrame, raycaster, screenCenter, floorPlane, intersectionPoint } from "./simulation.js";
 
-const gui_sim = new dat.GUI({ autoPlace: false }); 
-const gui_cam = new dat.GUI({ autoPlace: false }); 
+export const gui_sim = new dat.GUI({ autoPlace: false }); 
+export const gui_cam = new dat.GUI({ autoPlace: false }); 
 
 const container_sim = document.getElementById('sim-content');
 if (container_sim) {
