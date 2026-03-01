@@ -4,13 +4,12 @@ import { camera, controls } from "./scene.js";
 //1200
 export const playback = {
   frame: 0,
-  maxFrames: 2400,
-  // maxFrames: 36000,
+  maxFrames: 22000,
   playing: true,
   speed: 1,
 };
 
-const tracker = './files/combined_frames_2.csv';
+const tracker = './temp_files_15min/combined_frames_15min.csv';
 //tracks_output_wc_try1.csv';
 //'./files/combined_flicker_free.csv';
 
@@ -19,7 +18,7 @@ const tracker = './files/combined_frames_2.csv';
 // const tracker = './files/mapped_tracks_angle_01.csv';
 // const tracker = './files/tracks_output.csv';
 // const tracker = './files/mapped_tracks_angle_01_try_2.csv';
-const iot = "./files/iot.csv";
+const iot = "./temp_files_15min/cs_lab_iot_15min.csv";
 const track_count = "./files/combined_count_output.csv"
 
 export const uiElements = {
@@ -86,8 +85,11 @@ export function renderFrame(index) {
     }
   }
 
-  if (index < globalIoTData.length) {
-    const row = globalIoTData[index];
+  const seconds = Math.floor(index / 25);
+  if (seconds < globalIoTData.length) {
+    //const row = globalIoTData[index];
+    
+    const row = globalIoTData[seconds];
 
     if (view == "sec") uiElements.uiIot.style.display = "none";
     else {
@@ -119,7 +121,7 @@ export function renderFrame(index) {
 
     if (uiElements.uiTime) {
       uiElements.uiTime.innerText =
-        ((row["timestamp"] || index) / 10).toFixed(1) + "s";
+        ((index) / 25).toFixed(1) + "s";
     }
 
     // if (uiElements.uiOccupancy) {
@@ -212,37 +214,32 @@ export async function loadSimulationData(onLoadComplete) {
       );
       const xIdx = headers.findIndex((h) => h.includes("three_x") || h === "x");
       const zIdx = headers.findIndex((h) => h.includes("three_z") || h === "z");
-      //const camIdx = headers.findIndex(h => h.includes('camera'));
+      const camIdx = headers.findIndex(h => h.includes('camera'));
       const countIdx = headers.findIndex((h) => h.includes("count"));
 
       if (frameIdx > -1 && xIdx > -1 && zIdx > -1) {
         tLines.slice(1).forEach((line) => {
           const cols = line.split(",");
           const frame = parseInt(cols[frameIdx]);
-          //const id = `${cols[idIdx]}_${cols[camIdx]}`;
-          //alert(id);
-          //cols[idIdx];
-          const id = parseInt(cols[idIdx]);
+          const id = `${cols[idIdx]}_${cols[camIdx]}`;
+          //const id = parseInt(cols[idIdx]);
           const x = parseFloat(cols[xIdx]);
           const z = parseFloat(cols[zIdx]);
-          // const count = parseInt(cols[countIdx]);
-          // if (!globalCountData.has(frame)) {
-          //     globalCountData.set(frame, 0);
-          // }
-          // globalCountData.set(frame, globalCountData.get(frame) + count);
+         
           if (isNaN(frame) || isNaN(x) || isNaN(z)) return;
 
           if (!globalTrackData.has(frame)) globalTrackData.set(frame, []);
 
           globalTrackData.get(frame).push({ id, x, z });
 
-          const count =
-            countIdx > -1 && cols[countIdx] !== undefined
-              ? parseInt(cols[countIdx])
-              : NaN;
-          if (!isNaN(count) && !globalCountData.has(frame)) {
-            globalCountData.set(frame, count);
-          }
+          //********this wasnt working********//
+          // const count =
+          //   countIdx > -1 && cols[countIdx] !== undefined
+          //     ? parseInt(cols[countIdx])
+          //     : NaN;
+          // if (!isNaN(count) && !globalCountData.has(frame)) {
+          //   globalCountData.set(frame, count);
+          // }
 
           if (!trackMarkers.has(id)) {
             const PERSON_COLOR = 0x00ff88;
@@ -292,6 +289,14 @@ export async function loadSimulationData(onLoadComplete) {
         .map((r) => r.trim())
         .filter((r) => r);
       const headers = iRows[0].split(",").map((h) => h.trim().toLowerCase());
+      
+      //******this wasnt working*******//
+      // globalCountData = iRows.slice(1).map((row) => {
+      //   const vals = row.split(",");
+      //   const obj = {};
+      //   headers.forEach((h, i) => (obj[h] = vals[i]));
+      //   return obj;
+      // });
 
       // avoid overwriting globalCountData into an Array
       iRows.slice(1).forEach((row) => {

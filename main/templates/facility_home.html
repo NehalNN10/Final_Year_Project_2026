@@ -28,8 +28,11 @@
     </div>
   </div>
 
-  <div class="header2">
+  <div class="header2 row" style="margin-top: 0;">
     <span>Facilities Dashboard</span>
+    {% if session.get('role') == 'Facilities Admin' %}
+      <button class="track-btn btn-send-emergency" style="width: 10rem !important; height: 3rem !important;" onclick="openEmergencyModal()"> <h2>Send Alert</h2></button>
+    {% endif %}
   </div>
 
   <div class="main-home scroll" style="max-height: calc(100vh - 10rem); overflow-y: auto;">
@@ -352,6 +355,57 @@
           {% endfor %}
         </ul>
       </div>
+    </div>
+  </div>
+
+  <!-- Emergency Modal -->
+  <div class="modal-overlay" id="emergencyModal">
+    <div class="tracker-ui modal">
+      <div class="modal-header">
+        🚨 FACILITIES ALERT 🚨
+      </div>
+      <p style="margin-bottom: 20px">Please provide details about the situation:</p>
+      <form id="emergencyForm">
+        <div class="row">
+          <h4 for="roomNumber">Room Number</h4>
+          <input type="text" id="roomNumber" name="roomNumber" required />
+        </div>
+
+        <div class="row">
+          <h4 for="alertType">Alert Type</h4>
+          <select name="alertType" id="alertType" required>
+            <option value="AC" selected>AC</option>
+            <option value="Lights">Lights</option>
+            <option value="Temperature">Temperature</option>
+          </select>
+        </div>
+
+        <div class="row">
+          <h4 for="timeSince">Time Since Alert (minutes)</h4>
+          <input type="number" id="timeSince" name="timeSince" min="0" required />
+        </div>
+
+        <!-- <div class="form-group">
+          <h4 for="emergencyType">Emergency Type</h4>
+          <select id="emergencyType" name="emergencyType" required>
+            <option value="">-- Select Type --</option>
+            <option value="occupancy_alert">Occupancy Alert</option>
+            <option value="security_breach">Security Breach</option>
+            <option value="health_emergency">Health Emergency</option>
+            <option value="other">Other</option>
+          </select>
+        </div> -->
+
+        <div class="row">
+          <h4 for="description">Description</h4>
+          <input type="text" id="description" name="description" required />
+        </div>
+
+        <div class="row">
+          <button type="button" class="btn btn-cancel" onclick="closeEmergencyModal()">Cancel</button>
+          <button type="submit" class="btn btn-send-emergency">Send Alert</button>
+        </div>
+      </form>
     </div>
   </div>
 

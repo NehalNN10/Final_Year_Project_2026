@@ -7,6 +7,9 @@ with app.app_context():
     print("Deleting old data...")
     User.objects.delete()
     Role.objects.delete()
+    Rooms.objects.delete()
+    SecurityEmails.objects.delete()
+
 
     print("Seeding Database...")
 
@@ -14,24 +17,25 @@ with app.app_context():
     Role(name='Facilities Admin', department='Facilities', facilities_email=True).save()
     Role(name='Admin', department='Admin', facilities_email=True).save()
     Role(name='Security Officer', department='Security', facilities_email=False).save()
+    Role(name='Facilities Officer', department='Facilities', facilities_email=True).save()
     
     User(
         user_id='security',
-        email='security@habib.edu.pk',
+        email='security@none',
         password=generate_password_hash('security123'),
         role=Role.objects(name='Security Admin').first()
     ).save()
 
     User(
         user_id='facility',
-        email='facility@habib.edu.pk',
+        email='facility@none',
         password=generate_password_hash('facility123'),
         role=Role.objects(name='Facilities Admin').first()
     ).save()
 
     User(
         user_id='admin',
-        email='admin@habib.edu.pk',
+        email='admin@none',
         password=generate_password_hash('admin123'),
         role=Role.objects(name='Admin').first()
     ).save()
@@ -48,6 +52,13 @@ with app.app_context():
         email='mk07899@st.habib.edu.pk',
         password=generate_password_hash('MSK>NNH100'),
         role=Role.objects(name='Security Officer').first()
+    ).save()
+
+    User(
+        user_id='shawaiz',
+        email='shawaizniazi917@gmail.com',
+        password=generate_password_hash('MSK>NNH100'),
+        role=Role.objects(name='Facilities Officer').first()
     ).save()
 
     Rooms(
