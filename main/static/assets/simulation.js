@@ -58,7 +58,7 @@ export const uiElements = {
     uiName: document.getElementById('ui-room-name'),
     uiID: document.getElementById('ui-room-id'),
     uiFloor: document.getElementById('ui-room-floor'),
-    // uiCoords: document.getElementById('ui-coords'),
+    uiCoords: document.getElementById('ui-coords'),
     uiIot: document.getElementById('iot-data')
 };
 

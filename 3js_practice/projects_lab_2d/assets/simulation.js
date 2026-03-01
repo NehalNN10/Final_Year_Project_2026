@@ -298,6 +298,7 @@ export async function loadSimulationData(onLoadComplete) {
       //   return obj;
       // });
 
+      // avoid overwriting globalCountData into an Array
       iRows.slice(1).forEach((row) => {
         const vals = row.split(",");
         const frameNum = parseInt(vals[headers.indexOf("frame")]);
