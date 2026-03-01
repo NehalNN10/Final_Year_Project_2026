@@ -8,7 +8,7 @@ const guiRefs = setupGUI();
 frameController = guiRefs.frameController;
 
 // 1. Define how many simulation frames should play per second
-const SIMULATION_FPS = 10; 
+const SIMULATION_FPS = 25; 
 let lastTime = 0;
 
 loadSimulationData(() => {
