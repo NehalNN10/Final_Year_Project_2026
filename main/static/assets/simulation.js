@@ -7,13 +7,13 @@ const LOOP_DURATION = 120; // Match model.js
 
 export const playback = {
     frame: 0,
-    maxFrames: 1200,
+    maxFrames: 12000,
     playing: true,
     speed: 1
 };
 
 // const tracker = './files/mapped_tracks_angle_03.csv';
-const tracker = './files/combined_frames.csv';
+const tracker = './files/combined_frames_15min.csv';
 // const tracker = './files/mapped_tracks_angle_01_try_2.csv';
 const iot = './files/iot.csv'
 
