@@ -1,6 +1,6 @@
 // Import the new functions from world.js
 import { loadAssets, buildWorld } from "./assets/world.js";
-import { renderFrame, playback, loadSimulationData } from "./assets/simulation.js";
+import { renderFrame, playback, loadSimulationData, FPS, LOOP_DURATION } from "./assets/simulation.js";
 import { setupGUI } from "./assets/ui.js";
 import { scene, camera, renderer, controls } from "./assets/scene.js";
 
@@ -8,7 +8,6 @@ let frameController;
 const guiRefs = setupGUI();
 frameController = guiRefs.frameController;
 
-const SIMULATION_FPS = 10;
 let lastTime = 0;
 
 const container = document.getElementById('model-container');
@@ -32,7 +31,7 @@ resizeObserver.observe(container);
 // Mode Logic
 const liveMode = document.getElementById('live') ? document.getElementById('live').textContent.trim() : 'false';
 const LIVE_MODE = liveMode === 'true'; 
-const LOOP_DURATION_SECONDS = 120; 
+
 
 if (LIVE_MODE) {
     const replayBtn = document.getElementById('replay-btn');
@@ -78,8 +77,8 @@ let lastRenderedFrame = -1;
 
 function getLiveFrame() {
     const now = Date.now() / 1000;
-    const currentLoopSeconds = now % LOOP_DURATION_SECONDS;
-    return currentLoopSeconds * SIMULATION_FPS;
+    const currentLoopSeconds = now % LOOP_DURATION;
+    return currentLoopSeconds * FPS;
 }
 
 function animate(t = 0) {
@@ -95,7 +94,7 @@ function animate(t = 0) {
             else playback.frame = targetFrame;
             playback.playing = true;
         } else if (playback.playing) {
-            playback.frame += dt * SIMULATION_FPS * playback.speed;
+            playback.frame += dt * FPS * playback.speed;
             if (playback.frame > playback.maxFrames) playback.frame = 0;
         }
         
