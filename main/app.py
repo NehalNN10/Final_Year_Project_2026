@@ -1,10 +1,19 @@
 from flask import Flask, render_template, send_from_directory, request, redirect, url_for, session, flash, jsonify
 from flask_sqlalchemy import SQLAlchemy
+import socketio
 from werkzeug.security import generate_password_hash, check_password_hash
 from flask import Flask, render_template, session
 from models import db, Role, User, Rooms, SecurityEmails, RoomData # Import your DB and Models
 import os
 from dotenv import load_dotenv
+# Import stuff for redis
+import redis
+import json
+from threading import Thread
+from flask_socketio import SocketIO, emit, disconnect
+
+# redis setup here
+redis_client = redis.Redis(host='3.109.201.41', port=6379, decode_responses=True)
 from smtp_facilities import send_facilities_alert
 from smtp_security import send_emergency_alert
 
@@ -57,6 +66,14 @@ def index():
 @app.route('/model')
 def model():
     return render_template('model.html', department=session.get('department'))
+
+# live model route with redis and socketio
+@app.route('/live_model')
+# @login_required
+def live_model_view():
+    """Render live model with real-time Redis tracking"""
+    start_redis_listener()
+    return render_template('live_model.html', department=session.get('department'))
 
 @app.route('/model_replay')
 def model_replay():
@@ -159,5 +176,84 @@ def serve_temp_files_15min(filename):
 def serve_models(filename):
     return send_from_directory('static/models', filename)
 
+# more redis stuff here
+# Store live tracking data
+live_tracking_data = {}
+redis_thread = None
+
+socketio = SocketIO(app, cors_allowed_origins="*", async_mode='threading')
+
+def redis_listener():
+    """Background thread that listens to Redis and broadcasts to connected clients"""
+    pubsub = redis_client.pubsub()
+    pubsub.subscribe('tracking_stream')
+    
+    print("🎧 Redis listener started...")
+    
+    for message in pubsub.listen():
+        if message['type'] == 'message':
+            try:
+                data = json.loads(message['data'])
+                track_id = data.get('id')
+                occupancy = data.get('occupancy', 0)
+                frame_num = data.get('frame', 0)
+                
+                # Store latest position for this track
+                live_tracking_data[track_id] = {
+                    'id': track_id,
+                    'x': data.get('x', 0),
+                    'z': data.get('z', 0),
+                    'frame': frame_num,
+                    'timestamp': data.get('timestamp', 0),
+                    'occupancy': occupancy,
+                    'region': data.get('region', 'Unknown')
+                }
+                
+                # Broadcast to all connected WebSocket clients
+                socketio.emit('live_tracking_update', live_tracking_data[track_id], skip_sid=None)
+                print(f"📡 Broadcasting track {track_id}: x={data.get('x')}, z={data.get('z')}, occupancy={occupancy}, region={data.get('region', 'Unknown')}")
+            except (json.JSONDecodeError, KeyError) as e:
+                print(f"❌ Error processing Redis message: {e}")
+
+def start_redis_listener():
+    """Start Redis listener in background thread"""
+    global redis_thread
+    if redis_thread is None or not redis_thread.is_alive():
+        redis_thread = Thread(target=redis_listener, daemon=True)
+        redis_thread.start()
+        print("✅ Redis listener thread started")
+
+@app.route('/live_model')
+# @login_required
+def live_model():
+    """Render live model with real-time tracking"""
+    start_redis_listener()  # Ensure Redis listener is running
+    return render_template('live_model.html', 
+                          department=session.get('department'),
+                          live=True)
+
+@socketio.on('connect')
+def handle_connect():
+    """Handle new WebSocket connection"""
+    print(f"👤 Client connected: {request.sid}")
+    # Send current tracking data to newly connected client
+    socketio.emit('initial_live_data', list(live_tracking_data.values()))
+
+@socketio.on('disconnect')
+def handle_disconnect():
+    """Handle client disconnection"""
+    print(f"👤 Client disconnected: {request.sid}")
+
+@socketio.on('request_tracking_data')
+def send_tracking_data():
+    """Send all current tracking data on request"""
+    socketio.emit('initial_live_data', list(live_tracking_data.values()))
+
+
 if __name__ == '__main__':
-    app.run(host='0.0.0.0', port=1767, debug=True)
+    # app.run(host='0.0.0.0', port=1767, debug=True)
+    socketio.run(app, 
+                host='0.0.0.0',  # Listen on all interfaces
+                port=1767,       # Your port
+                debug=False,
+                allow_unsafe_werkzeug=True)
