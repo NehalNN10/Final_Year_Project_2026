@@ -81,28 +81,39 @@ socket.on('connect', () => {
 socket.on('initial_live_data', (trackingDataArray) => {
     console.log('📥 Initial tracking data received:', trackingDataArray.length, 'tracks');
     trackingDataArray.forEach(track => {
-        // Camera 3 doesn't need swapping
+        // --- CREATE COMPOSITE ID ---
+        const compositeId = `${track.region}_${track.id}`;
+        
         let position;
         if (track.region === 'MAIN_VIEW') {
-            position = { x: track.x, z: track.z };  // No swap for camera 3
+            position = { x: track.x, z: track.z };
         } else {
-            position = { x: track.z, z: track.x };  // Swap for others
+            position = { x: track.z, z: track.x };
         }
-        updateTrackMarker(track.id, position, track.region);
+        updateTrackMarker(compositeId, position, track.region);
     });
     updateLiveUI(trackingDataArray.length);
 });
 
 socket.on('live_tracking_update', (trackData) => {
-    console.log(`📡 Update received for track ${trackData.id}: (${trackData.x}, ${trackData.z})`);
+    // --- CREATE COMPOSITE ID ---
+    const compositeId = `${trackData.region}_${trackData.id}`;
+
+    console.log(`📡 Update received for track ${compositeId}: (${trackData.x}, ${trackData.z})`);
+
+    
     let position;
     if (trackData.region === 'MAIN_VIEW') {
-        position = { x: trackData.x, z: trackData.z };  // No swap for camera 3
+        position = { x: trackData.x, z: trackData.z };
     } else {
-        position = { x: trackData.z, z: trackData.x };  // Swap for others
+        position = { x: trackData.z, z: trackData.x };
     }
-    updateTrackMarker(trackData.id, position, trackData.region);
-    updateLiveUI(trackData.occupancy);
+    
+    updateTrackMarker(compositeId, position, trackData.region);
+    
+    if (trackData.occupancy !== undefined) {
+        updateLiveUI(trackData.occupancy);
+    }
 });
 
 socket.on('disconnect', () => {
