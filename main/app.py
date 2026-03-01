@@ -73,7 +73,7 @@ def model():
 def live_model_view():
     """Render live model with real-time Redis tracking"""
     start_redis_listener()
-    return render_template('model_live.html', department=session.get('department'))
+    return render_template('live_model.html', department=session.get('department'))
 
 @app.route('/model_replay')
 def model_replay():
@@ -224,7 +224,7 @@ def start_redis_listener():
 def live_model():
     """Render live model with real-time tracking"""
     start_redis_listener()  # Ensure Redis listener is running
-    return render_template('model_live.html', 
+    return render_template('live_model.html', 
                           department=session.get('department'),
                           live=True)
 
