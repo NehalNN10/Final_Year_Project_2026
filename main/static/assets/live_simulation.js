@@ -44,7 +44,7 @@ export function createLiveMarker(trackId, position, region, color = 0xff0000, si
     });
     const marker = new THREE.Mesh(geometry, material);
     
-    marker.position.set(position.z, 0.3, position.x);
+    marker.position.set(position.x, 0.3, position.z);
     marker.userData = {
         trackId: trackId,
         createdAt: Date.now(),
@@ -75,7 +75,7 @@ export function createLiveMarker(trackId, position, region, color = 0xff0000, si
 
 export function updateLiveMarker(marker, position) {
     if (marker) {
-        marker.position.set(position.z, 0.3, position.x);
+        marker.position.set(position.x, 0.3, position.z);
     }
 }
 
