@@ -10,14 +10,6 @@ export const playback = {
 };
 
 const tracker = './trim_files/combined_frames_trimmed.csv';
-//tracks_output_wc_try1.csv';
-//'./files/combined_flicker_free.csv';
-
-//'./files/tracks_output_cam2_allframes.csv';
-//mapped_tracks_cam1_manal
-// const tracker = './files/mapped_tracks_angle_01.csv';
-// const tracker = './files/tracks_output.csv';
-// const tracker = './files/mapped_tracks_angle_01_try_2.csv';
 const iot = "./temp_files_15min/cs_lab_iot_15min.csv";
 const track_count = "./temp_files_15min/combined_count_15min.csv"
 
