@@ -4,6 +4,9 @@ import cv2
 # ====================================================
 # 1. RAW DATA FOR CAMERA 3
 # ====================================================
+
+SCALE_FACTOR = 2560/800
+
 REGIONS_IMG = {
     "MAIN_VIEW": np.array([
         [91, 154],
@@ -15,7 +18,7 @@ REGIONS_IMG = {
         [488, 389],
         [149, 187],
         [172, 206]
-    ], dtype=np.float32)
+    ], dtype=np.float32) * SCALE_FACTOR
 }
 
 REGIONS_WORLD = {
