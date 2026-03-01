@@ -154,6 +154,7 @@ def redis_listener():
             try:
                 data = json.loads(message['data'])
                 track_id = data.get('id')
+                occupancy = data.get('occupancy', 0)
                 frame_num = data.get('frame', 0)
                 
                 # Store latest position for this track
@@ -162,12 +163,14 @@ def redis_listener():
                     'x': data.get('x', 0),
                     'z': data.get('z', 0),
                     'frame': frame_num,
-                    'timestamp': data.get('timestamp', 0)
+                    'timestamp': data.get('timestamp', 0),
+                    'occupancy': occupancy,
+                    'region': data.get('region', 'Unknown')
                 }
                 
                 # Broadcast to all connected WebSocket clients
                 socketio.emit('live_tracking_update', live_tracking_data[track_id], skip_sid=None)
-                print(f"📡 Broadcasting track {track_id}: x={data.get('x')}, z={data.get('z')}")
+                print(f"📡 Broadcasting track {track_id}: x={data.get('x')}, z={data.get('z')}, occupancy={occupancy}, region={data.get('region', 'Unknown')}")
             except (json.JSONDecodeError, KeyError) as e:
                 print(f"❌ Error processing Redis message: {e}")
 
