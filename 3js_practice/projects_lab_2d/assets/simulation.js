@@ -9,7 +9,7 @@ export const playback = {
   speed: 1,
 };
 
-const tracker = './temp_files_15min/combined_frames_15min.csv';
+const tracker = './trim_files/combined_frames_trimmed.csv';
 //tracks_output_wc_try1.csv';
 //'./files/combined_flicker_free.csv';
 
@@ -19,7 +19,7 @@ const tracker = './temp_files_15min/combined_frames_15min.csv';
 // const tracker = './files/tracks_output.csv';
 // const tracker = './files/mapped_tracks_angle_01_try_2.csv';
 const iot = "./temp_files_15min/cs_lab_iot_15min.csv";
-const track_count = "./files/combined_count_output.csv"
+const track_count = "./temp_files_15min/combined_count_15min.csv"
 
 export const uiElements = {
   uiOccupancy: document.getElementById("ui-iot-occupancy"),
