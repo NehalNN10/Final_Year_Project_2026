@@ -118,3 +118,80 @@ function updateDashboard() {
 loadData().then(() => {
     updateDashboard();
 });
+
+// ===== Emergency Modal Functions =====
+function openEmergencyModal() {
+    const modal = document.getElementById('emergencyModal');
+    if (modal) {
+        modal.classList.add('active');
+    }
+}
+
+function closeEmergencyModal() {
+    const modal = document.getElementById('emergencyModal');
+    if (modal) {
+        modal.classList.remove('active');
+    }
+    // Reset form
+    document.getElementById('emergencyForm').reset();
+}
+
+// module scripts don't expose functions to the global scope by default;
+// make them available for inline handlers
+window.openEmergencyModal = openEmergencyModal;
+window.closeEmergencyModal = closeEmergencyModal;
+
+// Close modal when clicking outside the modal content
+document.addEventListener('DOMContentLoaded', function() {
+    const modal = document.getElementById('emergencyModal');
+    
+    if (modal) {
+        modal.addEventListener('click', function(event) {
+            // Close only if clicking on the overlay itself, not the content
+            if (event.target === modal) {
+                closeEmergencyModal();
+            }
+        });
+
+        // Handle form submission
+        document.getElementById('emergencyForm').addEventListener('submit', async function(e) {
+            e.preventDefault();
+            
+            const formData = {
+                room_number: document.getElementById('roomNumber').value,
+                alert_type: document.getElementById('alertType').value,
+                time_since: document.getElementById('timeSince').value,
+                // emergency_type: document.getElementById('emergencyType').value,
+                description: document.getElementById('description').value
+            };
+
+            console.log('Submitting emergency alert:', formData);
+
+            try {
+                // Send facilities alert to backend
+                const response = await fetch('/send_facilities_alert', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify(formData)
+                });
+
+                const result = await response.json();
+                console.log('Response:', response.status, result);
+                
+                if (response.ok) {
+                    console.log('Emergency alert sent successfully!');
+                    alert('Emergency alert sent successfully!\n\nRecipients: ' + result.recipients.join(', '));
+                    closeEmergencyModal();
+                } else {
+                    console.error('Error:', result.error);
+                    alert('Error sending emergency alert:\n' + result.error);
+                }
+            } catch (error) {
+                console.error('Error sending emergency alert:', error);
+                alert('Error sending emergency alert:\n' + error.message);
+            }
+        });
+    }
+});

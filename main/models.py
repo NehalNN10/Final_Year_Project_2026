@@ -8,9 +8,9 @@ class Role(db.Document):
     department = db.StringField()
     facilities_email = db.BooleanField(required=True)
 
-class User(db.Document):
+class User(db.Document):    
     user_id = db.StringField(required=True, unique=True)
-    email = db.StringField(required=True, unique=True)
+    email = db.StringField(nullable=True, unique=True)
     password = db.StringField(required=True)
     role = db.ReferenceField(Role, required=True)
 
