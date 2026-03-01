@@ -26,32 +26,34 @@ resizeObserver.observe(container);
 
 let trackMarkers = new Map(); // Store markers by track ID
 
-function createTrackMarker(trackId, position) {
-    const marker = createLiveMarker(trackId, position);
+function createTrackMarker(trackId, position, region) {
+    const marker = createLiveMarker(trackId, position, region);
     scene.add(marker);
     trackMarkers.set(trackId, {
         mesh: marker,
         trackId: trackId,
         position: position,
-        lastUpdate: Date.now()
+        lastUpdate: Date.now(),
+        region: region
     });
     return marker;
 }
 
-function updateTrackMarker(trackId, position) {
+function updateTrackMarker(trackId, position, region) {
     if (trackMarkers.has(trackId)) {
         const markerData = trackMarkers.get(trackId);
         markerData.mesh.position.set(position.x, 0.3, position.z);
         markerData.position = position;
         markerData.lastUpdate = Date.now();
+        markerData.region = region; // Update region info
     } else {
-        createTrackMarker(trackId, position);
+        createTrackMarker(trackId, position, region);
     }
 }
 
 function removeStaleMarkers() {
     const now = Date.now();
-    const staleThreshold = 30000; // 30 seconds
+    const staleThreshold = 3000; // 30 seconds
     
     trackMarkers.forEach((markerData, trackId) => {
         if (now - markerData.lastUpdate > staleThreshold) {
@@ -83,15 +85,28 @@ socket.on('connect', () => {
 socket.on('initial_live_data', (trackingDataArray) => {
     console.log('📥 Initial tracking data received:', trackingDataArray.length, 'tracks');
     trackingDataArray.forEach(track => {
-        updateTrackMarker(track.id, { x: track.x, z: track.z });
+        // Camera 3 doesn't need swapping
+        let position;
+        if (track.region === 'MAIN_VIEW') {
+            position = { x: track.x, z: track.z };  // No swap for camera 3
+        } else {
+            position = { x: track.z, z: track.x };  // Swap for others
+        }
+        updateTrackMarker(track.id, position, track.region);
     });
-    updateLiveUI(trackMarkers.size);
+    updateLiveUI(trackingDataArray.length);
 });
 
 socket.on('live_tracking_update', (trackData) => {
     console.log(`📡 Update received for track ${trackData.id}: (${trackData.x}, ${trackData.z})`);
-    updateTrackMarker(trackData.id, { x: trackData.x, z: trackData.z });
-    updateLiveUI(trackMarkers.size);
+    let position;
+    if (trackData.region === 'MAIN_VIEW') {
+        position = { x: trackData.x, z: trackData.z };  // No swap for camera 3
+    } else {
+        position = { x: trackData.z, z: trackData.x };  // Swap for others
+    }
+    updateTrackMarker(trackData.id, position, trackData.region);
+    updateLiveUI(trackData.occupancy);
 });
 
 socket.on('disconnect', () => {

@@ -6,7 +6,9 @@ export const livePlayback = {
     trackCount: 0
 };
 
-export function createLiveMarker(trackId, position, color = 0xff0000, size = 0.15) {
+export function createLiveMarker(trackId, position, region, color = 0xff0000, size = 0.15) {
+    if (region === "MAIN_VIEW")
+        color = 0x00ff00; // Green for main view
     const geometry = new THREE.SphereGeometry(size, 32, 32);
     const material = new THREE.MeshStandardMaterial({
         color: color,
@@ -17,10 +19,11 @@ export function createLiveMarker(trackId, position, color = 0xff0000, size = 0.1
     });
     const marker = new THREE.Mesh(geometry, material);
     
-    marker.position.set(position.x, 0.3, position.z);
+    marker.position.set(position.z, 0.3, position.x);
     marker.userData = {
         trackId: trackId,
-        createdAt: Date.now()
+        createdAt: Date.now(),
+        region: region
     };
     
     // Add a label above the marker
@@ -33,7 +36,7 @@ export function createLiveMarker(trackId, position, color = 0xff0000, size = 0.1
     ctx.fillStyle = '#ffffff';
     ctx.font = 'Bold 40px Arial';
     ctx.textAlign = 'center';
-    ctx.fillText(`Track ${trackId}`, 128, 45);
+    ctx.fillText(`Track ${trackId} Region ${region}`, 128, 45);
     
     const texture = new THREE.CanvasTexture(canvas);
     const labelGeometry = new THREE.PlaneGeometry(1, 0.25);
@@ -47,7 +50,7 @@ export function createLiveMarker(trackId, position, color = 0xff0000, size = 0.1
 
 export function updateLiveMarker(marker, position) {
     if (marker) {
-        marker.position.set(position.x, 0.3, position.z);
+        marker.position.set(position.z, 0.3, position.x);
     }
 }
 
