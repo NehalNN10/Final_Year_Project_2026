@@ -1,7 +1,7 @@
 import * as THREE from 'three';
 import { OrbitControls } from 'jsm/controls/OrbitControls.js';
 import { loadAssets, buildWorld } from "./assets/world.js";
-import { livePlayback, createLiveMarker, updateLiveMarker, getFormattedTime } from "./assets/live_simulation.js";
+import { renderFrame, livePlayback, createLiveMarker, updateLiveMarker, getFormattedTime } from "./assets/live_simulation.js";
 import { scene, camera, renderer, controls } from "./assets/scene.js";
 
 const socket = io();
@@ -65,14 +65,10 @@ function removeStaleMarkers() {
 }
 
 function updateLiveUI(trackCount) {
-    const occupancyEl = document.getElementById('ui-occupancy');
-    const timeEl = document.getElementById('ui-iot-time');
+    const occupancyEl = document.getElementById('ui-iot-occupancy');
     
     if (occupancyEl) {
         occupancyEl.textContent = `${trackCount} people`;
-    }
-    if (timeEl) {
-        timeEl.textContent = getFormattedTime();
     }
 }
 
@@ -132,6 +128,7 @@ function animate() {
         removeStaleMarkers();
     }
     
+    renderFrame(); // Update UI elements like time and occupancy
     controls.update();
     renderer.render(scene, camera);
 }

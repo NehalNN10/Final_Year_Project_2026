@@ -9,7 +9,9 @@
     <link href="https://fonts.googleapis.com/css2?family=League+Spartan:wght@100..900&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}" />
 
-    <title>HU Digital Twin - Model</title>
+    <title>HU Digital Twin - Live Model</title>
+
+    <script src="https://cdn.socket.io/4.5.4/socket.io.js"></script>
 
     <script type="importmap">
       {
@@ -24,10 +26,9 @@
   </head>
 
   <body>
-
     <div class="main-nav">
       <div style="flex: 1;">
-        <h1>HU Digital Twin</h1>
+        <h1>HU Digital Twin - LIVE</h1>
       </div>
       <div style="flex: 2;"> 
         <div style="display: flex; flex-direction: row; justify-content: space-evenly">
@@ -38,20 +39,18 @@
           {% else %}
             <button class="header" onclick="window.location.href='/dashboard'">Home</button>
           {% endif %}
-          <button class="header selected" onclick="window.location.href='/model'">Model</button>
-          <button class="header" onclick="window.location.href='/live_model'">Live Model</button>
+          <button class="header" onclick="window.location.href='/model'">Model</button>
+          <button class="header selected" onclick="window.location.href='/live_model'">Live Model</button>
           <button class="header" onclick="window.location.href='/'">Log Out</button>
         </div>
       </div>
-      
     </div>
 
     <div class="main">
-
       <div id="model-container">
         <div class="crosshair"></div>
-        </div> 
-      <script type="module" src="{{ url_for('static', filename='model.js') }}"></script>
+      </div> 
+      
       <div class="scroll" id="float">
         
 
@@ -89,29 +88,6 @@
               <span id="ui-iot-occu-header">Occupancy:</span>
               <span id="ui-iot-occupancy" class="bold value">Detecting...</span>
 
-            </div>
-        
-            <div id="iot-data">
-              <!-- Room Temperature -->
-              <div class="row">
-                <span>
-                  <span class="label"> 🌡️ Temperature:</span>
-                  <span id="ui-iot-temp" class="bold">">??</span>
-                </span>
-              </div>
-
-              <!-- Room AC & Light State -->
-              <div class="row">
-                <span>
-                  <span class="label"> ❄️ AC State:</span>
-                  <span id="ui-iot-ac" class="bold">--</span>
-                </span>
-
-                <span>
-                  <span class="label"> 💡 Lights State:</span>
-                  <span id="ui-iot-lights" class="bold">--</span>
-                </span>
-              </div>
             </div>
 
             <!-- <div class="row">
@@ -172,6 +148,6 @@
       </div>
     </div>
 
+    <script type="module" src="{{ url_for('static', filename='live_model.js') }}"></script>
   </body>
-
 </html>
