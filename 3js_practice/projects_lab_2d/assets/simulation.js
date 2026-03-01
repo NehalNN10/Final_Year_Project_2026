@@ -9,7 +9,7 @@ export const playback = {
   speed: 1,
 };
 
-const tracker = './temp_files_15min/cam2.csv';
+const tracker = './temp_files_15min/combined_frames_15min.csv';
 //tracks_output_wc_try1.csv';
 //'./files/combined_flicker_free.csv';
 
@@ -214,24 +214,18 @@ export async function loadSimulationData(onLoadComplete) {
       );
       const xIdx = headers.findIndex((h) => h.includes("three_x") || h === "x");
       const zIdx = headers.findIndex((h) => h.includes("three_z") || h === "z");
-      //const camIdx = headers.findIndex(h => h.includes('camera'));
+      const camIdx = headers.findIndex(h => h.includes('camera'));
       const countIdx = headers.findIndex((h) => h.includes("count"));
 
       if (frameIdx > -1 && xIdx > -1 && zIdx > -1) {
         tLines.slice(1).forEach((line) => {
           const cols = line.split(",");
           const frame = parseInt(cols[frameIdx]);
-          //const id = `${cols[idIdx]}_${cols[camIdx]}`;
-          //alert(id);
-          //cols[idIdx];
-          const id = parseInt(cols[idIdx]);
+          const id = `${cols[idIdx]}_${cols[camIdx]}`;
+          //const id = parseInt(cols[idIdx]);
           const x = parseFloat(cols[xIdx]);
           const z = parseFloat(cols[zIdx]);
-          // const count = parseInt(cols[countIdx]);
-          // if (!globalCountData.has(frame)) {
-          //     globalCountData.set(frame, 0);
-          // }
-          // globalCountData.set(frame, globalCountData.get(frame) + count);
+         
           if (isNaN(frame) || isNaN(x) || isNaN(z)) return;
 
           if (!globalTrackData.has(frame)) globalTrackData.set(frame, []);
