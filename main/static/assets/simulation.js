@@ -13,9 +13,12 @@ export const playback = {
 };
 
 // const tracker = './files/mapped_tracks_angle_03.csv';
-const tracker = './temp_files_15min/combined_frames_15min.csv';
+// const tracker = './temp_files_15min/combined_frames_15min.csv';
+// const iot = "./temp_files_15min/cs_lab_iot_15min.csv";
+// const track_count = "./files/combined_count_output.csv"
+const tracker = './trim_files/combined_frames_trimmed.csv';
 const iot = "./temp_files_15min/cs_lab_iot_15min.csv";
-const track_count = "./files/combined_count_output.csv"
+const track_count = "./temp_files_15min/combined_count_15min.csv"
 const globalCount = 18;
 // const tracker = './files/mapped_tracks_angle_01_try_2.csv';
 
