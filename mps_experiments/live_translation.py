@@ -353,7 +353,7 @@ while True:
     viz3_disp = resize_for_display(viz3)
 
     dashboard = np.hstack((viz1_disp, viz2_disp, viz3_disp))
-    cv2.imshow("Multi-Cam Verification Console", dashboard)
+    # cv2.imshow("Multi-Cam Verification Console", dashboard)
 
     if cv2.waitKey(1) & 0xFF == ord('q'):
         break
