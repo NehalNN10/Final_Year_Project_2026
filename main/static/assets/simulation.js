@@ -2,20 +2,24 @@ import * as THREE from "three";
 import { createMarker } from "./world.js";
 import { camera, controls} from "./scene.js";
 
-const FPS = 10; 
-const LOOP_DURATION = 120; // Match model.js
+export const FPS = 25; 
+export const LOOP_DURATION = 900; // Match model.js
 
 export const playback = {
     frame: 0,
-    maxFrames: 1200,
+    maxFrames: FPS * LOOP_DURATION,
     playing: true,
     speed: 1
 };
 
 // const tracker = './files/mapped_tracks_angle_03.csv';
-const tracker = './files/combined_frames_2.csv';
+const tracker = './temp_files_15min/combined_frames_15min.csv';
+const iot = "./temp_files_15min/cs_lab_iot_15min.csv";
+const track_count = "./files/combined_count_output.csv"
+const globalCount = 18;
 // const tracker = './files/mapped_tracks_angle_01_try_2.csv';
-const iot = './files/iot.csv'
+
+// const iot = './files/iot.csv'
 
 export const raycaster = new THREE.Raycaster();
 export const screenCenter = new THREE.Vector2(0, 0); // (0,0) is the center of the screen
@@ -62,6 +66,9 @@ let globalTrackFrames = [];
 let globalTrackData = new Map(); 
 let globalIoTData = []; 
 let trackMarkers = new Map();
+//new
+let globalCountData = new Map();
+
 
 export function renderFrame(index) {
 
@@ -96,10 +103,48 @@ export function renderFrame(index) {
         //         uiElements.uiOccupancy.style.color = (l > 20) ? "#ff4444" : ( l === 0 ? "#fff" : "#00ff88");
         //     }
         // }
+
+        if (uiElements.uiOccupancy && uiElements.uiOccuHeader) {
+            const count = globalCountData.get(realFrameNumber);
+
+            //comment
+            // const l = row['occu'];
+
+            //new
+            const l =
+            typeof count === "number"
+            ? count
+            : detections
+                ? detections.length
+                : globalCount;
+            /*****/
+
+            if (department == "Facilities"){
+                uiElements.uiOccuHeader.innerText = "Status: ";
+                uiElements.uiOccupancy.innerText = (l > 0) ? "Occupied" : "Vacant";
+                uiElements.uiOccupancy.style.color = (l > 0) ? "#ff4444" : "#00ff88";
+            }
+            else {
+                uiElements.uiOccuHeader.innerText = "Occupancy Count: ";
+                uiElements.uiOccupancy.innerText = l;
+                uiElements.uiOccupancy.style.color = (l > 20) ? "#ff4444" : ( l === 0 ? "#fff" : "#00ff88");
+            }
+        }
+
+
+
     }
 
-    if (index < globalIoTData.length) {
-        const row = globalIoTData[index];
+    //new
+    const seconds = Math.floor(index / FPS);
+    //from index to seconds
+    if (seconds < globalIoTData.length) {
+        //commented out
+        // const row = globalIoTData[index];
+
+        //new 
+        const row = globalIoTData[seconds];
+        //************************ */
         
         if (department == "Security") uiElements.uiIot.style.display = "none";
         else {
@@ -145,7 +190,12 @@ export function renderFrame(index) {
             
             // 2. Add the frame's time to that start point
             // If we are at Frame 10 (1s), we add 1s to the cycle start
-            const frameTime = new Date(cycleStartTime.getTime() + (index / FPS) * 1000);
+
+            //comment
+            // const frameTime = new Date(cycleStartTime.getTime() + (index / FPS) * 1000);
+
+            //replaced with 
+            const frameTime = new Date(cycleStartTime.getTime() + (seconds) * 1000);
             
             uiElements.uiTime.innerText = frameTime.toLocaleTimeString(); 
             
@@ -156,19 +206,7 @@ export function renderFrame(index) {
         //     uiElements.uiOccupancy.innerText = l;
         //     uiElements.uiOccupancy.style.color = (l > 20) ? "#ff4444" : ( l === 0 ? "#fff" : "#00ff88");
         // }
-        if (uiElements.uiOccupancy && uiElements.uiOccuHeader) {
-            const l = row['occu'];
-            if (department == "Facilities"){
-                uiElements.uiOccuHeader.innerText = "Status: ";
-                uiElements.uiOccupancy.innerText = (l > 0) ? "Occupied" : "Vacant";
-                uiElements.uiOccupancy.style.color = (l > 0) ? "#ff4444" : "#00ff88";
-            }
-            else {
-                uiElements.uiOccuHeader.innerText = "Occupancy Count: ";
-                uiElements.uiOccupancy.innerText = l;
-                uiElements.uiOccupancy.style.color = (l > 20) ? "#ff4444" : ( l === 0 ? "#fff" : "#00ff88");
-            }
-        }
+        
     }
     
     if (uiElements.uiName && uiElements.uiID && uiElements.uiFloor) {
@@ -233,12 +271,19 @@ export async function loadSimulationData(onLoadComplete) {
             const idIdx = headers.findIndex(h => h.includes('id') || h.includes('track'));
             const xIdx = headers.findIndex(h => h.includes('three_x') || h === 'x');
             const zIdx = headers.findIndex(h => h.includes('three_z') || h === 'z');
+            //new
+            const camIdx = headers.findIndex(h => h.includes('camera'));
+            const countIdx = headers.findIndex((h) => h.includes("count"));
+            /**********/
 
             if (frameIdx > -1 && xIdx > -1 && zIdx > -1) {
                 tLines.slice(1).forEach(line => {
                     const cols = line.split(',');
                     const frame = parseInt(cols[frameIdx]);
-                    const id = cols[idIdx];
+                    //new
+                    const id = `${cols[idIdx]}_${cols[camIdx]}`;
+                    //comment
+                    //const id = cols[idIdx];
                     const x = parseFloat(cols[xIdx]);
                     const z = parseFloat(cols[zIdx]);
                     
@@ -280,6 +325,32 @@ export async function loadSimulationData(onLoadComplete) {
     } catch (e) { console.error("Error loading IoT", e); }
 
     // playback.maxFrames = Math.max(globalTrackFrames.length, globalIoTData.length) - 1;
+    
+    //neww  
+    try {
+        const iResp = await fetch(track_count);
+        if (iResp.ok) {
+        const iText = await iResp.text();
+        const iRows = iText
+            .split("\n")
+            .map((r) => r.trim())
+            .filter((r) => r);
+        const headers = iRows[0].split(",").map((h) => h.trim().toLowerCase());
+
+        iRows.slice(1).forEach((row) => {
+            const vals = row.split(",");
+            const frameNum = parseInt(vals[headers.indexOf("frame")]);
+            const countNum = parseInt(vals[headers.indexOf("count")]);
+            if (!isNaN(frameNum) && !isNaN(countNum)) {
+            globalCountData.set(frameNum, countNum);
+            }
+        });
+    }
+  } catch (e) {
+    console.error("Error loading Count", e);
+  }
+
+    /*************** */
     
     if (onLoadComplete) onLoadComplete();
 }
