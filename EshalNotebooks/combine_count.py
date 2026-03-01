@@ -1,51 +1,41 @@
 import pandas as pd
 
-# Load the two Excel files
-file1 = pd.read_excel("C:/Users/USER/Downloads/cam1_people_count_log.xlsx")
-file2 = pd.read_excel("C:/Users/USER/Downloads/cam2_people_count_log.xlsx")
+# File paths
+csv1_path = "3js_practice/projects_lab_2d/trim_files/cam1_trimmed_count.csv"
+csv2_path = "3js_practice/projects_lab_2d/trim_files/cam2_trimmed_count.csv"
+output_path ="3js_practice/projects_lab_2d/trim_files/combined_trimmed_count.csv"
 
-# Merge on 'frame' column (outer keeps all frames from both files)
-merged = pd.merge(file1, file2, on="Frame", how="outer", suffixes=('_1', '_2'))
+# Initial global count
+global_count = 19
 
-# Replace NaN values with 0 (in case a frame exists in only one file)
-merged = merged.fillna(0)
+# Read CSV files
+df1 = pd.read_csv(csv1_path)
+df2 = pd.read_csv(csv2_path)
 
-# Add the counts
-merged["count"] = merged["Count_1"] + merged["Count_2"]
+# Merge on frame and sum counts
+merged = pd.merge(df1, df2, on="Frame", how="outer", suffixes=('_1', '_2')).fillna(0)
 
-# Keep only required columns
-final_df = merged[["Frame", "count"]]
+# Sum change in count from both CSVs
+merged["total_change"] = merged["Count_1"] + merged["Count_2"]
 
-# Sort by frame number (optional but recommended)
-final_df = final_df.sort_values(by="Frame")
+# Sort by frame (important)
+merged = merged.sort_values("Frame")
 
-# Save to new Excel file
-final_df.to_excel("C:/Users/USER/Downloads/combined_count_output.xlsx", index=False)
+# Create list to store results
+final_counts = []
 
-print("Combined file saved as combined_output.xlsx")
+# Compute running global count
+for change in merged["total_change"]:
+    global_count += change
+    final_counts.append(global_count)
 
-import pandas as pd
+# Prepare final dataframe
+output_df = pd.DataFrame({
+    "Frame": merged["Frame"],
+    "Count": final_counts
+})
 
-# Load the two Excel files
-file1 = pd.read_excel("C:/Users/USER/Downloads/cam1_people_count_log.xlsx")
-file2 = pd.read_excel("C:/Users/USER/Downloads/cam2_people_count_log.xlsx")
+# Save to CSV
+output_df.to_csv(output_path, index=False)
 
-# Merge on 'frame' column (outer keeps all frames from both files)
-merged = pd.merge(file1, file2, on="Frame", how="outer", suffixes=('_1', '_2'))
-
-# Replace NaN values with 0 (in case a frame exists in only one file)
-merged = merged.fillna(0)
-
-# Add the counts
-merged["count"] = merged["Count_1"] + merged["Count_2"]
-
-# Keep only required columns
-final_df = merged[["Frame", "count"]]
-
-# Sort by frame number (optional but recommended)
-final_df = final_df.sort_values(by="Frame")
-
-# Save to new Excel file
-final_df.to_excel("C:/Users/USER/Downloads/combined_count_output.xlsx", index=False)
-
-print("Combined file saved as combined_output.xlsx")
+print("Final CSV saved as:", output_path)

@@ -3,7 +3,7 @@ import pandas as pd
 # Load CSV files
 df1 = pd.read_csv("3js_practice/projects_lab_2d/temp_files_15min/cam1.csv")
 df2 = pd.read_csv("3js_practice/projects_lab_2d/temp_files_15min/cam2.csv")
-df3 = pd.read_csv("3js_practice/projects_lab_2d/temp_files_15min/cam3.csv")
+df3 = pd.read_csv("3js_practice/projects_lab_2d/trim_files/cam3_shifted.csv")
 
 
 # Add camera/angle identifier
@@ -19,4 +19,4 @@ combined = combined.sort_values(by=["frame", "camera"]).reset_index(drop=True)
 
 # Save
 combined.to_csv(
-    "3js_practice/projects_lab_2d/files/combined_frames_15min.csv", index=False)
+    "3js_practice/projects_lab_2d/trim_files/combined_frames_trimmed.csv", index=False)
