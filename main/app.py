@@ -150,6 +150,10 @@ def send_fac_alert():
 def serve_files(filename):
     return send_from_directory('static/files', filename)
 
+@app.route('/temp_files_15min/<path:filename>')
+def serve_temp_files_15min(filename):
+    return send_from_directory('static/temp_files_15min', filename)
+
 # Serve models from static/models directory
 @app.route('/models/<path:filename>')
 def serve_models(filename):
