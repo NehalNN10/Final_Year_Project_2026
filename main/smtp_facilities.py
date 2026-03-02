@@ -150,4 +150,4 @@ def send_facilities_alert(room_number, alert_type, time_since, recipient, descri
 # TEST THE FUNCTION
 # ==========================================
 if __name__ == '__main__':
-    send_alert(room_number="Projects Lab (C-007)", alert_type="Occupancy Alert", time_since="5 minutes", description="The room is over capacity.")
+    send_facilities_alert(room_number="Projects Lab (C-007)", alert_type="Occupancy Alert", time_since="5 minutes", description="The room is over capacity.")

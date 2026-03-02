@@ -11,9 +11,18 @@
 
     <title>HU Digital Twin - Facilities Dashboard</title>
 
-  </head>
-<body>
+    <script type="importmap">
+      {
+        "imports": {
+          "three": "https://cdn.jsdelivr.net/npm/three@0.161.0/build/three.module.js",
+          "jsm/": "https://cdn.jsdelivr.net/npm/three@0.161.0/examples/jsm/"
+        }
+      }
+    </script>
 
+    <script type="text/javascript" src="{{ url_for('static', filename='dat.gui.min.js') }}"></script>
+
+  </head>
 <body>
   <div class="main-nav">
     <div style="flex: 1;">
