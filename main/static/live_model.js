@@ -11,6 +11,30 @@ if (container) {
     container.appendChild(renderer.domElement);
 }
 
+const statusEl = document.getElementById('data-status');
+let heartbeatTimer = null;
+
+function setStatus(isOnline) {
+    if (!statusEl) return;
+    
+    if (isOnline) {
+        if (statusEl.textContent !== "Online") { // Prevent unnecessary DOM updates
+            statusEl.textContent = "Online";
+            statusEl.style.backgroundColor = "#00ff88"; // Bright Green
+            statusEl.style.color = "#000000";
+            statusEl.style.boxShadow = "0 0 10px #00ff88"; // Glow effect
+        }
+    } else {
+        statusEl.textContent = "Offline";
+        statusEl.style.backgroundColor = "#ff0000"; // Red
+        statusEl.style.color = "#ffffff";
+        statusEl.style.boxShadow = "none";
+        statusEl.style.boxShadow = "0 0 10px #ff0000"; // Glow effect
+    }
+}
+
+setStatus(false);
+
 // Smart Resizing
 const resizeObserver = new ResizeObserver(() => {
     if (!container) return;
@@ -54,21 +78,30 @@ function updateTrackMarker(trackId, position, region) {
 function removeStaleMarkers() {
     const now = Date.now();
     const staleThreshold = 3000; // 30 seconds
+    let removedCount = 0; // Track if we actually removed anything
     
     trackMarkers.forEach((markerData, trackId) => {
         if (now - markerData.lastUpdate > staleThreshold) {
             scene.remove(markerData.mesh);
             trackMarkers.delete(trackId);
             console.log(`🗑️ Removed stale marker: ${trackId}`);
+            removedCount++;
         }
     });
+
+    // --- FIX: Update the UI count if markers were removed ---
+    if (removedCount > 0) {
+        updateLiveUI(trackMarkers.size); // Use the current map size
+    }
 }
 
 function updateLiveUI(trackCount) {
     const occupancyEl = document.getElementById('ui-iot-occupancy');
-    
     if (occupancyEl) {
         occupancyEl.textContent = `${trackCount} people`;
+        
+        // Optional: Add color logic if you want consistency
+        occupancyEl.style.color = (trackCount > 20) ? "#ff4444" : (trackCount === 0 ? "#ffffff" : "#00ff88");
     }
 }
 
@@ -96,6 +129,14 @@ socket.on('initial_live_data', (trackingDataArray) => {
 });
 
 socket.on('live_tracking_update', (trackData) => {
+    setStatus(true); 
+    
+    if (heartbeatTimer) clearTimeout(heartbeatTimer);
+    
+    heartbeatTimer = setTimeout(() => {
+        setStatus(false);
+    }, 10000);
+
     // --- CREATE COMPOSITE ID ---
     const compositeId = `${trackData.region}_${trackData.id}`;
 

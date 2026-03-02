@@ -1,8 +1,4 @@
-const LOOP_DURATION_SECONDS = 120; 
-const FPS = 10;
-
-const TRACKER_CSV = './files/mapped_tracks_angle_01.csv';
-const IOT_CSV = './files/iot.csv';
+import {FPS, LOOP_DURATION, tracker, iot} from './assets/simulation.js';
 
 let globalTrackData = new Map(); 
 let globalIoTData = [];      
@@ -17,7 +13,7 @@ const uiElements = {
 
 async function loadData() {
     try {
-        const tResp = await fetch(TRACKER_CSV);
+        const tResp = await fetch(tracker);
         const tText = await tResp.text();
         const tLines = tText.split('\n').filter(l => l.trim());
         
@@ -35,7 +31,7 @@ async function loadData() {
             });
         }
 
-        const iResp = await fetch(IOT_CSV);
+        const iResp = await fetch(iot);
         const iText = await iResp.text();
         const iRows = iText.split('\n').map(r => r.trim()).filter(r => r);
         const iHeaders = iRows[0].split(',').map(h => h.trim().toLowerCase());
@@ -54,10 +50,10 @@ async function loadData() {
     }
 }
 
-function getCurrentFrame() {
+export function getCurrentFrame() {
     const now = Date.now() / 1000;
-    const currentLoopSeconds = now % LOOP_DURATION_SECONDS;
-    return Math.floor(currentLoopSeconds * FPS);
+    const currentLoopSeconds = now % LOOP_DURATION;
+    return Math.floor(currentLoopSeconds);
 }
 
 function updateDashboard() {
@@ -68,11 +64,23 @@ function updateDashboard() {
     if (uiElements.time) {
         const now = new Date();
         const nowSeconds = Math.floor(now.getTime() / 1000);
-        const secondsIntoCycle = nowSeconds % LOOP_DURATION_SECONDS;
-        const cycleStartTime = new Date(now.getTime() - (secondsIntoCycle * 1000));
-        const simTime = new Date(cycleStartTime.getTime() + (frame / FPS) * 1000);
         
-        uiElements.time.innerText = simTime.toLocaleTimeString();
+        // 1. Find the start of the CURRENT 2-minute cycle
+        // (Current Time minus the remainder of 120)
+        const secondsIntoCycle = nowSeconds % LOOP_DURATION;
+        const cycleStartTime = new Date(now.getTime() - (secondsIntoCycle * 1000));
+        
+        // 2. Add the frame's time to that start point
+        // If we are at Frame 10 (1s), we add 1s to the cycle start
+
+        //comment
+        // const frameTime = new Date(cycleStartTime.getTime() + (index / FPS) * 1000);
+
+        //replaced with 
+        const frameTime = new Date(cycleStartTime.getTime() + (frame) * 1000);
+        
+        uiElements.time.innerText = frameTime.toLocaleTimeString(); 
+        
     }
 
     if (uiElements.occ) {

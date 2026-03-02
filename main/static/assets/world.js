@@ -148,15 +148,13 @@ export function createMarker(z, x, color, radius = 0.1, label = '') {
     // This creates the "Template" marker for the pool
     const meshGroup = createObjectMarker(z, x, Math.PI, models.roblox);
     meshGroup.position.y = 0.5;
+    meshGroup.rotation.y = Math.random() * Math.PI * 2; // Random rotation for visual variety
 
-    const smat = new THREE.SpriteMaterial({ color: 0xffffff, transparent: true });
-    const sprite = new THREE.Sprite(smat);
-    sprite.scale.set(0.8, 0.4, 1);  
-    sprite.position.set(0, radius + 1, 0); 
+    // --- REMOVED SPRITE CREATION HERE ---
 
     const group = new THREE.Group();
     group.add(meshGroup);
-    group.add(sprite);
+    // group.add(sprite); // Removed
     scene.add(group);
     
     return group;
@@ -172,6 +170,7 @@ export function updateMarker(markerGroup, x, z, id) {
     for (let i = 0; i < id.length; i++) hash = id.charCodeAt(i) + ((hash << 5) - hash);
     const color = new THREE.Color(`hsl(${Math.abs(hash) % 360}, 70%, 50%)`);
 
+    // The mesh is now the only child, or at index 0
     const meshGroup = markerGroup.children[0];
     if (meshGroup) {
         meshGroup.traverse((child) => {
@@ -187,30 +186,7 @@ export function updateMarker(markerGroup, x, z, id) {
         });
     }
 
-    // C. Text Update (Sprite) - Only if ID changed
-    if (markerGroup.userData.currentId === id) return;
-    markerGroup.userData.currentId = id;
-
-    const sprite = markerGroup.children[1];
-    if (sprite) {
-        if (sprite.material.map) sprite.material.map.dispose();
-
-        const canvas = document.createElement('canvas');
-        const size = 256;
-        canvas.width = canvas.height = size;
-        const ctx = canvas.getContext('2d');
-        // ctx.fillStyle = `rgba(0,0,0,0.15)`;
-        // ctx.fillRect(0, 0, size, size);
-        // ctx.fillStyle = '#000';
-        // ctx.font = '100px League Spartan'; 
-        // ctx.textAlign = 'center';
-        // ctx.textBaseline = 'middle';
-        // ctx.fillText(id, size / 2, size / 2);
-
-        const tex = new THREE.CanvasTexture(canvas);
-        tex.minFilter = THREE.LinearFilter;
-        sprite.material.map = tex;
-    }
+    // --- REMOVED SECTION C (Text Update) COMPLETELY ---
 }
 
 export function buildWorld() {
