@@ -1,5 +1,5 @@
 import * as THREE from 'three';
-import { createMarker } from "./world.js";
+import { createObjectMarker, models } from "./world.js";
 import { camera, controls} from "./scene.js";
 
 export const raycaster = new THREE.Raycaster();
@@ -34,15 +34,10 @@ export const livePlayback = {
 export function createLiveMarker(trackId, position, region, color = 0xff0000, size = 0.15) {
     if (region === "MAIN_VIEW")
         color = 0x00ff00; // Green for main view
-    const geometry = new THREE.SphereGeometry(size, 32, 32);
-    const material = new THREE.MeshStandardMaterial({
-        color: color,
-        emissive: color,
-        emissiveIntensity: 0.5,
-        metalness: 0.3,
-        roughness: 0.4
-    });
-    const marker = new THREE.Mesh(geometry, material);
+    const marker = createObjectMarker(position.z, position.x, Math.PI, models.roblox);
+    marker.position.y = 0.5;
+    marker.rotation.y = Math.random() * Math.PI * 2; // Random rotation for visual variety
+    
     
     marker.position.set(position.x, 0.3, position.z);
     marker.userData = {
