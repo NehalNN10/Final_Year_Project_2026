@@ -92,7 +92,7 @@ function updateDashboard() {
             uiElements.occ.innerText = isNaN(count) ? "--" : count;
             
             // Color Logic
-            uiElements.occ.style.backgroundColor = count > 0 ? "#ff4444" : "#00ff88";
+            uiElements.occ.style.backgroundColor = count > 20 ? "#ff4444" : count != 0 ? "#00ff88" : "#ffffff";
             uiElements.occ.style.color = "#000000";
         } else {
             // Optional: Keep last known value or show placeholder if frame is out of range
