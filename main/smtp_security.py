@@ -43,6 +43,12 @@ def send_emergency_alert(room_number, occupancy_count, recipient, description=No
     """
 
     # 2. HTML Content
+
+    if description:
+        description_html = f"<p style=\"margin:5px 0;\"><strong>Details:</strong> {description}</p>"
+    else:
+        description_html = "<p style=\"margin:5px 0;\"><strong>Details:</strong> No additional details provided.</p>"
+
     html_content = """
     <!DOCTYPE html>
     <html>
@@ -89,11 +95,7 @@ def send_emergency_alert(room_number, occupancy_count, recipient, description=No
                   <p style="margin:5px 0;"><strong>Room Number:</strong> {{room_number}}</p>
                   <p style="margin:5px 0;"><strong>Current Occupancy:</strong> {{occupancy}}</p>
                   <p style="margin:5px 0;"><strong>Timestamp:</strong> {{timestamp}}</p>
-                  {% if description %}
-                    <p style="margin:5px 0;"><strong>Details:</strong> {{description}}</p>
-                  {% else %}
-                    <p style="margin:5px 0;"><strong>Details:</strong> No additional details provided.</p>
-                  {% endif %}
+                  {{description_html}}
                 </td>
               </tr>
             </table>
@@ -126,7 +128,7 @@ def send_emergency_alert(room_number, occupancy_count, recipient, description=No
     html_content = html_content.replace('{{room_number}}', str(room_number))
     html_content = html_content.replace('{{occupancy}}', str(occupancy_count))
     html_content = html_content.replace('{{timestamp}}', str(timestamp))
-    html_content = html_content.replace('{{description}}', str(description))
+    html_content = html_content.replace('{{description_html}}', description_html)
 
     # Attach both parts
     part1 = MIMEText(text_content, 'plain')
