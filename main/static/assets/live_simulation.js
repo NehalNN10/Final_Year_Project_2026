@@ -36,7 +36,7 @@ export function createLiveMarker(trackId, position, region, color = 0xff0000, si
         color = 0x00ff00; // Green for main view
     const marker = createObjectMarker(position.z, position.x, Math.PI, models.roblox);
     marker.position.y = 0.5;
-    marker.rotation.y = Math.random() * Math.PI * 2; // Random rotation for visual variety
+    // marker.rotation.y = Math.random() * Math.PI * 2; // Random rotation for visual variety
     
     
     marker.position.set(position.x, 0.3, position.z);
