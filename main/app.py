@@ -19,6 +19,12 @@ from smtp_security import send_emergency_alert
 
 load_dotenv()
 
+# Get the absolute path of the directory where app.py lives (the 'main' folder)
+BASE_DIR = os.path.dirname(os.path.abspath(__file__))
+
+# Go up one level (..) to find your single source of truth folders
+CSV_DIR = os.path.abspath(os.path.join(BASE_DIR, '..', 'csv_files'))
+
 app = Flask(__name__)
 
 app.secret_key = os.getenv("SECRET_KEY", "fallback_secret_key_change_in_production")
@@ -165,11 +171,11 @@ def send_fac_alert():
 # Serve files from static/files directory
 @app.route('/files/<path:filename>')
 def serve_files(filename):
-    return send_from_directory('static/files', filename)
+    return send_from_directory(CSV_DIR, filename)
 
 @app.route('/temp_files_15min/<path:filename>')
 def serve_temp_files_15min(filename):
-    return send_from_directory('static/temp_files_15min', filename)
+    return send_from_directory(f'{CSV_DIR}/temp_files_15min', filename)
 
 # Serve models from static/models directory
 @app.route('/models/<path:filename>')
