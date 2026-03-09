@@ -171,7 +171,7 @@ def send_fac_alert():
 # Serve files from static/files directory
 @app.route('/files/<path:filename>')
 def serve_files(filename):
-    return send_from_directory(CSV_DIR, filename)
+    return send_from_directory(f'{CSV_DIR}/files', filename)
 
 @app.route('/temp_files_15min/<path:filename>')
 def serve_temp_files_15min(filename):
