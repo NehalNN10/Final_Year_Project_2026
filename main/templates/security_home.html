@@ -39,17 +39,24 @@
   </div>
 
   <div class="header2">
-    <span>Security Dashboard</span>
-  </div>
+  <span>Security Dashboard</span>
+
+  {% if session.get('role') == 'Security Admin' %}
+    <div style="margin-left: auto; display: flex; gap: 15px; align-items: center;">
+      
+      <button class="track-btn btn-red btn-auto" onclick="openEmergencyModal()">
+        <h2>Send Emergency Alert</h2>
+      </button>
+
+    </div>
+  {% endif %}
+</div>
 
   <div class="main-home scroll" style="max-height: calc(100vh - 10rem); overflow-y: auto;">
     <div class="row boxes">
       <div class="tracker-ui scroll outer box">
         <div class="row" style="margin-top: 0px !important">
           <h2>Occupancy Alert</h2>
-          {% if session.get('role') == 'Security Admin' %}
-            <button class="track-btn btn-send-emergency" style="width: 20rem !important; height: 3rem !important;" onclick="openEmergencyModal()"> <h2>Send Emergency Alert</h2></button>
-          {% endif %}
         </div>
         <div id="ac-alerts">
           <div class="tracker-ui">
@@ -187,16 +194,66 @@
             </tr>
             {% endfor %}
         </table>
-
-        <ul>
-            {% for facility in facilities %}
-            <li>
-                <strong>{{ facility.name }}</strong> - {{ facility.location }}
-                <button onclick="window.location.href='/model?facility_id={{ facility.id }}'">View Model</button>
-            </li>
-            {% endfor %}
-        </ul>
       </div>
+
+      {% if session.get('role') == 'Security Admin' %}
+      <div class="tracker-ui scroll outer box">
+        <div class="row" style="margin-top: 0px !important; justify-content: space-between; align-items: center;">
+          <h2>Staff Information</h2>
+          <button class="track-btn btn-blue btn-auto" style="height: 2.5rem;" onclick="openStaffModal()">
+            Add Staff
+          </button>
+        </div>
+
+        {% for staff in staff_list %}
+        <div class="tracker-ui">
+          <div class="row" style="margin-top: 0px !important; display: flex; align-items: center; justify-content: space-between;">
+            
+            <div style="flex: 1; padding-right: 10px; min-width: 0;">
+              <div style="display: flex; align-items: center; gap: 10px; font-size: 1.2rem; flex-wrap: wrap;">
+                <h4 style="margin: 0; white-space: nowrap;">{{ staff.name }}</h4>
+              </div>
+              <div style="margin-top: 5px;">
+                <span style="color: #888; font-size: 0.9rem;">{{ staff.email }}</span>
+              </div>
+              <div style="margin-top: 5px;">
+                <span style="color: #888; font-size: 0.9rem;">{{ staff.role.name }}</span>
+              </div>
+            </div>
+
+            <div style="display: flex; gap: 5px; flex-shrink: 0;">
+              
+              <button class="btn btn-yellow" style="margin: 0;" 
+                      onclick="openStaffModal('{{ staff.id }}', '{{ staff.user_id }}', '{{ staff.email }}', '{{ staff.role.name }}')"> 
+                ✏️ 
+              </button>
+              
+              <button class="btn btn-red" 
+                      style="margin: 0;" 
+                      onclick="deleteStaff('{{ staff.id }}')"> 
+                🗑️ 
+              </button>
+
+            </div>
+
+          </div>
+          <div style="margin-top: 5px;">
+            <span>Rooms Assigned: </span>
+            {% if staff_rooms[staff.user_id] == [] %}
+            <span style="color: #888;">N/A</span>
+            {% else %}
+              <span style="color: #888;"> 
+              {% for room in staff_rooms[staff.user_id] %}
+                {% if not loop.first %}, {% endif %}
+              {{ room }}
+              {% endfor %}
+              </span>
+            {% endif %}
+          </div>
+        </div>
+        {% endfor %}
+      </div>
+      {% endif %}
     </div>
   </div>
 
@@ -234,9 +291,54 @@
           <input type="text" id="description" name="description" required />
         </div>
 
-        <div class="row">
+        <div class="row" style="justify-content: end;">
           <button type="button" class="btn btn-cancel" onclick="closeEmergencyModal()">Cancel</button>
-          <button type="submit" class="btn btn-send-emergency">Send Emergency Alert</button>
+          <button type="submit" class="btn btn-red">Send Emergency Alert</button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <div class="modal-overlay" id="staffModal">
+    <div class="tracker-ui modal">
+      <div class="modal-header" id="staffModalTitle">
+        Add New Staff
+      </div>
+      
+      <form id="staffForm">
+        <input type="hidden" id="staffDbId" name="staffDbId">
+
+        <div class="row">
+          <h4>Username / ID</h4>
+          <input type="text" id="staffUserId" name="user_id" required />
+        </div>
+
+        <div class="row">
+          <h4>Name</h4>
+          <input type="text" id="staffName" name="name" required />
+        </div>
+
+        <div class="row">
+          <h4>Email</h4>
+          <input type="email" id="staffEmail" name="email" required />
+        </div>
+
+        <div class="row">
+          <h4>Password</h4>
+          <input type="password" id="staffPassword" name="password" placeholder="(Leave blank if editing)" />
+        </div>
+
+        <div class="row">
+          <h4>Role</h4>
+          <select id="staffRole" name="role" required>
+            <option value="Security Officer">Security Officer</option>
+            <option value="Security Admin">Security Admin</option>
+          </select>
+        </div>
+
+        <div class="row" style="justify-content: end; margin-top: 20px;">
+          <button type="button" class="btn btn-cancel btn-auto" onclick="closeStaffModal()">Cancel</button>
+          <button type="submit" class="btn btn-red btn-auto">Save Staff</button>
         </div>
       </form>
     </div>

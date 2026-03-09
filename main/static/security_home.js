@@ -181,3 +181,84 @@ document.addEventListener('DOMContentLoaded', function() {
         });
     }
 });
+
+// --- Modal Logic ---
+window.openStaffModal = function(id = '', userId = '', email = '', role = '') {
+    const modal = document.getElementById('staffModal');
+    const title = document.getElementById('staffModalTitle');
+    
+    // Populate fields
+    document.getElementById('staffDbId').value = id;
+    document.getElementById('staffName').value = name;
+    document.getElementById('staffUserId').value = userId;
+    document.getElementById('staffEmail').value = email;
+    if(role) document.getElementById('staffRole').value = role;
+    
+    // Change Title based on action
+    if (id) {
+        title.innerText = "Edit Staff Member";
+        document.getElementById('staffPassword').required = false;
+    } else {
+        title.innerText = "Add New Staff";
+        document.getElementById('staffPassword').required = true;
+    }
+
+    modal.classList.add('active');
+}
+
+window.closeStaffModal = function() {
+    document.getElementById('staffModal').classList.remove('active');
+    document.getElementById('staffForm').reset();
+}
+
+// --- Submit Logic (Add/Edit) ---
+document.getElementById('staffForm').addEventListener('submit', async function(e) {
+    e.preventDefault();
+    
+    const formData = new FormData(e.target);
+    const data = Object.fromEntries(formData.entries());
+    
+    // Determine if this is an Add or Edit based on hidden ID
+    const endpoint = data.staffDbId ? '/api/staff/edit' : '/api/staff/add';
+
+    try {
+        const res = await fetch(endpoint, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify(data)
+        });
+
+        if (res.ok) {
+            alert('Staff saved successfully!');
+            location.reload(); // Reload to see changes
+        } else {
+            const err = await res.json();
+            alert('Error: ' + err.error);
+        }
+    } catch (error) {
+        console.error(error);
+        alert('Failed to save staff.');
+    }
+});
+
+// --- Delete Logic ---
+window.deleteStaff = async function(id) {
+    if (!confirm("Are you sure you want to delete this staff member? This cannot be undone.")) return;
+
+    try {
+        const res = await fetch('/api/staff/delete', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ id: id })
+        });
+
+        if (res.ok) {
+            alert('Staff deleted.');
+            location.reload();
+        } else {
+            alert('Error deleting staff.');
+        }
+    } catch (error) {
+        console.error(error);
+    }
+}

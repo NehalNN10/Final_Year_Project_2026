@@ -91,7 +91,30 @@ def facility_home():
 
 @app.route('/security_home')
 def security_home():
-    return render_template('security_home.html', department=session.get('department'), role=session.get('role'))
+    # Fetch all users who are in the Security department
+    # Note: You might need to adjust this query based on your exact Role model structure
+    staff_list = []
+    
+    # Example logic: Filter users where their role is related to Security
+    all_users = User.objects()
+    for u in all_users:
+        if u.role and u.role.department == 'Security':
+            staff_list.append(u)
+    
+    staff_rooms = {}
+
+    for staff in staff_list:
+        rooms_for_staff = []
+        for se in SecurityEmails.objects(user=staff):
+            if se.room:
+                rooms_for_staff.append(se.room.room_name)
+        staff_rooms[staff.user_id] = rooms_for_staff
+
+    return render_template('security_home.html', 
+                           department=session.get('department'), 
+                           role=session.get('role'),
+                           staff_list=staff_list,
+                           staff_rooms=staff_rooms) # <--- Pass the list here
 
 @app.route('/dashboard')
 def dashboard():
@@ -254,6 +277,62 @@ def handle_disconnect():
 def send_tracking_data():
     """Send all current tracking data on request"""
     socketio.emit('initial_live_data', list(live_tracking_data.values()))
+
+@app.route('/api/staff/add', methods=['POST'])
+def add_staff():
+    data = request.get_json()
+    try:
+        # Find the Role object first
+        role = Role.objects(name=data['role']).first()
+        if not role:
+            return jsonify({'error': 'Role not found'}), 400
+            
+        new_user = User(
+            user_id=data['user_id'],
+            email=data['email'],
+            password=generate_password_hash(data['password']),
+            role=role
+        )
+        new_user.save()
+        return jsonify({'success': True}), 200
+    except Exception as e:
+        return jsonify({'error': str(e)}), 400
+
+@app.route('/api/staff/edit', methods=['POST'])
+def edit_staff():
+    data = request.get_json()
+    try:
+        user = User.objects(id=data['staffDbId']).first()
+        if not user:
+            return jsonify({'error': 'User not found'}), 404
+            
+        user.user_id = data['user_id']
+        user.email = data['email']
+        
+        # Only update password if provided
+        if data.get('password'):
+            user.password = generate_password_hash(data['password'])
+            
+        role = Role.objects(name=data['role']).first()
+        if role:
+            user.role = role
+            
+        user.save()
+        return jsonify({'success': True}), 200
+    except Exception as e:
+        return jsonify({'error': str(e)}), 400
+
+@app.route('/api/staff/delete', methods=['POST'])
+def delete_staff():
+    data = request.get_json()
+    try:
+        user = User.objects(id=data['id']).first()
+        if user:
+            user.delete()
+            return jsonify({'success': True}), 200
+        return jsonify({'error': 'User not found'}), 404
+    except Exception as e:
+        return jsonify({'error': str(e)}), 400
 
 
 if __name__ == '__main__':

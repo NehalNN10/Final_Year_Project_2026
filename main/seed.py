@@ -21,6 +21,7 @@ with app.app_context():
     
     User(
         user_id='security',
+        name='Security Admin',
         email='security@none',
         password=generate_password_hash('security123'),
         role=Role.objects(name='Security Admin').first()
@@ -28,6 +29,7 @@ with app.app_context():
 
     User(
         user_id='facility',
+        name='Facilities Admin',
         email='facility@none',
         password=generate_password_hash('facility123'),
         role=Role.objects(name='Facilities Admin').first()
@@ -35,6 +37,7 @@ with app.app_context():
 
     User(
         user_id='admin',
+        name='Admin',
         email='admin@none',
         password=generate_password_hash('admin123'),
         role=Role.objects(name='Admin').first()
@@ -42,6 +45,7 @@ with app.app_context():
 
     User(
         user_id='nh07884',
+        name="Nehal Naeem Haji",
         email='nh07884@st.habib.edu.pk',
         password=generate_password_hash('YoGurt67'),
         role=Role.objects(name='Security Officer').first()
@@ -49,6 +53,7 @@ with app.app_context():
 
     User(
         user_id='mk07899',
+        name="Muhammad Shawaiz Khan",
         email='mk07899@st.habib.edu.pk',
         password=generate_password_hash('MSK>NNH100'),
         role=Role.objects(name='Security Officer').first()
@@ -56,6 +61,7 @@ with app.app_context():
 
     User(
         user_id='shawaiz',
+        name="Shawaiz Niazi",
         email='shawaizniazi917@gmail.com',
         password=generate_password_hash('MSK>NNH100'),
         role=Role.objects(name='Facilities Officer').first()
@@ -64,13 +70,29 @@ with app.app_context():
     Rooms(
         room_id='C-006',
         room_name='Digital Instrumentations Lab',
-        max_occupancy=50
+        max_occupancy=35
     ).save()
 
     Rooms(
         room_id='C-007',
         room_name='Projects Lab',
         max_occupancy=50
+    ).save()
+
+    Rooms(
+        room_id='C-109',
+        room_name='Arif Habib Classroom',
+        max_occupancy=50
+    ).save()
+
+    SecurityEmails(
+        room=Rooms.objects(room_id='C-109').first(),
+        user=User.objects(user_id='mk07899').first()
+    ).save()
+
+    SecurityEmails(
+        room=Rooms.objects(room_id='C-109').first(),
+        user=User.objects(user_id='nh07884').first()
     ).save()
 
     SecurityEmails(
