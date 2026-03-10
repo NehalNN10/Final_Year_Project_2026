@@ -1,9 +1,7 @@
 import * as THREE from "three";
 import { createMarker } from "./world.js";
+import { FPS, LOOP_DURATION, iot, track_count } from "../variables.js";
 import { camera, controls} from "./scene.js";
-
-export const FPS = 25; 
-export const LOOP_DURATION = 900; // Match model.js
 
 export const playback = {
     frame: 0,
@@ -19,8 +17,6 @@ export const playback = {
 // const iot = "./temp_files_15min/cs_lab_iot_15min.csv";
 // const track_count = "./files/combined_count_output.csv"
 export const tracker = `/temp_files_15min/combined_frames_15min.csv`;
-export const iot = `/temp_files_15min/cs_lab_iot_15min.csv`;
-export const track_count = `/temp_files_15min/combined_count_15min.csv`
 export const globalCount = 18;
 // const tracker = './files/mapped_tracks_angle_01_try_2.csv';
 
@@ -252,11 +248,10 @@ export function renderFrame(index) {
 }
 
 export function getRoomInfo(x, z) {
-    if (z >= -9.1 && z <= -2.4 && x >= -9.35 && x <= 9.35) {
+    if (x >= -9.1 && x <= 9.1 && z >= -9.35 && z <= 9.35) {
         return { name: "Projects Lab", id: "C-007", floor: "Lower Ground" };
-    }
-    else if (z >= -2.4 && z <= 9.1 && x >= -5.35 && x <= 9.35) {
-         return { name: "Projects Lab", id: "C-007", floor: "Lower Ground" };
+    } else if (x > 9.1 && x <= 16.95 && z >= -9.35 && z <= 9.35) {
+        return { name: "Power Lab", id: "C-006", floor: "Lower Ground" };
     }
     return { name: "Outside Bounds", id: "N/A", floor: "N/A" };
 }

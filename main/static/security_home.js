@@ -1,4 +1,4 @@
-import {FPS, LOOP_DURATION, track_count, iot} from './assets/simulation.js';
+import {FPS, LOOP_DURATION, track_count, iot} from './variables.js';
 
 let globalTrackData = new Map(); 
 let globalIoTData = [];      
@@ -182,19 +182,102 @@ document.addEventListener('DOMContentLoaded', function() {
     }
 });
 
-// --- Modal Logic ---
-window.openStaffModal = function(id = '', userId = '', email = '', role = '') {
+window.toggleRoomList = function() {
+    const container = document.getElementById('roomChecklistContainer');
+    const btn = document.querySelector('button[onclick="toggleRoomList()"]');
+    
+    if (container.style.display === 'none') {
+        container.style.display = 'block';
+        btn.innerText = 'Hide Rooms ▲';
+    } else {
+        container.style.display = 'none';
+        btn.innerText = 'Show Rooms ▼';
+    }
+}
+
+// --- Updated Modal Logic (Back to Checkboxes) ---
+window.openStaffModal = async function(id = '', userId = '', email = '', name = '', role = '') { // <--- Added name param
     const modal = document.getElementById('staffModal');
     const title = document.getElementById('staffModalTitle');
+    const roleSelect = document.getElementById('staffRole');
+    const roomContainer = document.getElementById('roomChecklist');
     
-    // Populate fields
+    // Reset toggle
+    document.getElementById('roomChecklistContainer').style.display = 'none';
+    document.querySelector('button[onclick="toggleRoomList()"]').innerText = 'Show Rooms ▼';
+
+    // 1. Populate Basic Fields
     document.getElementById('staffDbId').value = id;
     document.getElementById('staffName').value = name;
     document.getElementById('staffUserId').value = userId;
     document.getElementById('staffEmail').value = email;
-    if(role) document.getElementById('staffRole').value = role;
+    // document.getElementById('staffPassword').value = password; // Only if you have this field
     
-    // Change Title based on action
+    // 2. Reset Dynamic Fields
+    roleSelect.innerHTML = '<option>Loading...</option>';
+    roomContainer.innerHTML = '<span style="color:#888;">Loading rooms...</span>';
+
+    try {
+        // 3. API Call 1: Meta Info
+        const metaResponse = await fetch('/api/security_info');
+        const metaData = await metaResponse.json();
+
+        // 4. API Call 2: Assignments (only if editing)
+        let assignedRoomIds = [];
+        if (id) {
+            const assignResponse = await fetch(`/api/user_assignments/${id}`);
+            const assignData = await assignResponse.json();
+            assignedRoomIds = assignData.assigned_rooms || [];
+        }
+
+        // --- A. Roles ---
+        roleSelect.innerHTML = '';
+        metaData.roles.forEach(r => {
+            const option = document.createElement('option');
+            option.value = r.name;
+            option.innerText = r.name;
+            if (r.name === role) option.selected = true;
+            roleSelect.appendChild(option);
+        });
+
+        // --- B. Rooms (Checkboxes) ---
+        roomContainer.innerHTML = '';
+        metaData.rooms.forEach(room => {
+            // 1. Create Container
+            const div = document.createElement('div');
+            div.className = 'checklist-item'; // Use CSS class
+
+            // 2. Create Checkbox
+            const checkbox = document.createElement('input');
+            checkbox.type = 'checkbox';
+            checkbox.name = 'assigned_rooms';
+            checkbox.value = room.id;
+            checkbox.id = `room_${room.id}`;
+            checkbox.className = 'checklist-checkbox'; // Use CSS class
+
+            if (assignedRoomIds.includes(room.id)) {
+                checkbox.checked = true;
+            }
+
+            // 3. Create Label
+            const label = document.createElement('label');
+            label.htmlFor = `room_${room.id}`;
+            label.innerText = `${room.room_id} - ${room.name}`;
+            label.className = 'checklist-label'; // Use CSS class
+
+            // 4. Assemble
+            div.appendChild(checkbox);
+            div.appendChild(label);
+            roomContainer.appendChild(div);
+        });
+
+    } catch (error) {
+        console.error(error);
+        // Use a class for the error message too
+        roomContainer.innerHTML = '<div class="checklist-error">Error loading data</div>';
+    }
+
+    // Change Title
     if (id) {
         title.innerText = "Edit Staff Member";
         document.getElementById('staffPassword').required = false;
@@ -217,6 +300,9 @@ document.getElementById('staffForm').addEventListener('submit', async function(e
     
     const formData = new FormData(e.target);
     const data = Object.fromEntries(formData.entries());
+
+    const checkedRooms = formData.getAll('assigned_rooms');
+    data.assigned_rooms = checkedRooms;
     
     // Determine if this is an Add or Edit based on hidden ID
     const endpoint = data.staffDbId ? '/api/staff/edit' : '/api/staff/add';

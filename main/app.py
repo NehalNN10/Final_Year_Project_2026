@@ -282,20 +282,40 @@ def send_tracking_data():
 def add_staff():
     data = request.get_json()
     try:
-        # Find the Role object first
         role = Role.objects(name=data['role']).first()
         if not role:
             return jsonify({'error': 'Role not found'}), 400
             
         new_user = User(
+            name=data.get('name'),
             user_id=data['user_id'],
             email=data['email'],
             password=generate_password_hash(data['password']),
             role=role
         )
         new_user.save()
+
+        # --- FIXED ROOM ASSIGNMENT LOGIC ---
+        assigned_ids = data.get('assigned_rooms', [])
+        for r_id in assigned_ids:
+            room = None
+            try:
+                # Try finding by DB ID first
+                room = Rooms.objects(id=r_id).first()
+            except Exception:
+                pass # Ignore if ID format is invalid
+
+            # Fallback to Room Number
+            if not room:
+                room = Rooms.objects(room_id=r_id).first()
+            
+            # If found, save it
+            if room:
+                SecurityEmails(user=new_user, room=room).save()
+
         return jsonify({'success': True}), 200
     except Exception as e:
+        print(f"Error adding staff: {e}") 
         return jsonify({'error': str(e)}), 400
 
 @app.route('/api/staff/edit', methods=['POST'])
@@ -307,9 +327,9 @@ def edit_staff():
             return jsonify({'error': 'User not found'}), 404
             
         user.user_id = data['user_id']
+        user.name = data.get('name')
         user.email = data['email']
         
-        # Only update password if provided
         if data.get('password'):
             user.password = generate_password_hash(data['password'])
             
@@ -318,8 +338,31 @@ def edit_staff():
             user.role = role
             
         user.save()
+
+        # 2. Update Room Assignments
+        SecurityEmails.objects(user=user).delete()
+        
+        assigned_ids = data.get('assigned_rooms', [])
+        for r_id in assigned_ids:
+            room = None
+            
+            # Step A: Try Database ID
+            try:
+                room = Rooms.objects(id=r_id).first()
+            except Exception:
+                pass
+            
+            # Step B: Try Room Number
+            if not room:
+                room = Rooms.objects(room_id=r_id).first()
+            
+            # Step C: Save
+            if room:
+                SecurityEmails(user=user, room=room).save()
+
         return jsonify({'success': True}), 200
     except Exception as e:
+        print(f"Error editing staff: {e}")
         return jsonify({'error': str(e)}), 400
 
 @app.route('/api/staff/delete', methods=['POST'])
@@ -333,6 +376,39 @@ def delete_staff():
         return jsonify({'error': 'User not found'}), 404
     except Exception as e:
         return jsonify({'error': str(e)}), 400
+
+@app.route('/api/security_info', methods=['GET'])
+def get_security_info():
+    """Returns available Security roles and all Rooms"""
+    try:
+        # 1. Get Roles for Security Department
+        roles = Role.objects(department='Security')
+        roles_data = [{'name': r.name} for r in roles]
+
+        # 2. Get All Rooms (so we can list them in the modal)
+        rooms = Rooms.objects()
+        rooms_data = [{'id': str(r.id), 'room_id': r.room_id, 'name': r.room_name} for r in rooms]
+
+        return jsonify({'roles': roles_data, 'rooms': rooms_data})
+    except Exception as e:
+        return jsonify({'error': str(e)}), 500
+    
+@app.route('/api/user_assignments/<user_db_id>', methods=['GET'])
+def get_user_assignments(user_db_id):
+    """Returns the list of Room IDs assigned to a specific user"""
+    try:
+        user = User.objects(id=user_db_id).first()
+        if not user:
+            return jsonify({'assigned_rooms': []})
+        
+        # Query SecurityEmails to find rooms assigned to this user
+        assignments = SecurityEmails.objects(user=user)
+        # Return a list of Room Object IDs
+        assigned_room_ids = [str(a.room.id) for a in assignments]
+        
+        return jsonify({'assigned_rooms': assigned_room_ids})
+    except Exception as e:
+        return jsonify({'error': str(e)}), 500
 
 
 if __name__ == '__main__':
