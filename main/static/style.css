@@ -153,6 +153,26 @@ body { margin: 0; overflow: hidden; font-family: 'League Spartan', sans-serif !i
     cursor: pointer;
 }
 
+.room-btn {
+    font-family: 'League Spartan', sans-serif !important;
+    background: none;
+    font-size: 1rem;
+    justify-content: center !important;
+    align-items: center;
+    border-radius: 5px;
+    border: 1px solid #888;
+    color: #fff !important;
+    padding: 10px;
+    transition: all 0.3s ease;
+}
+
+.room-btn:hover {
+    border-color: #00ff88 !important;
+    color: #00ff88 !important;
+    box-shadow: 0 0 20px rgba(0, 255, 136, 0.6) !important;
+    cursor: pointer;
+}
+
 .fill {
     padding: 10px;
     border-radius: 20px;
@@ -647,7 +667,6 @@ input[type="radio"] + label {
 .modal-header {
     font-size: 28px;
     font-weight: bold;
-    color: #ff3333;
     margin-bottom: 20px;
     text-align: center;
 }
@@ -712,21 +731,21 @@ input[type="radio"] + label {
     background-color: #ff3333;
     box-shadow: 0 0 20px rgba(255, 51, 51, 0.6) !important;
     border: 1px solid #ffffff !important;
-    color: #000 !important;
+    color: #fff !important;
     cursor: pointer;
 }
 
 .btn-yellow {
     background-color: #ffcc33;
     border: 1px solid #000;
-    color: #000;
+    color: #000 !important;
 }
 
 .btn-yellow:hover {
     background-color: #ffcc33;
     box-shadow: 0 0 20px rgba(255, 204, 51, 0.6) !important;
-    border: 1px solid #ffffff !important;
-    color: #ffffff !important;
+    border: 1px solid #000000 !important;
+    color: #000 !important;
     cursor: pointer;
 }
 
@@ -748,6 +767,44 @@ input[type="radio"] + label {
   width: auto !important;
   padding-left: 20px;
   padding-right: 20px;
+}
+
+/* Checklist Container Items */
+.checklist-item {
+    display: flex;
+    align-items: center;
+    margin-bottom: 5px;
+    padding: 5px;
+    border-radius: 4px;
+    transition: background-color 0.2s;
+}
+
+.checklist-item:hover {
+    background-color: rgba(255, 255, 255, 0.1);
+}
+
+/* Checklist Checkbox */
+.checklist-checkbox {
+    margin-right: 10px !important;
+    width: auto !important; /* Override global input width */
+    flex: none;
+    cursor: pointer;
+}
+
+/* Checklist Label */
+.checklist-label {
+    color: #fff;
+    cursor: pointer;
+    font-size: 0.9rem;
+    user-select: none; /* Prevents text highlighting when clicking repeatedly */
+}
+
+/* Error Message Style */
+.checklist-error {
+    color: #ff4444;
+    font-style: italic;
+    padding: 10px;
+    text-align: center;
 }
 
 /* .btn-cancel {

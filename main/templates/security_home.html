@@ -223,8 +223,9 @@
 
             <div style="display: flex; gap: 5px; flex-shrink: 0;">
               
-              <button class="btn btn-yellow" style="margin: 0;" 
-                      onclick="openStaffModal('{{ staff.id }}', '{{ staff.user_id }}', '{{ staff.email }}', '{{ staff.role.name }}')"> 
+              <button class="btn btn-yellow" 
+                      style="width: auto !important; min-width: 40px; padding: 5px 10px; margin: 0;" 
+                      onclick="openStaffModal('{{ staff.id }}', '{{ staff.user_id }}', '{{ staff.email }}', '{{ staff.name }}', '{{ staff.role.name }}')"> 
                 ✏️ 
               </button>
               
@@ -260,7 +261,7 @@
   <!-- Emergency Modal -->
   <div class="modal-overlay" id="emergencyModal">
     <div class="tracker-ui modal">
-      <div class="modal-header">
+      <div class="modal-header" style="color: #ff3333;">
         🚨 EMERGENCY ALERT 🚨
       </div>
       <p style="margin-bottom: 20px">Please provide details about the emergency situation:</p>
@@ -301,7 +302,7 @@
 
   <div class="modal-overlay" id="staffModal">
     <div class="tracker-ui modal">
-      <div class="modal-header" id="staffModalTitle">
+      <div class="modal-header" style="color: #6666ff;" id="staffModalTitle">
         Add New Staff
       </div>
       
@@ -309,12 +310,12 @@
         <input type="hidden" id="staffDbId" name="staffDbId">
 
         <div class="row">
-          <h4>Username / ID</h4>
+          <h4>Username/ID</h4>
           <input type="text" id="staffUserId" name="user_id" required />
         </div>
 
         <div class="row">
-          <h4>Name</h4>
+          <h4>Full Name</h4>
           <input type="text" id="staffName" name="name" required />
         </div>
 
@@ -331,14 +332,27 @@
         <div class="row">
           <h4>Role</h4>
           <select id="staffRole" name="role" required>
-            <option value="Security Officer">Security Officer</option>
-            <option value="Security Admin">Security Admin</option>
           </select>
         </div>
 
-        <div class="row" style="justify-content: end; margin-top: 20px;">
+        <div class="row">
+          <h4>Assigned Rooms</h4>
+          <button type="button" class="room-btn" style="box-sizing: border-box !important; margin: 0;" onclick="toggleRoomList()">
+            Show/Hide Rooms ▼
+          </button>
+        </div>
+        
+        <div>
+          <div id="roomChecklistContainer" style="display: none; width: max-content; margin-top: 5px; margin-left: auto;">
+            <div id="roomChecklist" style="max-height: 150px; overflow-y: auto; background: rgba(0,0,0,0.5); padding: 10px; border: 1px solid #888; border-radius: 5px;">
+              <span style="color: #888;">Loading...</span>
+            </div>
+          </div>
+        </div>
+
+        <div class="row" style="justify-content: center; margin-top: 20px;">
           <button type="button" class="btn btn-cancel btn-auto" onclick="closeStaffModal()">Cancel</button>
-          <button type="submit" class="btn btn-red btn-auto">Save Staff</button>
+          <button type="submit" class="btn btn-yellow btn-auto">Save Staff</button>
         </div>
       </form>
     </div>

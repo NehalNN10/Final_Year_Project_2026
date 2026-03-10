@@ -18,7 +18,7 @@ export const scene = new THREE.Scene();
 scene.background = new THREE.Color(0x131314);
 
 const rgbeLoader = new RGBELoader();
-rgbeLoader.load('static/files/qwantani_sunset_puresky_4k.hdr', function(texture) {
+rgbeLoader.load('static/models/qwantani_sunset_puresky_4k.hdr', function(texture) {
     texture.mapping = THREE.EquirectangularReflectionMapping;
     scene.environment = texture; 
     scene.background = texture; 

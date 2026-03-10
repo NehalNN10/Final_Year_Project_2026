@@ -1,4 +1,4 @@
-import {FPS, LOOP_DURATION, tracker, iot} from './assets/simulation.js';
+import {FPS, LOOP_DURATION, tracker, iot} from './variables.js';
 
 let globalTrackData = new Map(); 
 let globalIoTData = [];      

@@ -1,6 +1,7 @@
 // Import the new functions from world.js
 import { loadAssets, buildWorld } from "./assets/world.js";
-import { renderFrame, playback, loadSimulationData, FPS, LOOP_DURATION } from "./assets/simulation.js";
+import { loadSimulationData, renderFrame, playback } from "./assets/simulation.js";
+import { FPS, LOOP_DURATION } from "./variables.js";
 import { setupGUI } from "./assets/ui.js";
 import { scene, camera, renderer, controls } from "./assets/scene.js";
 

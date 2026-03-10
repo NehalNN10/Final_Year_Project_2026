@@ -184,10 +184,10 @@ export function renderFrame(index) {
 }
 
 export function getRoomInfo(x, z) {
-  if (x >= -9.1 && x <= -2.4 && z >= -9.35 && z <= 9.35) {
+  if (x >= -9.1 && x <= 9.1 && z >= -9.35 && z <= 9.35) {
     return { name: "Projects Lab", id: "C-007", floor: "Lower Ground" };
-  } else if (x >= -2.4 && x <= 9.1 && z <= 5.35 && z >= -9.35) {
-    return { name: "Projects Lab", id: "C-007", floor: "Lower Ground" };
+  } else if (x > 9.1 && x <= 16.95 && z >= -9.35 && z <= 9.35) {
+    return { name: "Power Lab", id: "C-006", floor: "Lower Ground" };
   }
   return { name: "Outside Bounds", id: "N/A", floor: "N/A" };
 }
