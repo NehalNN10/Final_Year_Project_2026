@@ -233,11 +233,23 @@ export function renderFrame(index) {
             // }
             
             // Color Logic
-            const color = (info.id === "N/A") ? "#ff4444" : "#00ff88";
-            const whiteColor = (info.id === "N/A") ? "#ff4444" : "#ffffff";
-            uiElements.uiName.style.color = color;
-            uiElements.uiID.style.color = whiteColor
-            uiElements.uiFloor.style.color = whiteColor // Fix: uiFloor was declared but not colored
+            if (info.id === "N/A") {
+                uiElements.uiName.style.color = "#ff4444";
+                uiElements.uiID.style.color = "#ff4444";
+                uiElements.uiFloor.style.color = "#ff4444";
+                uiElements.uiTemp.innerText = "N/A";
+                uiElements.uiTemp.style.color = "#ff4444";
+                uiElements.uiAC.innerText = "N/A";
+                uiElements.uiAC.style.color = "#ff4444";
+                uiElements.uiLights.innerText = "N/A";
+                uiElements.uiLights.style.color = "#ff4444";
+                uiElements.uiOccupancy.innerText = "N/A";
+                uiElements.uiOccupancy.style.color = "#ff4444";
+            } else {
+                uiElements.uiFloor.style.color = "#fff";
+                uiElements.uiID.style.color = "#fff";
+                uiElements.uiName.style.color = "#00ff88";
+            }
 
         } else {
             // No: We are looking at the sky/void
@@ -248,9 +260,9 @@ export function renderFrame(index) {
 }
 
 export function getRoomInfo(x, z) {
-    if (x >= -9.1 && x <= 9.1 && z >= -9.35 && z <= 9.35) {
+    if (z >= -9.1 && z <= 9.1 && x >= -9.35 && x <= 9.35) {
         return { name: "Projects Lab", id: "C-007", floor: "Lower Ground" };
-    } else if (x > 9.1 && x <= 16.95 && z >= -9.35 && z <= 9.35) {
+    } else if (z > 9.1 && z <= 16.95 && x >= -9.35 && x <= 9.35) {
         return { name: "Power Lab", id: "C-006", floor: "Lower Ground" };
     }
     return { name: "Outside Bounds", id: "N/A", floor: "N/A" };

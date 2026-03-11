@@ -144,16 +144,20 @@ export const worldObjects = {
 
         wallz3: createWall(18-4.25, wallThickness, 8.75 + 7.5 + wallThickness*1.5, 4.25/2, materials.wall),
 
-        workbench_v1: createObject(0.9, 2.375, 8.75 + wallThickness + 7.5 - 0.6 - 2.375/2, 9 - 3.2 - 0.9/2, materials.bench),
-        workbench_v2: createObject(0.9, 2.375, 8.75 + wallThickness + 7.5 - 0.6 - 2.375*(3/2)-0.2, 9 - 3.2 - 0.9/2, materials.bench),
+        workbench_v1: createObject(0.9, 2.375, 8.75 + wallThickness + 7.5 - 0.6 - 2.375/2, 9 - 2.8 - 0.9/2, materials.bench),
+        workbench_v2: createObject(0.9, 2.375, 8.75 + wallThickness + 7.5 - 0.6 - 2.375*(3/2)-0.2, 9 - 2.8 - 0.9/2, materials.bench),
 
-        table_v1: createObject(0.9, 1.8, 8.75 + wallThickness + 7.5 - 0.6 - 1.8/2, 9 - 3.3 - 0.9 - 2 - 0.9/2, materials.bench),
-        table_v2: createObject(0.9, 1.8, 8.75 + wallThickness + 7.5 - 0.6 - 1.8*(3/2), 9 - 3.3 - 0.9 - 2 - 0.9/2, materials.bench),
+        table_v1: createObject(0.85, 1.8, 8.75 + wallThickness + 7.5 - 0.6 - 1.8/2, 9 - 2.8 - 0.85 - 1.5 - 0.85/2, materials.bench),
+        table_v2: createObject(0.85, 1.8, 8.75 + wallThickness + 7.5 - 0.6 - 1.8*(3/2), 9 - 2.8 - 0.85 - 1.5 - 0.85/2, materials.bench),
 
-        table_v1: createObject(0.9, 1.8, 8.75 + wallThickness + 7.5 - 0.6 - 1.8/2, 9 - 3.3 - 0.9 - 2 - 0.9 - 1.45 - 0.9/2, materials.bench),
-        table_v2: createObject(0.9, 1.8, 8.75 + wallThickness + 7.5 - 0.6 - 1.8*(3/2), 9 - 3.3 - 0.9 - 2 - 0.9 - 1.45 - 0.9/2, materials.bench),
+        table_v1: createObject(0.85, 1.8, 8.75 + wallThickness + 7.5 - 0.6 - 1.8/2, 9 - 2.8 - 0.85 - 1.5 - 0.85 - 1.45 - 0.85/2, materials.bench),
+        table_v2: createObject(0.85, 1.8, 8.75 + wallThickness + 7.5 - 0.6 - 1.8*(3/2), 9 - 2.8 - 0.85 - 1.5 - 0.85 - 1.45 - 0.85/2, materials.bench),
+        table_v1: createObject(0.85, 1.8, 8.75 + wallThickness + 7.5 - 0.6 - 1.8/2, 9 - 2.8 - 0.85 - 1.5 - 0.85 - 1.45 - 0.85*(3/2), materials.bench),
+        table_v2: createObject(0.85, 1.8, 8.75 + wallThickness + 7.5 - 0.6 - 1.8*(3/2), 9 - 2.8 - 0.85 - 1.5 - 0.85 - 1.45 - 0.85*(3/2), materials.bench),
 
-        table_v1: createObject(0.9, 1.8, 8.75 + wallThickness + 7.5 - 0.6 - 1.8/2, 9 - 3.3 - 0.9 - 2 - 0.9 - 1.45 - 0.9 - 1.3 - 0.9/2, materials.bench),
-        table_v2: createObject(0.9, 1.8, 8.75 + wallThickness + 7.5 - 0.6 - 1.8*(3/2), 9 - 3.3 - 0.9 - 2 - 0.9 - 1.45 - 0.9 - 1.3 - 0.9/2, materials.bench),
+        table_v1: createObject(0.85, 1.8, 8.75 + wallThickness + 7.5 - 0.6 - 1.8/2, 9 - 2.8 - 0.85 - 1.5 - 0.85 - 1.45 - 0.85*2 - 1.3 - 0.85/2, materials.bench),
+        table_v2: createObject(0.85, 1.8, 8.75 + wallThickness + 7.5 - 0.6 - 1.8*(3/2), 9 - 2.8 - 0.85 - 1.5 - 0.85 - 1.45 - 0.85*2 - 1.3 - 0.85/2, materials.bench),
+        table_v1: createObject(0.85, 1.8, 8.75 + wallThickness + 7.5 - 0.6 - 1.8/2, 9 - 2.8 - 0.85 - 1.5 - 0.85 - 1.45 - 0.85*2 - 1.3 - 0.85*(3/2), materials.bench),
+        table_v2: createObject(0.85, 1.8, 8.75 + wallThickness + 7.5 - 0.6 - 1.8*(3/2), 9 - 2.8 - 0.85 - 1.5 - 0.85 - 1.45 - 0.85*2 - 1.3 - 0.85*(3/2), materials.bench),
     }
 };

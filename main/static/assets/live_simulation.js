@@ -1,6 +1,7 @@
 import * as THREE from 'three';
 import { createObjectMarker, models } from "./world.js";
 import { camera, controls} from "./scene.js";
+import { xor } from 'three/tsl';
 
 export const raycaster = new THREE.Raycaster();
 export const screenCenter = new THREE.Vector2(0, 0); // (0,0) is the center of the screen
@@ -241,9 +242,9 @@ export function renderFrame() {
 }
 
 export function getRoomInfo(x, z) {
-    if (x >= -9.1 && x <= 9.1 && z >= -9.35 && z <= 9.35) {
+    if (z >= -9.1 && z <= 9.1 && x >= -9.35 && x <= 9.35) {
         return { name: "Projects Lab", id: "C-007", floor: "Lower Ground" };
-    } else if (x > 9.1 && x <= 16.95 && z >= -9.35 && z <= 9.35) {
+    } else if (z > 9.1 && z <= 16.95 && x >= -9.35 && x <= 9.35) {
         return { name: "Power Lab", id: "C-006", floor: "Lower Ground" };
     }
     return { name: "Outside Bounds", id: "N/A", floor: "N/A" };

@@ -14,7 +14,9 @@ export const worldObjects = {};
 
 export const models = {
     white_table: './models/table.glb',
+    black_table: './models/black_table.glb',
     workbench:   './models/workbench.glb',
+    workbench_table: './models/workbench_table.glb',
     pillar:      './models/pillar.glb',
     camera:      './models/camera.glb',
     roblox:      './models/roblox.glb',
@@ -219,7 +221,7 @@ export function buildWorld() {
     wallxn: createWall(wallThickness, 6 + wallThickness, -9 - wallThickness/2, -5.75 + wallThickness/2, materials.wall, 2, 3),
 
     wallzn: createWall(4 - wallThickness, wallThickness, -7 - wallThickness/2, -2.75 + wallThickness/2, materials.wall, 2, 3),
-    wallzp: createWall(14 + wallThickness*2, wallThickness, 2, 8.75 + wallThickness/2, materials.wall, 2, 3),
+    wallzp: createWall(18 + wallThickness*2, wallThickness, 0, 8.75 + wallThickness/2, materials.wall, 2, 3),
 
     pillar: createObject(1.75, 2.5, 0, models.pillar),
     table_p11: createObject(0.5, 2.5, Math.PI / 2, models.white_table),
@@ -266,11 +268,40 @@ export function buildWorld() {
 
     buggy: createObject2(1.8, 0.8, -8, -5, materials.buggy),
 
+    wallx1 : createWall(wallThickness, 7.5 + wallThickness, 9 + wallThickness/2, 8.75 + 3.75 + wallThickness*1.5, materials.wall, 4, 2),
+    
+    wallx2 : createWall(wallThickness, 3.75 + wallThickness, -9 - wallThickness/2, 8.75 + 3.75/2 + wallThickness*1.5, materials.wall, 4, 2),
+    wallx3 : createWall(wallThickness, 4.2 + wallThickness, -4.75 - wallThickness/2, 8.75 + 3.3 + 4.2/2 + wallThickness*1.5,materials.wall, 4, 2),
+
+    wallz1: createWall(4.25-wallThickness/1.5, wallThickness, -9 + 4.25/2 - wallThickness*(4/3), 8.75 + wallThickness/2, materials.wall),
+    wallz2: createWall(4.25-wallThickness, wallThickness, -9 + 4.25/2 - wallThickness/2, 8.75 + 3.75 + wallThickness*1.5, materials.glass),
+
+    wallz3: createWall(18-4.25, wallThickness, 4.25/2, 8.75 + 7.5 + wallThickness*1.5, materials.wall, 4, 2),
+
+    wallz4: createWall(4.25-wallThickness, wallThickness, -9 + 4.25/2 - wallThickness/2, 8.75 + 3.75 + wallThickness*1.5, materials.wall, 2, 3),
+
+    workbench_v1: createObject(8.75 + wallThickness + 7.5 - 0.6 - 2.375/2, 9 - 2.8 - 0.9/2, -Math.PI/2, models.workbench_table),
+    workbench_v2: createObject(8.75 + wallThickness + 7.5 - 0.6 - 2.375*(3/2)-0.2, 9 - 2.8 - 0.9/2, -Math.PI/2, models.workbench_table),
+
+    table_v1: createObject(8.75 + wallThickness + 7.5 - 0.6 - 1.8/2, 9 - 2.8 - 0.85 - 1.5 - 0.85/2, Math.PI/2, models.black_table),
+    table_v2: createObject(8.75 + wallThickness + 7.5 - 0.6 - 1.8*(3/2), 9 - 2.8 - 0.85 - 1.5 - 0.85/2, Math.PI/2, models.black_table),
+
+    table_v1: createObject(8.75 + wallThickness + 7.5 - 0.6 - 1.8/2, 9 - 2.8 - 0.85 - 1.5 - 0.85 - 1.45 - 0.85/2, Math.PI/2, models.black_table),
+    table_v2: createObject(8.75 + wallThickness + 7.5 - 0.6 - 1.8*(3/2), 9 - 2.8 - 0.85 - 1.5 - 0.85 - 1.45 - 0.85/2, Math.PI/2, models.black_table),
+    table_v1: createObject(8.75 + wallThickness + 7.5 - 0.6 - 1.8/2, 9 - 2.8 - 0.85 - 1.5 - 0.85 - 1.45 - 0.85*(3/2), Math.PI/2, models.black_table),
+    table_v2: createObject(8.75 + wallThickness + 7.5 - 0.6 - 1.8*(3/2), 9 - 2.8 - 0.85 - 1.5 - 0.85 - 1.45 - 0.85*(3/2), Math.PI/2, models.black_table),
+
+    table_v1: createObject(8.75 + wallThickness + 7.5 - 0.6 - 1.8/2, 9 - 2.8 - 0.85 - 1.5 - 0.85 - 1.45 - 0.85*2 - 1.3 - 0.85/2, Math.PI/2, models.black_table),
+    table_v2: createObject(8.75 + wallThickness + 7.5 - 0.6 - 1.8*(3/2), 9 - 2.8 - 0.85 - 1.5 - 0.85 - 1.45 - 0.85*2 - 1.3 - 0.85/2, Math.PI/2, models.black_table),
+    table_v1: createObject(8.75 + wallThickness + 7.5 - 0.6 - 1.8/2, 9 - 2.8 - 0.85 - 1.5 - 0.85 - 1.45 - 0.85*2 - 1.3 - 0.85*(3/2), Math.PI/2, models.black_table),
+    table_v2: createObject(8.75 + wallThickness + 7.5 - 0.6 - 1.8*(3/2), 9 - 2.8 - 0.85 - 1.5 - 0.85 - 1.45 - 0.85*2 - 1.3 - 0.85*(3/2), Math.PI/2, models.black_table),
+
     });
 }
 
 export const materials = {
-    floor: new THREE.MeshMatcapMaterial({ color: 0x447c5a, side: THREE.DoubleSide }),
+    floor: new THREE.MeshBasicMaterial({ color: 0x447c5a, side: THREE.DoubleSide }),
+    floor2: new THREE.MeshBasicMaterial({ color: 0x928f83, side: THREE.DoubleSide }),
     wall: new THREE.MeshStandardMaterial({ color: 0x999999, side: THREE.DoubleSide }),
     wood: new THREE.MeshStandardMaterial({ color: 0x462416, side: THREE.DoubleSide }),
     white: new THREE.MeshStandardMaterial({ color: 0xffffffff, side: THREE.DoubleSide }),
@@ -298,4 +329,14 @@ export function createObject2(w, h, z, x, material) {
     if (material != materials.glass) { mesh.receiveShadow = true; mesh.castShadow = true; }
     scene.add(mesh);
     return mesh;
+}
+
+export function createFloor(w, h, z, x, material) {
+    const floorGeometry1 = new THREE.PlaneGeometry(w, h);
+    const mesh = new THREE.Mesh(floorGeometry1, material);
+    mesh.rotation.x = -Math.PI / 2;
+    mesh.position.z = z
+    mesh.position.x = x
+    scene.add(mesh);
+    return mesh
 }
