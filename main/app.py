@@ -411,6 +411,28 @@ def get_user_assignments(user_db_id):
         return jsonify({'error': str(e)}), 500
 
 
+#will uncomment this once the esp32 is ready.....
+# @app.route('/data', methods=['POST'])
+# def receive_esp32_data():
+#     data = request.get_json(silent=True)
+#
+#     if not data:
+#         return jsonify({'success': False, 'error': 'Invalid or missing JSON'}), 400
+#
+#     temperature = data.get('temperature')
+#     lidar_light = data.get('lidar_light')
+#
+#     print('ESP32 data received:', data)
+#
+#     return jsonify({
+#         'success': True,
+#         'received': {
+#             'temperature': temperature,
+#             'lidar_light': lidar_light
+#         }
+#     }), 200
+
+
 if __name__ == '__main__':
     # app.run(host='0.0.0.0', port=1767, debug=True)
     socketio.run(app, 
