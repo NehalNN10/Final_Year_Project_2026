@@ -20,8 +20,6 @@
       }
     </script>
 
-    <script type="text/javascript" src="{{ url_for('static', filename='dat.gui.min.js') }}"></script>
-
   </head>
 <body>
   <div class="main-nav">
@@ -207,37 +205,29 @@
 
         {% for staff in staff_list %}
         <div class="tracker-ui">
-          <div class="row" style="margin-top: 0px !important; display: flex; align-items: center; justify-content: space-between;">
-            
-            <div style="flex: 1; padding-right: 10px; min-width: 0;">
-              <div style="display: flex; align-items: center; gap: 10px; font-size: 1.2rem; flex-wrap: wrap;">
-                <h4 style="margin: 0; white-space: nowrap;">{{ staff.name }}</h4>
-              </div>
-              <div style="margin-top: 5px;">
-                <span style="color: #888; font-size: 0.9rem;">{{ staff.email }}</span>
-              </div>
-              <div style="margin-top: 5px;">
-                <span style="color: #888; font-size: 0.9rem;">{{ staff.role.name }}</span>
-              </div>
-            </div>
+          <div class="row" style="margin-top: 0;">
+            <h4 style="font-size: 1.2rem; flex: 5; margin: 0;">{{ staff.name }}</h4>
 
-            <div style="display: flex; gap: 5px; flex-shrink: 0;">
-              
+            <div class="row" style="margin-top: 0; flex: 2">
               <button class="btn btn-yellow" 
-                      style="width: auto !important; min-width: 40px; padding: 5px 10px; margin: 0;" 
-                      onclick="openStaffModal('{{ staff.id }}', '{{ staff.user_id }}', '{{ staff.email }}', '{{ staff.name }}', '{{ staff.role.name }}')"> 
+                style="max-width: 2.5rem !important; margin: 0; padding: 5px 0px;" 
+                onclick="openStaffModal('{{ staff.id }}', '{{ staff.user_id }}', '{{ staff.email }}', '{{ staff.name }}', '{{ staff.role.name }}')"> 
                 ✏️ 
               </button>
-              
               <button class="btn btn-red" 
-                      style="margin: 0;" 
-                      onclick="deleteStaff('{{ staff.id }}')"> 
+                style="max-width: 2.5rem !important; margin: 0; padding: 5px 0px;" 
+                onclick="deleteStaff('{{ staff.id }}')"> 
                 🗑️ 
               </button>
-
             </div>
-
           </div>
+          <div style="margin-top: 5px;">
+            <span style="color: #888; font-size: 0.9rem;">{{ staff.email }}</span>
+          </div>
+          <div style="margin-top: 5px;">
+            <span style="color: #888; font-size: 0.9rem;">{{ staff.role.name }}</span>
+          </div>
+
           <div style="margin-top: 5px;">
             <span>Rooms Assigned: </span>
             {% if staff_rooms[staff.user_id] == [] %}

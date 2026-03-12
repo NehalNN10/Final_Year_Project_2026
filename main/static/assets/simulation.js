@@ -68,10 +68,16 @@ export function renderFrame(index) {
     
     trackMarkers.forEach(m => m.visible = false);
 
-    const room = getRoom(intersectionPoint.x, intersectionPoint.z);
-    const roomInf = roomInfo[room];
+    raycaster.setFromCamera(screenCenter, camera);
+
+    // 2. Intersect
+    // We use a temporary variable to check if we actually hit the floor
+    const hit = raycaster.ray.intersectPlane(floorPlane, intersectionPoint);
+
+    const room = hit ? getRoom(intersectionPoint.x, intersectionPoint.z) : null;
+    const roomInf = room ? roomInfo[room] : null;
     const seconds = Math.floor(index / FPS);
-    const row = iot[room][seconds];
+    const row = room ? iot[room][seconds] : null;
 
     if (room == "C-007") {
         if (index < globalTrackFrames.length) {
@@ -90,13 +96,26 @@ export function renderFrame(index) {
         }
     }
 
-    if (row) {
-        if (uiElements.uiName && uiElements.uiID && uiElements.uiFloor) {
-            uiElements.uiName.innerText = roomInf.name;
-            uiElements.uiID.innerText = roomInf.room_id;
-            uiElements.uiFloor.innerText = roomInf.room_floor;
-        }
+    if (roomInf) {
+        uiElements.uiName.innerText = roomInf.name;
+        uiElements.uiID.innerText = roomInf.room_id;
+        uiElements.uiFloor.innerText = roomInf.room_floor;
+        uiElements.uiName.style.color = "#00ff88";
+        uiElements.uiID.style.color = "#ffffff";
+        uiElements.uiFloor.style.color = "#ffffff";
+    }
+    else {
+        uiElements.uiName.innerText = "N/A";
+        uiElements.uiID.innerText = "N/A";
+        uiElements.uiFloor.innerText = "N/A";
+        uiElements.uiName.style.color = "#ff4444";
+        uiElements.uiID.style.color = "#ff4444";
+        uiElements.uiFloor.style.color = "#ff4444";
+    }
+        
 
+
+    if (row) {
         if (department == "Security") uiElements.uiIot.style.display = "none";
         else {
             uiElements.uiIot.style.display = "block";
@@ -142,30 +161,9 @@ export function renderFrame(index) {
                 uiElements.uiOccupancy.style.color = (l > room.max_occupancy) ? "#ff4444" : ( l === 0 ? "#fff" : "#00ff88");
             }
         }
-
-        if (uiElements.uiDate) {
-           displayCurrentDateTime();
-        }
-            
-        // --- NEW CODE START: TIME CALCULATION ---
-        if (uiElements.uiTime) {
-            const now = new Date();
-            const nowSeconds = Math.floor(now.getTime() / 1000);
-            
-            const secondsIntoCycle = nowSeconds % LOOP_DURATION;
-            const cycleStartTime = new Date(now.getTime() - (secondsIntoCycle * 1000));
-            
-            const frameTime = new Date(cycleStartTime.getTime() + (seconds) * 1000);
-            
-            uiElements.uiTime.innerText = frameTime.toLocaleTimeString(); 
-            
-        }
     }
     
     else {
-        uiElements.uiName.style.color = "#ff4444";
-        uiElements.uiID.style.color = "#ff4444";
-        uiElements.uiFloor.style.color = "#ff4444";
         uiElements.uiTemp.innerText = "N/A";
         uiElements.uiTemp.style.color = "#ff4444";
         uiElements.uiAC.innerText = "N/A";
@@ -174,6 +172,24 @@ export function renderFrame(index) {
         uiElements.uiLights.style.color = "#ff4444";
         uiElements.uiOccupancy.innerText = "N/A";
         uiElements.uiOccupancy.style.color = "#ff4444";
+    }
+
+    if (uiElements.uiDate) {
+        displayCurrentDateTime();
+    }
+        
+    // --- NEW CODE START: TIME CALCULATION ---
+    if (uiElements.uiTime) {
+        const now = new Date();
+        const nowSeconds = Math.floor(now.getTime() / 1000);
+        
+        const secondsIntoCycle = nowSeconds % LOOP_DURATION;
+        const cycleStartTime = new Date(now.getTime() - (secondsIntoCycle * 1000));
+        
+        const frameTime = new Date(cycleStartTime.getTime() + (seconds) * 1000);
+        
+        uiElements.uiTime.innerText = frameTime.toLocaleTimeString(); 
+        
     }
 }
 
