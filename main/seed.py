@@ -1,6 +1,7 @@
 from app import app
-from models import db, User, Role, Rooms, SecurityEmails
+from models import db, User, Role, Rooms, SecurityEmails, RoomData
 from werkzeug.security import generate_password_hash
+import pandas as pd
 
 # Connect to the app context to access the DB
 with app.app_context():
@@ -9,7 +10,7 @@ with app.app_context():
     Role.objects.delete()
     Rooms.objects.delete()
     SecurityEmails.objects.delete()
-
+    RoomData.objects.delete()
 
     print("Seeding Database...")
 
@@ -69,20 +70,23 @@ with app.app_context():
 
     Rooms(
         room_id='C-006',
-        room_name='Digital Instrumentations Lab',
-        max_occupancy=35
+        room_name='Power Lab',
+        room_floor='Lower Ground Floor',
+        max_occupancy=30
     ).save()
 
     Rooms(
         room_id='C-007',
         room_name='Projects Lab',
+        room_floor='Lower Ground Floor',
         max_occupancy=50
     ).save()
 
     Rooms(
         room_id='C-109',
         room_name='Arif Habib Classroom',
-        max_occupancy=50
+        room_floor='Ground Floor',
+        max_occupancy=35
     ).save()
 
     SecurityEmails(
@@ -104,5 +108,22 @@ with app.app_context():
         room=Rooms.objects(room_id='C-007').first(),
         user=User.objects(user_id='mk07899').first()
     ).save()
+
+    data_proj = pd.read_csv('../csv_files/temp_files_15min/cs_lab_iot_15min.csv')
+    occu_proj = pd.read_csv('../csv_files/temp_files_15min/combined_count_15min.csv')
+
+    occu_subset = occu_proj.iloc[::25].reset_index(drop=True)
+    data_proj['occu'] = occu_subset['Count']
+    target_room = Rooms.objects(room_id='C-007').first()
+
+    for index, row in data_proj.iterrows():
+        RoomData(
+            room = target_room,
+            time = row['timestamp'],
+            occupancy = row['occu'],
+            temperature = row['temp'],
+            ac = row['ac'] == 'On',
+            lights = row['lights'] == 'On'
+        ).save()
 
     print("Database seeded successfully!")

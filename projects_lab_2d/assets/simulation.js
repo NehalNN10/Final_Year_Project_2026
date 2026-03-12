@@ -154,7 +154,7 @@ export function renderFrame(index) {
   if (uiElements.uiName && uiElements.uiID && uiElements.uiFloor) {
     const camX = camera.position.x;
     const camZ = camera.position.z;
-    const info = getRoomInfo(camX, camZ);
+    const info = getRoom(camX, camZ);
 
     uiElements.uiName.innerText = info.name;
     uiElements.uiID.innerText = info.id;
@@ -183,7 +183,7 @@ export function renderFrame(index) {
   }
 }
 
-export function getRoomInfo(x, z) {
+export function getRoom(x, z) {
   if (x >= -9.1 && x <= 9.1 && z >= -9.35 && z <= 9.35) {
     return { name: "Projects Lab", id: "C-007", floor: "Lower Ground" };
   } else if (x > 9.1 && x <= 16.95 && z >= -9.35 && z <= 9.35) {

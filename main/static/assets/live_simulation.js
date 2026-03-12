@@ -220,7 +220,7 @@ export function renderFrame() {
         // 3. Safety Check: Did we hit the floor?
         if (hit) {
             // Yes: Use the updated intersectionPoint
-            const info = getRoomInfo(intersectionPoint.x, intersectionPoint.z);
+            const info = getRoom(intersectionPoint.x, intersectionPoint.z);
 
             uiElements.uiName.innerText = info.name;
             uiElements.uiID.innerText = info.id;
@@ -241,7 +241,7 @@ export function renderFrame() {
     }
 }
 
-export function getRoomInfo(x, z) {
+export function getRoom(x, z) {
     if (z >= -9.1 && z <= 9.1 && x >= -9.35 && x <= 9.35) {
         return { name: "Projects Lab", id: "C-007", floor: "Lower Ground" };
     } else if (z > 9.1 && z <= 16.95 && x >= -9.35 && x <= 9.35) {

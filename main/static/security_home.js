@@ -1,7 +1,4 @@
-import {FPS, LOOP_DURATION, track_count, iot} from './variables.js';
-
-let globalTrackData = new Map(); 
-let globalIoTData = [];      
+import {FPS, LOOP_DURATION, iot} from './variables.js';
 
 const uiElements = {
     time: document.getElementById('time'),
@@ -11,64 +8,16 @@ const uiElements = {
 function getCurrentFrame() {
     const now = Date.now() / 1000;
     const currentLoopSeconds = now % LOOP_DURATION;
-    return Math.floor(currentLoopSeconds * FPS); // Ensure FPS is applied
-}
-
-async function loadData() {
-    try {
-        console.log("Fetching track count from:", track_count); // Debugging
-        const tResp = await fetch(track_count);
-        if (!tResp.ok) throw new Error(`Failed to load track CSV: ${tResp.status}`);
-        
-        const tText = await tResp.text();
-        const tLines = tText.split('\n').filter(l => l.trim());
-        
-        if (tLines.length > 1) {
-            const headers = tLines[0].split(',').map(h => h.trim().toLowerCase());
-            const frameIdx = headers.indexOf('frame');
-            // 1. Find the index of the 'Count' column (usually index 1)
-            const countIdx = headers.indexOf('count'); 
-            
-            tLines.slice(1).forEach(line => {
-                const cols = line.split(',');
-                const frame = parseInt(cols[frameIdx]);
-                
-                if (!isNaN(frame)) {
-                    // 2. Store the EXACT row data directly
-                    globalTrackData.set(frame, cols);
-                }
-            });
-        }
-
-        const iResp = await fetch(iot);
-        if (!iResp.ok) throw new Error(`Failed to load IoT CSV: ${iResp.status}`);
-        
-        const iText = await iResp.text();
-        const iRows = iText.split('\n').map(r => r.trim()).filter(r => r);
-        const iHeaders = iRows[0].split(',').map(h => h.trim().toLowerCase());
-
-        globalIoTData = iRows.slice(1).map(row => {
-            const vals = row.split(',');
-            const obj = {};
-            iHeaders.forEach((h, i) => obj[h] = vals[i]);
-            return obj;
-        });
-
-        console.log("Facility Data Loaded Successfully");
-        
-    } catch (e) {
-        console.error("Error loading CSVs:", e);
-        // Fallback: If data fails, set text to Error so you know
-        if(uiElements.occ) uiElements.occ.innerText = "Error";
-    }
+    return Math.floor(currentLoopSeconds);
 }
 
 function updateDashboard() {
     requestAnimationFrame(updateDashboard);
 
     const frame = getCurrentFrame();
+    
+    const row = iot["C-007"][frame];
 
-    // --- TIME UPDATE ---
     if (uiElements.time) {
         const now = new Date();
         const nowSeconds = Math.floor(now.getTime() / 1000);
@@ -79,32 +28,19 @@ function updateDashboard() {
         uiElements.time.innerText = simTime.toLocaleTimeString();
     }
 
-    // --- OCCUPANCY UPDATE (FIXED) ---
     if (uiElements.occ) {
-        // 3. Retrieve the row for this frame
-        const row = globalTrackData.get(frame); 
+        // 
+        const count = row.occupancy;
+        uiElements.occ.innerText = isNaN(count) ? "--" : count;
         
-        if (row) {
-            // 4. Read the value from the 2nd column (Index 1)
-            // The CSV format is: Frame, Count (e.g., "0,18")
-            const count = parseInt(row[1]); 
-
-            uiElements.occ.innerText = isNaN(count) ? "--" : count;
-            
-            // Color Logic
-            uiElements.occ.style.backgroundColor = count > 20 ? "#ff4444" : count != 0 ? "#00ff88" : "#ffffff";
-            uiElements.occ.style.color = "#000000";
-        } else {
-            // Optional: Keep last known value or show placeholder if frame is out of range
-            // uiElements.occ.innerText = "--"; 
-        }
+        uiElements.occ.style.backgroundColor = count > 20 ? "#ff4444" : count != 0 ? "#00ff88" : "#ffffff";
+        uiElements.occ.style.color = "#000000";
+    
     }
 }
 
 // Start the app
-loadData().then(() => {
-    updateDashboard();
-});
+updateDashboard();
 
 // ===== Emergency Modal Functions =====
 function openEmergencyModal() {

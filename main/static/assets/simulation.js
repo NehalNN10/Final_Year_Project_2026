@@ -1,6 +1,6 @@
 import * as THREE from "three";
 import { createMarker } from "./world.js";
-import { FPS, LOOP_DURATION, iot, track_count } from "../variables.js";
+import { FPS, LOOP_DURATION, iot, getRoom, roomInfo } from "../variables.js";
 import { camera, controls} from "./scene.js";
 
 export const playback = {
@@ -10,17 +10,8 @@ export const playback = {
     speed: 1
 };
 
-// const FILE_PATH = '../../../csv_files';
-
-// const tracker = './files/mapped_tracks_angle_03.csv';
-// const tracker = './temp_files_15min/combined_frames_15min.csv';
-// const iot = "./temp_files_15min/cs_lab_iot_15min.csv";
-// const track_count = "./files/combined_count_output.csv"
 export const tracker = `/temp_files_15min/combined_frames_15min.csv`;
 export const globalCount = 18;
-// const tracker = './files/mapped_tracks_angle_01_try_2.csv';
-
-// const iot = './files/iot.csv'
 
 export const raycaster = new THREE.Raycaster();
 export const screenCenter = new THREE.Vector2(0, 0); // (0,0) is the center of the screen
@@ -77,82 +68,42 @@ export function renderFrame(index) {
     
     trackMarkers.forEach(m => m.visible = false);
 
-    if (index < globalTrackFrames.length) {
-        const realFrameNumber = globalTrackFrames[index];
-        const detections = globalTrackData.get(realFrameNumber) || [];
-        if (department != "Facilities") {
-            detections.forEach(d => {
-                const marker = trackMarkers.get(d.id);
-                if (marker) {
-                    marker.position.x = d.z; 
-                    marker.position.z = d.x;
-                    marker.visible = true;
-                }
-            });
-        }
-    
-        // if (uiElements.uiOccupancy && uiElements.uiOccuHeader) {
-        //     const l = detections.length;
-        //     if (department == "Facilities"){
-        //         uiElements.uiOccuHeader.innerText = "Occupancy: ";
-        //         uiElements.uiOccupancy.innerText = (l > 0) ? "Occupied" : "Vacant";
-        //         uiElements.uiOccupancy.style.color = (l > 0) ? "#ff4444" : "#00ff88";
-        //     }
-        //     else {
-        //         uiElements.uiOccuHeader.innerText = "Occupancy: ";
-        //         uiElements.uiOccupancy.innerText = l;
-        //         uiElements.uiOccupancy.style.color = (l > 20) ? "#ff4444" : ( l === 0 ? "#fff" : "#00ff88");
-        //     }
-        // }
+    const room = getRoom(intersectionPoint.x, intersectionPoint.z);
+    const roomInf = roomInfo[room];
+    const seconds = Math.floor(index / FPS);
+    const row = iot[room][seconds];
 
-        if (uiElements.uiOccupancy && uiElements.uiOccuHeader) {
-            const count = globalCountData.get(realFrameNumber);
-
-            //comment
-            // const l = row['occu'];
-
-            //new
-            const l =
-            typeof count === "number"
-            ? count
-            : detections
-                ? detections.length
-                : globalCount;
-            /*****/
-
-            if (department == "Facilities"){
-                uiElements.uiOccuHeader.innerText = "Status: ";
-                uiElements.uiOccupancy.innerText = (l > 0) ? "Occupied" : "Vacant";
-                uiElements.uiOccupancy.style.color = (l > 0) ? "#ff4444" : "#00ff88";
-            }
-            else {
-                uiElements.uiOccuHeader.innerText = "Occupancy Count: ";
-                uiElements.uiOccupancy.innerText = l;
-                uiElements.uiOccupancy.style.color = (l > 20) ? "#ff4444" : ( l === 0 ? "#fff" : "#00ff88");
+    if (room == "C-007") {
+        if (index < globalTrackFrames.length) {
+            const realFrameNumber = globalTrackFrames[index];
+            const detections = globalTrackData.get(realFrameNumber) || [];
+            if (department != "Facilities") {
+                detections.forEach(d => {
+                    const marker = trackMarkers.get(d.id);
+                    if (marker) {
+                        marker.position.x = d.z; 
+                        marker.position.z = d.x;
+                        marker.visible = true;
+                    }
+                });
             }
         }
-
-
-
     }
 
-    //new
-    const seconds = Math.floor(index / FPS);
-    //from index to seconds
-    if (seconds < globalIoTData.length) {
-        //commented out
-        // const row = globalIoTData[index];
+    if (row) {
+        if (uiElements.uiName && uiElements.uiID && uiElements.uiFloor) {
+            uiElements.uiName.innerText = roomInf.name;
+            uiElements.uiID.innerText = roomInf.room_id;
+            uiElements.uiFloor.innerText = roomInf.room_floor;
+        }
 
-        //new 
-        const row = globalIoTData[seconds];
-        //************************ */
-        
         if (department == "Security") uiElements.uiIot.style.display = "none";
         else {
             uiElements.uiIot.style.display = "block";
 
             if (uiElements.uiTemp) {
-                const t = parseFloat(row['temp']);
+                // const t = parseFloat(row['temp']);
+                const t = row.temperature;
                 uiElements.uiTemp.innerText = t + "°C";
                 
                 if (t <= 19) uiElements.uiTemp.style.color = "#0088ff";
@@ -163,15 +114,32 @@ export function renderFrame(index) {
             }
             
             if (uiElements.uiAC) {
-                const ac = row['ac']; 
-                uiElements.uiAC.innerText = (ac === "On") ? "• ON" : "- OFF";
-                uiElements.uiAC.style.color = (ac === "On") ? "#00ff88" : "#ff4444";
+                // const ac = row['ac']; 
+                const ac = row.ac;
+                uiElements.uiAC.innerText = ac ? "• ON" : "- OFF";
+                uiElements.uiAC.style.color = ac ? "#00ff88" : "#ff4444";
             }
 
             if (uiElements.uiLights) {
-                const l = row['lights'];
-                uiElements.uiLights.innerText = (l === "On") ? "• ON" : "- OFF";
-                uiElements.uiLights.style.color = (l === "On") ? "#00ff88" : "#ff4444";
+                // const l = row['lights'];
+                const l = row.lights;
+                uiElements.uiLights.innerText = l ? "• ON" : "- OFF";
+                uiElements.uiLights.style.color = l ? "#00ff88" : "#ff4444";
+            }
+        }
+
+        if (uiElements.uiOccupancy && uiElements.uiOccuHeader) {
+            const l = row.occupancy;
+                
+            if (department == "Facilities"){
+                uiElements.uiOccuHeader.innerText = "Status: ";
+                uiElements.uiOccupancy.innerText = (l > 0) ? "Occupied" : "Vacant";
+                uiElements.uiOccupancy.style.color = (l > 0) ? "#ff4444" : "#00ff88";
+            }
+            else {
+                uiElements.uiOccuHeader.innerText = "Occupancy Count: ";
+                uiElements.uiOccupancy.innerText = l;
+                uiElements.uiOccupancy.style.color = (l > room.max_occupancy) ? "#ff4444" : ( l === 0 ? "#fff" : "#00ff88");
             }
         }
 
@@ -184,88 +152,29 @@ export function renderFrame(index) {
             const now = new Date();
             const nowSeconds = Math.floor(now.getTime() / 1000);
             
-            // 1. Find the start of the CURRENT 2-minute cycle
-            // (Current Time minus the remainder of 120)
             const secondsIntoCycle = nowSeconds % LOOP_DURATION;
             const cycleStartTime = new Date(now.getTime() - (secondsIntoCycle * 1000));
             
-            // 2. Add the frame's time to that start point
-            // If we are at Frame 10 (1s), we add 1s to the cycle start
-
-            //comment
-            // const frameTime = new Date(cycleStartTime.getTime() + (index / FPS) * 1000);
-
-            //replaced with 
             const frameTime = new Date(cycleStartTime.getTime() + (seconds) * 1000);
             
             uiElements.uiTime.innerText = frameTime.toLocaleTimeString(); 
             
         }
-
-        // if (uiElements.uiOccupancy) {
-        //     const l = row['occu'];
-        //     uiElements.uiOccupancy.innerText = l;
-        //     uiElements.uiOccupancy.style.color = (l > 20) ? "#ff4444" : ( l === 0 ? "#fff" : "#00ff88");
-        // }
-        
     }
     
-    if (uiElements.uiName && uiElements.uiID && uiElements.uiFloor) {
-        
-        // 1. Setup Ray
-        raycaster.setFromCamera(screenCenter, camera);
-
-        // 2. Intersect
-        // We use a temporary variable to check if we actually hit the floor
-        const hit = raycaster.ray.intersectPlane(floorPlane, intersectionPoint);
-
-        // 3. Safety Check: Did we hit the floor?
-        if (hit) {
-            // Yes: Use the updated intersectionPoint
-            const info = getRoomInfo(intersectionPoint.x, intersectionPoint.z);
-
-            uiElements.uiName.innerText = info.name;
-            uiElements.uiID.innerText = info.id;
-            uiElements.uiFloor.innerText = info.floor;
-            
-            // if (uiElements.uiCoords) {
-            //     uiElements.uiCoords.innerText = `${intersectionPoint.x.toFixed(1)}, ${intersectionPoint.z.toFixed(1)}`;
-            // }
-            
-            // Color Logic
-            if (info.id === "N/A") {
-                uiElements.uiName.style.color = "#ff4444";
-                uiElements.uiID.style.color = "#ff4444";
-                uiElements.uiFloor.style.color = "#ff4444";
-                uiElements.uiTemp.innerText = "N/A";
-                uiElements.uiTemp.style.color = "#ff4444";
-                uiElements.uiAC.innerText = "N/A";
-                uiElements.uiAC.style.color = "#ff4444";
-                uiElements.uiLights.innerText = "N/A";
-                uiElements.uiLights.style.color = "#ff4444";
-                uiElements.uiOccupancy.innerText = "N/A";
-                uiElements.uiOccupancy.style.color = "#ff4444";
-            } else {
-                uiElements.uiFloor.style.color = "#fff";
-                uiElements.uiID.style.color = "#fff";
-                uiElements.uiName.style.color = "#00ff88";
-            }
-
-        } else {
-            // No: We are looking at the sky/void
-            // Keep the previous info or show nothing
-            // uiElements.uiCoords.innerText = "--, --";
-        }
+    else {
+        uiElements.uiName.style.color = "#ff4444";
+        uiElements.uiID.style.color = "#ff4444";
+        uiElements.uiFloor.style.color = "#ff4444";
+        uiElements.uiTemp.innerText = "N/A";
+        uiElements.uiTemp.style.color = "#ff4444";
+        uiElements.uiAC.innerText = "N/A";
+        uiElements.uiAC.style.color = "#ff4444";
+        uiElements.uiLights.innerText = "N/A";
+        uiElements.uiLights.style.color = "#ff4444";
+        uiElements.uiOccupancy.innerText = "N/A";
+        uiElements.uiOccupancy.style.color = "#ff4444";
     }
-}
-
-export function getRoomInfo(x, z) {
-    if (z >= -9.1 && z <= 9.1 && x >= -9.35 && x <= 9.35) {
-        return { name: "Projects Lab", id: "C-007", floor: "Lower Ground" };
-    } else if (z > 9.1 && z <= 16.95 && x >= -9.35 && x <= 9.35) {
-        return { name: "Power Lab", id: "C-006", floor: "Lower Ground" };
-    }
-    return { name: "Outside Bounds", id: "N/A", floor: "N/A" };
 }
 
 export async function loadSimulationData(onLoadComplete) {
@@ -320,47 +229,47 @@ export async function loadSimulationData(onLoadComplete) {
         console.error("Error loading tracks:", e); 
     }
 
-    try {
-        const iResp = await fetch(iot);
-        if (iResp.ok) {
-            const iText = await iResp.text();
-            const iRows = iText.split('\n').map(r => r.trim()).filter(r => r);
-            const headers = iRows[0].split(',').map(h => h.trim().toLowerCase());
+    // try {
+    //     const iResp = await fetch(iot["C-007"]);
+    //     if (iResp.ok) {
+    //         const iText = await iResp.text();
+    //         const iRows = iText.split('\n').map(r => r.trim()).filter(r => r);
+    //         const headers = iRows[0].split(',').map(h => h.trim().toLowerCase());
             
-            globalIoTData = iRows.slice(1).map(row => {
-                const vals = row.split(',');
-                const obj = {};
-                headers.forEach((h, i) => obj[h] = vals[i]);
-                return obj;
-            });
-        }
-    } catch (e) { console.error("Error loading IoT", e); }
+    //         globalIoTData = iRows.slice(1).map(row => {
+    //             const vals = row.split(',');
+    //             const obj = {};
+    //             headers.forEach((h, i) => obj[h] = vals[i]);
+    //             return obj;
+    //         });
+    //     }
+    // } catch (e) { console.error("Error loading IoT", e); }
 
     // playback.maxFrames = Math.max(globalTrackFrames.length, globalIoTData.length) - 1;
     
     //neww  
-    try {
-        const iResp = await fetch(track_count);
-        if (iResp.ok) {
-        const iText = await iResp.text();
-        const iRows = iText
-            .split("\n")
-            .map((r) => r.trim())
-            .filter((r) => r);
-        const headers = iRows[0].split(",").map((h) => h.trim().toLowerCase());
+//     try {
+//         const iResp = await fetch(track_count);
+//         if (iResp.ok) {
+//         const iText = await iResp.text();
+//         const iRows = iText
+//             .split("\n")
+//             .map((r) => r.trim())
+//             .filter((r) => r);
+//         const headers = iRows[0].split(",").map((h) => h.trim().toLowerCase());
 
-        iRows.slice(1).forEach((row) => {
-            const vals = row.split(",");
-            const frameNum = parseInt(vals[headers.indexOf("frame")]);
-            const countNum = parseInt(vals[headers.indexOf("count")]);
-            if (!isNaN(frameNum) && !isNaN(countNum)) {
-            globalCountData.set(frameNum, countNum);
-            }
-        });
-    }
-  } catch (e) {
-    console.error("Error loading Count", e);
-  }
+//         iRows.slice(1).forEach((row) => {
+//             const vals = row.split(",");
+//             const frameNum = parseInt(vals[headers.indexOf("frame")]);
+//             const countNum = parseInt(vals[headers.indexOf("count")]);
+//             if (!isNaN(frameNum) && !isNaN(countNum)) {
+//             globalCountData.set(frameNum, countNum);
+//             }
+//         });
+//     }
+//   } catch (e) {
+//     console.error("Error loading Count", e);
+//   }
 
     /*************** */
     
