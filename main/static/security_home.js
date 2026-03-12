@@ -23,7 +23,7 @@ function updateDashboard() {
         const nowSeconds = Math.floor(now.getTime() / 1000);
         const secondsIntoCycle = nowSeconds % LOOP_DURATION;
         const cycleStartTime = new Date(now.getTime() - (secondsIntoCycle * 1000));
-        const simTime = new Date(cycleStartTime.getTime() + (frame / FPS) * 1000);
+        const simTime = new Date(cycleStartTime.getTime() + (frame) * 1000);
         
         uiElements.time.innerText = simTime.toLocaleTimeString();
     }

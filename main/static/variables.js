@@ -64,5 +64,5 @@ export function getRoom(x, z) {
     } else if (z > 9.1 && z <= 16.95 && x >= -9.35 && x <= 9.35) {
         return "C-006";
     }
-    return "N/A";
+    return null;
 }
