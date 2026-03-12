@@ -392,7 +392,49 @@ def get_security_info():
         return jsonify({'roles': roles_data, 'rooms': rooms_data})
     except Exception as e:
         return jsonify({'error': str(e)}), 500
+
+@app.route('/api/room_data', methods=['GET'])
+def get_room_data():
+    """Returns all RoomData entries for a given room"""
+    room_id = request.args.get('room_id')
+    try:
+        room = Rooms.objects(room_id=room_id).first()
+        if not room:
+            return jsonify({'error': 'Room not found'}), 404
+        
+        data_entries = RoomData.objects(room=room)
+        data_list = []
+        for d in data_entries:
+            data_list.append({
+                'time': d.time,
+                'occupancy': d.occupancy,
+                'temperature': d.temperature,
+                'ac': d.ac,
+                'lights': d.lights
+            })
+        
+        return jsonify({'room_data': data_list})
+    except Exception as e:
+        return jsonify({'error': str(e)}), 500
     
+@app.route('/api/room_info', methods=['GET'])
+def get_room_info():
+    """Returns information about a specific room"""
+    room_id = request.args.get('room_id')
+    try:
+        room = Rooms.objects(room_id=room_id).first()
+        if not room:
+            return jsonify({'error': 'Room not found'}), 404
+
+        return jsonify({
+            'room_id': room.room_id,
+            'name': room.room_name,
+            'room_floor': room.room_floor,
+            'max_occupancy': room.max_occupancy
+        })
+    except Exception as e:
+        return jsonify({'error': str(e)}), 500
+
 @app.route('/api/user_assignments/<user_db_id>', methods=['GET'])
 def get_user_assignments(user_db_id):
     """Returns the list of Room IDs assigned to a specific user"""

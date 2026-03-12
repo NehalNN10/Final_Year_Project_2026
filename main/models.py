@@ -18,6 +18,7 @@ class User(db.Document):
 class Rooms(db.Document):
     room_id = db.StringField(required=True, unique=True)
     room_name = db.StringField(required=True, unique=True)
+    room_floor = db.StringField(required=True)
     max_occupancy = db.IntField(required=True)
 
 class SecurityEmails(db.Document):
@@ -28,6 +29,6 @@ class RoomData(db.Document):
     room = db.ReferenceField(Rooms, required=True)
     time = db.IntField(required=True)
     occupancy = db.IntField(required=True)
-    temperature = db.IntField(required=True)
+    temperature = db.FloatField(required=True)
     ac = db.BooleanField(required=True)
     lights = db.BooleanField(required=True)
