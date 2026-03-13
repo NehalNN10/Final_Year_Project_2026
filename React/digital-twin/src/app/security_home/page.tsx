@@ -1,0 +1,161 @@
+"use client";
+
+import { useState, useEffect } from "react";
+import Navbar from "../../components/Navbar";
+import StaffList from "../../components/StaffList";
+import FormRow from "../../components/FormRow";
+
+export default function SecurityHome() {
+  // --- States ---
+  const [staffList, setStaffList] = useState<any[]>([]);
+  const [staffRooms, setStaffRooms] = useState<any>({});
+  const [roomsData, setRoomsData] = useState<any[]>([]);
+  const [currentRole, setCurrentRole] = useState("Security Admin");
+
+  const [isEmergencyModalOpen, setEmergencyModalOpen] = useState(false);
+
+  const [emergencyForm, setEmergencyForm] = useState({ roomNumber: "", occupancy: "", description: "" });
+  
+  const [currentRoomStats, setCurrentRoomStats] = useState<any>({});
+  const [currentTimeSpan, setCurrentTimeSpan] = useState("...");
+  
+  const LOOP_DURATION = 900;
+
+  // --- Initial Data Fetch ---
+  useEffect(() => {
+    fetch("/api/security_home_data")
+      .then((res) => res.json())
+      .then((data) => {
+        setStaffList(data.staff_list || []);
+        setStaffRooms(data.staff_rooms || {});
+        setRoomsData(data.rooms || []);
+        if (data.current_role) setCurrentRole(data.current_role);
+      })
+      .catch(err => console.error("Error fetching data:", err));
+  }, []);
+
+  // --- Real-Time Simulation Loop ---
+  useEffect(() => {
+    if (roomsData.length === 0) return;
+    
+    const interval = setInterval(() => {
+      const now = new Date();
+      const currentFrame = Math.floor(now.getTime() / 1000) % LOOP_DURATION;
+      
+      const cycleStartTime = new Date(now.getTime() - (currentFrame * 1000));
+      setCurrentTimeSpan(new Date(cycleStartTime.getTime() + (currentFrame * 1000)).toLocaleTimeString());
+
+      const newStats: any = {};
+      roomsData.forEach(room => {
+        if (room.timeseries?.length > 0) {
+          newStats[room.room_id] = room.timeseries.find((e: any) => e.time === currentFrame) 
+            || [...room.timeseries].reverse().find((e: any) => e.time <= currentFrame) 
+            || room.timeseries[0];
+        } else {
+          newStats[room.room_id] = { occupancy: "--", temperature: "--" };
+        }
+      });
+      setCurrentRoomStats(newStats);
+    }, 1000);
+    
+    return () => clearInterval(interval);
+  }, [roomsData]);
+
+  // --- Handlers ---
+  const handleEmergencySubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+    const res = await fetch('/send_emergency_alert', {
+      method: 'POST', headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ room_number: emergencyForm.roomNumber, occupancy_count: emergencyForm.occupancy, description: emergencyForm.description })
+    });
+    if (res.ok) {
+      alert('Emergency alert sent!');
+      setEmergencyModalOpen(false);
+      setEmergencyForm({ roomNumber: "", occupancy: "", description: "" });
+    }
+  };
+
+  // --- UI Render ---
+  return (
+    <div className="min-h-screen bg-[#131313] text-white">
+      <Navbar department="Security" />
+
+      {/* Side Nav */}
+      <div className="side-nav row mt-0! text-black">
+        <span>Security Dashboard</span>
+        {currentRole === 'Security Admin' && (
+          <button className="btn btn-red btn-auto m-0! py-1!" onClick={() => setEmergencyModalOpen(true)}>
+            <h2 className="font-bold text-white text-xl">Send Emergency Alert</h2>
+          </button>
+        )}
+      </div>
+
+      <div className="main-home scroll">
+        <div className="row boxes">
+          
+          {/* Column 1: Alerts */}
+          <div className="tracker-ui scroll outer box min-w-70">
+            <h3 className="font-bold">Occupancy Alerts</h3>
+            {/* Dynamic Alerts will map here later */}
+            <div className="tracker-ui mt-4 p-4 text-gray-400 text-center">
+              No active alerts.
+            </div>
+          </div>
+
+          {/* Column 2: Rooms Table */}
+          <div className="tracker-ui scroll outer box min-w-120">
+            <div className="row mt-0! font-bold">
+              <h3 className="flex-2">Rooms Real-Time Data</h3>
+              <h3 className="flex-1 text-right!"> ⏰ <span>{currentTimeSpan}</span></h3>
+            </div>
+            <table className="scroll table w-full mt-4">
+              <thead>
+                <tr><th style={{width:'22%'}}>ID</th><th style={{width:'40%'}}>Name</th><th style={{width:'13%'}}>Occupancy</th></tr>
+              </thead>
+              <tbody>
+                {roomsData.map(room => {
+                  const count = currentRoomStats[room.room_id]?.occupancy;
+                  const bgColor = count > room.max_occupancy ? "#ff4444" : (count !== "--" && count !== 0) ? "#00ff88" : "#ffffff";
+                  return (
+                    <tr key={room.id}>
+                      <td>{room.room_id}</td><td>{room.name}</td>
+                      <td><span className="fill" style={{ backgroundColor: bgColor }}>{count ?? "??"}</span></td>
+                    </tr>
+                  );
+                })}
+              </tbody>
+            </table>
+          </div>
+
+          {/* Column 3: Staff List */}
+          {currentRole === 'Security Admin' && (
+            <StaffList 
+              staffList={staffList}
+              staffRooms={staffRooms}
+              department="Security"
+            />
+          )}
+        </div>
+      </div>
+
+      {/* EMERGENCY MODAL */}
+      {isEmergencyModalOpen && (
+        <div className="modal-overlay active" onClick={(e) => e.target === e.currentTarget && setEmergencyModalOpen(false)}>
+          <div className="tracker-ui modal text-white">
+            <div className="modal-header p-4 text-3xl text-[#f33]">🚨 EMERGENCY ALERT 🚨</div>
+            <form onSubmit={handleEmergencySubmit}>
+              <FormRow label="Room Name" value={emergencyForm.roomNumber} onChange={e => setEmergencyForm({...emergencyForm, roomNumber: e.target.value})}/>
+              <FormRow label="Occupancy" type="number" value={emergencyForm.occupancy} onChange={e => setEmergencyForm({...emergencyForm, occupancy: e.target.value})} />
+              <FormRow label="Description" value={emergencyForm.description} onChange={e => setEmergencyForm({...emergencyForm, description: e.target.value})} />
+
+              <div className="row mt-4! justify-center!">
+                <button type="button" className="btn btn-auto" onClick={() => setEmergencyModalOpen(false)}>Cancel</button>
+                <button type="submit" className="btn btn-red btn-auto">Send</button>
+              </div>
+            </form>
+          </div>
+        </div>
+      )}
+    </div>
+  );
+}

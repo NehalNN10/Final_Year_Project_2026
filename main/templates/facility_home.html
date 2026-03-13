@@ -29,19 +29,19 @@
       <h1>HU Digital Twin </h1>
     </div>
     <div style="flex: 2;"> 
-      <div style="display: flex; flex-direction: row; justify-content: space-evenly">
-        <button class="header selected" onclick="window.location.href='/facility_home'">Home</button>
-        <button class="header" onclick="window.location.href='/model'">Model</button>
-        <button class="header" onclick="window.location.href='/live_model'">Live Model</button>
-        <button class="header" onclick="window.location.href='/'">Log Out</button>
+      <div class="nav-headers">
+        <button class="btn-header selected" onclick="window.location.href='/facility_home'">Home</button>
+        <button class="btn-header" onclick="window.location.href='/model'">Model</button>
+        <button class="btn-header" onclick="window.location.href='/live_model'">Live Model</button>
+        <button class="btn-header" onclick="window.location.href='/'">Log Out</button>
       </div>
     </div>
   </div>
 
-  <div class="header2 row" style="margin-top: 0;">
+  <div class="btn-header2 row" style="margin-top: 0;">
     <span>Facilities Dashboard</span>
     {% if session.get('role') == 'Facilities Admin' %}
-      <button class="track-btn btn-red" style="width: 10rem !important; height: 3rem !important;" onclick="openEmergencyModal()"> <h2>Send Alert</h2></button>
+      <button class="btn-track btn-red" style="width: 10rem !important; height: 3rem !important;" onclick="openEmergencyModal()"> <h2>Send Alert</h2></button>
     {% endif %}
   </div>
 

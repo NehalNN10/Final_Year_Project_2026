@@ -1,0 +1,55 @@
+import * as THREE from "three";
+import { camera, controls, scene } from "./scene.js";
+import { FPS } from "./variables.js";
+import { playback, renderFrame } from "./simulation.js";
+
+export const params = {
+    darkMode: true
+};
+
+// --- CAMERA CONTROLS ---
+export function resetCameraView() {
+    camera.position.set(-10, 15, 0);
+    camera.lookAt(0, 0, 0); 
+    controls.target.set(0, 0, 0);
+    controls.update();
+}
+
+export function toggleTheme() {
+    params.darkMode = !params.darkMode;
+    scene.background = new THREE.Color(params.darkMode ? 0x131314 : 0xffffff);
+    return params.darkMode;
+}
+
+// --- SIMULATION CONTROLS ---
+export function togglePlayPause() {
+    playback.playing = !playback.playing;
+    return playback.playing;
+}
+
+export function rewindSim() {
+    playback.frame -= 5 * FPS; 
+    if (playback.frame < 0) playback.frame = 0; 
+    renderFrame(Math.floor(playback.frame));
+}
+
+export function fastForwardSim() {
+    playback.frame += 5 * FPS; 
+    if (playback.frame > playback.maxFrames) playback.frame = playback.maxFrames; 
+    renderFrame(Math.floor(playback.frame));
+}
+
+export function resetSim() {
+    playback.frame = 0; 
+    playback.speed = 1; 
+    renderFrame(0);
+}
+
+export function changeSpeed(value) {
+    playback.speed = parseFloat(value);
+}
+
+export function scrubFrame(value) {
+    playback.frame = parseInt(value, 10);
+    renderFrame(Math.floor(playback.frame));
+}
