@@ -451,7 +451,156 @@ def get_user_assignments(user_db_id):
         return jsonify({'assigned_rooms': assigned_room_ids})
     except Exception as e:
         return jsonify({'error': str(e)}), 500
+    
+@app.route('/api/login', methods=['POST'])
+def api_login():
+    data = request.get_json()
+    user_id_input = data.get('user_id')
+    password_input = data.get('password')
 
+    # Query the user from the database
+    user = User.objects(user_id=user_id_input).first() or User.objects(email=user_id_input).first()
+
+    if not user:
+        return jsonify({'error': 'User ID/Email does not exist.'}), 404
+    elif not check_password_hash(user.password, password_input):
+        return jsonify({'error': 'Incorrect password.'}), 401
+    else:
+        # Successful login - Return JSON with department info for Next.js routing
+        
+        # Optional: You can still store in Flask session if needed for other routes
+        session['user_id'] = str(user.id)
+        session['department'] = user.role.department
+        session['role'] = user.role.name 
+        
+        return jsonify({
+            'success': True,
+            'department': user.role.department,
+            'role': user.role.name,
+            'user_id': user.user_id
+        }), 200
+
+@app.route('/api/security_home_data', methods=['GET'])
+def api_security_home_data():
+    try:
+        # 1. Get Security Staff
+        staff_list = []
+        for u in User.objects():
+            if u.role and u.role.department == 'Security':
+                staff_list.append({
+                    'id': str(u.id),
+                    'user_id': u.user_id,
+                    'name': u.name,
+                    'email': u.email,
+                    'role': u.role.name
+                })
+        
+        # 2. Get Rooms Assigned to Staff
+        staff_rooms = {}
+        for staff in staff_list:
+            user_obj = User.objects(id=staff['id']).first()
+            rooms_for_staff = []
+            for se in SecurityEmails.objects(user=user_obj):
+                if se.room:
+                    rooms_for_staff.append(se.room.room_name)
+            staff_rooms[staff['user_id']] = rooms_for_staff
+
+        # 3. Get All Rooms Data (for the table)
+        rooms_data = []
+        for r in Rooms.objects():
+            # Fetch all simulated time data for this specific room
+            rd_entries = RoomData.objects(room=r).order_by('time')
+            
+            # Create an array of the time data
+            timeseries = []
+            for rd in rd_entries:
+                timeseries.append({
+                    'time': rd.time,
+                    'occupancy': rd.occupancy,
+                    'temperature': rd.temperature,
+                    'ac': rd.ac,
+                    'lights': rd.lights
+                })
+
+            rooms_data.append({
+                'id': str(r.id),
+                'room_id': r.room_id,
+                'name': r.room_name,
+                'max_occupancy': r.max_occupancy,
+                'timeseries': timeseries # <--- We are now sending the data loop to React!
+            })
+
+        return jsonify({
+            'staff_list': staff_list,
+            'staff_rooms': staff_rooms,
+            'rooms': rooms_data,
+            'current_role': session.get('role', 'Security Admin') # Gets current user's role
+        }), 200
+    except Exception as e:
+        return jsonify({'error': str(e)}), 500
+
+@app.route('/api/facility_info', methods=['GET'])
+def get_facility_info():
+    """Returns available Facilities roles"""
+    try:
+        # Get Roles for Facilities Department
+        roles = Role.objects(department='Facilities') # Note: Your DB uses plural 'Facilities'
+        roles_data = [{'name': r.name} for r in roles]
+
+        # Facilities staff don't get assigned specific rooms in your current DB model, 
+        # so we don't need to return rooms here!
+        return jsonify({'roles': roles_data})
+    except Exception as e:
+        return jsonify({'error': str(e)}), 500
+
+@app.route('/api/facility_home_data', methods=['GET'])
+def api_facility_home_data():
+    try:
+        # 1. Get Facilities Staff
+        staff_list = []
+        for u in User.objects():
+            if u.role and u.role.department == 'Facilities':
+                staff_list.append({
+                    'id': str(u.id),
+                    'user_id': u.user_id,
+                    'name': u.name,
+                    'email': u.email,
+                    'role': u.role.name
+                })
+
+        # 3. Get All Rooms Data with time-series
+        rooms_data = []
+        for r in Rooms.objects():
+            rd_entries = RoomData.objects(room=r).order_by('time')
+            timeseries = []
+            for rd in rd_entries:
+                timeseries.append({
+                    'time': rd.time,
+                    'occupancy': rd.occupancy,
+                    'temperature': rd.temperature,
+                    'ac': rd.ac,
+                    'lights': rd.lights
+                })
+
+            rooms_data.append({
+                'id': str(r.id),
+                'room_id': r.room_id,
+                'name': r.room_name,
+                'timeseries': timeseries
+            })
+
+        return jsonify({
+            'staff_list': staff_list,   # <-- Now sending staff to React!
+            'rooms': rooms_data,
+            'current_role': session.get('role', 'Facilities Admin')
+        }), 200
+    except Exception as e:
+        return jsonify({'error': str(e)}), 500
+
+@app.route('/api/session', methods=['GET'])
+def api_session():
+    dept = session.get('department', 'Security') 
+    return jsonify({'department': dept})
 
 if __name__ == '__main__':
     # app.run(host='0.0.0.0', port=1767, debug=True)

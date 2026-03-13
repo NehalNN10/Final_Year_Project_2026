@@ -7,7 +7,7 @@
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=League+Spartan:wght@100..900&display=swap" rel="stylesheet">
-    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+    <link rel="stylesheet" href="{{ url_for('static', filename='style_new.css') }}">
 
     <title>HU Digital Twin - Security Dashboard</title>
 
@@ -27,44 +27,42 @@
       <h1>HU Digital Twin </h1>
     </div>
     <div style="flex: 2;"> 
-      <div style="display: flex; flex-direction: row; justify-content: space-evenly">
-        <button class="header selected" onclick="window.location.href='/security_home'">Home</button>
-        <button class="header" onclick="window.location.href='/model'">Model</button>
-        <button class="header" onclick="window.location.href='/live_model'">Live Model</button>
-        <button class="header" onclick="window.location.href='/'">Log Out</button>
+      <div class="nav-headers">
+        <button class="btn-header selected" onclick="window.location.href='/security_home'">Home</button>
+        <button class="btn-header" onclick="window.location.href='/model'">Model</button>
+        <button class="btn-header" onclick="window.location.href='/live_model'">Live Model</button>
+        <button class="btn-header" onclick="window.location.href='/'">Log Out</button>
       </div>
     </div>
   </div>
 
-  <div class="header2">
+  <div class="side-nav row no-margin-top">
   <span>Security Dashboard</span>
 
   {% if session.get('role') == 'Security Admin' %}
-    <div style="margin-left: auto; display: flex; gap: 15px; align-items: center;">
       
-      <button class="track-btn btn-red btn-auto" onclick="openEmergencyModal()">
-        <h2>Send Emergency Alert</h2>
-      </button>
+    <button class="btn btn-red btn-auto no-margin" onclick="openEmergencyModal()">
+      <h2 class="no-margin">Send Emergency Alert</h2>
+    </button>
 
-    </div>
   {% endif %}
 </div>
 
-  <div class="main-home scroll" style="max-height: calc(100vh - 10rem); overflow-y: auto;">
+  <div class="main-home scroll">
     <div class="row boxes">
       <div class="tracker-ui scroll outer box">
-        <div class="row" style="margin-top: 0px !important">
-          <h2>Occupancy Alert</h2>
+        <div class="row no-margin-top">
+          <h3>Occupancy Alert</h3>
         </div>
         <div id="ac-alerts">
           <div class="tracker-ui">
-            <div class="row" style="margin-top: 0px !important;">
+            <div class="row no-margin-top">
               <div style="flex: 3;">
-                <div class="row" style="margin-top: 0px !important;">
+                <div class="row no-margin-top">
                   <h4>Soorty Lecture Hall - E-121</h4>
                 </div>
                 <div class="row">
-                  <div class="row" style="flex: 2; margin-top: 0px;">
+                  <div class="row no-margin-top">
                     <span>Vacant</span>
                     <span>On</span>
                     <span>23 °C</span>
@@ -72,20 +70,20 @@
                   <div style="flex: 1;"></div>
                 </div>
               </div>
-              <div style="flex: 1; text-align: right;">
-                <span style="color: red; font-weight: bold;">37 mins</span>
+              <div class="alert-time">
+                37 mins
               </div>
             </div>
           </div>
 
           <div class="tracker-ui">
-            <div class="row" style="margin-top: 0px !important;">
+            <div class="row no-margin-top">
               <div style="flex: 3;">
-                <div class="row" style="margin-top: 0px !important;">
+                <div class="row no-margin-top">
                   <h4>Horizon Room 07 - H-507</h4>
                 </div>
                 <div class="row">
-                  <div class="row" style="flex: 2; margin-top: 0px;">
+                  <div class="row no-margin-top">
                     <span>Vacant</span>
                     <span>On</span>
                     <span>23 °C</span>
@@ -93,20 +91,20 @@
                   <div style="flex: 1;"></div>
                 </div>
               </div>
-              <div style="flex: 1; text-align: right;">
-                <span style="color: red; font-weight: bold;">45 mins</span>
+              <div class="alert-time">
+                45 mins
               </div>
             </div>
           </div>
 
           <div class="tracker-ui">
-            <div class="row" style="margin-top: 0px !important;">
+            <div class="row no-margin-top">
               <div style="flex: 3;">
-                <div class="row" style="margin-top: 0px !important;">
+                <div class="row no-margin-top">
                   <h4>Arif Habib Classroom - C-109</h4>
                 </div>
                 <div class="row">
-                  <div class="row" style="flex: 2; margin-top: 0px;">
+                  <div class="row no-margin-top">
                     <span>Vacant</span>
                     <span>On</span>
                     <span>23 °C</span>
@@ -114,20 +112,20 @@
                   <div style="flex: 1;"></div>
                 </div>
               </div>
-              <div style="flex: 1; text-align: right;">
-                <span style="color: red; font-weight: bold;">1 hr 45 mins</span>
+              <div class="alert-time">
+                1 hr 45 mins
               </div>
             </div>
           </div>
 
           <div class="tracker-ui">
-            <div class="row" style="margin-top: 0px !important;">
+            <div class="row no-margin-top">
               <div style="flex: 3;">
-                <div class="row" style="margin-top: 0px !important;">
+                <div class="row no-margin-top">
                   <h4>Linux Lab - E-003</h4>
                 </div>
                 <div class="row">
-                  <div class="row" style="flex: 2; margin-top: 0px;">
+                  <div class="row no-margin-top">
                     <span>Vacant</span>
                     <span>On</span>
                     <span>23 °C</span>
@@ -135,20 +133,20 @@
                   <div style="flex: 1;"></div>
                 </div>
               </div>
-              <div style="flex: 1; text-align: right;">
-                <span style="color: red; font-weight: bold;">22 mins</span>
+              <div class="alert-time">
+                22 mins
               </div>
             </div>
           </div>
 
           <div class="tracker-ui">
-            <div class="row" style="margin-top: 0px !important;">
+            <div class="row no-margin-top">
               <div style="flex: 3;">
-                <div class="row" style="margin-top: 0px !important;">
+                <div class="row no-margin-top">
                   <h4>W-243</h4>
                 </div>
                 <div class="row">
-                  <div class="row" style="flex: 2; margin-top: 0px;">
+                  <div class="row no-margin-top">
                     <span>Vacant</span>
                     <span>On</span>
                     <span>23 °C</span>
@@ -156,23 +154,23 @@
                   <div style="flex: 1;"></div>
                 </div>
               </div>
-              <div style="flex: 1; text-align: right;">
-                <span style="color: red; font-weight: bold;">1 min</span>
+              <div class="alert-time">
+                1 min
               </div>
             </div>
           </div>
         </div>
       </div>
 
-      <div class="tracker-ui scroll outer" style="flex: 1; margin: 0 20px 0 0; overflow-y: auto;">
-        <div class="row" style="margin-top: 0px !important">
-            <h2>Rooms Real-Time Data</h2>
-            <h2> ⏰ <span id="time"></span></h2>
+      <div class="tracker-ui scroll outer box">
+        <div class="row no-margin-top">
+            <h3 style="flex: 3">Rooms Real-Time Data</h3>
+            <h3 style="flex: 2"> ⏰ <span id="time"></span></h3>
         </div>
         
-        <table class="scroll" style="width: 100%; margin-top: 10px; border-collapse: collapse; ">
+        <table class="scroll table">
             <tr>
-            <th style="width: 8%;">Room ID</th>
+            <th style="width: 20%;">Room ID</th>
             <th style="width: 40%">Room Name</th>
             <th style="width: 13%">Occupancy</th>
             </tr>
@@ -196,44 +194,43 @@
 
       {% if session.get('role') == 'Security Admin' %}
       <div class="tracker-ui scroll outer box">
-        <div class="row" style="margin-top: 0px !important; justify-content: space-between; align-items: center;">
-          <h2>Staff Information</h2>
-          <button class="track-btn btn-blue btn-auto" style="height: 2.5rem;" onclick="openStaffModal()">
-            Add Staff
+        <div class="row no-margin-top">
+          <h3>Staff Information</h3>
+          <button class="btn btn-blue btn-auto no-margin" onclick="openStaffModal()">
+            <h4> ➕ Add Staff </h4>
+             
           </button>
         </div>
 
         {% for staff in staff_list %}
         <div class="tracker-ui">
-          <div class="row" style="margin-top: 0;">
-            <h4 style="font-size: 1.2rem; flex: 5; margin: 0;">{{ staff.name }}</h4>
+          <div class="row no-margin">
+            <h4 class="no-margin" style="flex: 5;">{{ staff.name }}</h4>
 
-            <div class="row" style="margin-top: 0; flex: 2">
-              <button class="btn btn-yellow" 
-                style="max-width: 2.5rem !important; margin: 0; padding: 5px 0px;" 
+            <div class="row no-margin" style="flex: 2">
+              <button class="btn btn-yellow btn-list" 
                 onclick="openStaffModal('{{ staff.id }}', '{{ staff.user_id }}', '{{ staff.email }}', '{{ staff.name }}', '{{ staff.role.name }}')"> 
                 ✏️ 
               </button>
-              <button class="btn btn-red" 
-                style="max-width: 2.5rem !important; margin: 0; padding: 5px 0px;" 
+              <button class="btn btn-red btn-list" 
                 onclick="deleteStaff('{{ staff.id }}')"> 
                 🗑️ 
               </button>
             </div>
           </div>
-          <div style="margin-top: 5px;">
-            <span style="color: #888; font-size: 0.9rem;">{{ staff.email }}</span>
+          <div>
+            <span class="faded-font">{{ staff.email }}</span>
           </div>
-          <div style="margin-top: 5px;">
-            <span style="color: #888; font-size: 0.9rem;">{{ staff.role.name }}</span>
+          <div>
+            <span class="faded-font">{{ staff.role.name }}</span>
           </div>
 
-          <div style="margin-top: 5px;">
+          <div>
             <span>Rooms Assigned: </span>
             {% if staff_rooms[staff.user_id] == [] %}
-            <span style="color: #888;">N/A</span>
+            <span class="faded-font">N/A</span>
             {% else %}
-              <span style="color: #888;"> 
+              <span class="faded-font"> 
               {% for room in staff_rooms[staff.user_id] %}
                 {% if not loop.first %}, {% endif %}
               {{ room }}
@@ -251,10 +248,10 @@
   <!-- Emergency Modal -->
   <div class="modal-overlay" id="emergencyModal">
     <div class="tracker-ui modal">
-      <div class="modal-header" style="color: #ff3333;">
+      <div class="modal-header btn-red">
         🚨 EMERGENCY ALERT 🚨
       </div>
-      <p style="margin-bottom: 20px">Please provide details about the emergency situation:</p>
+      <p>Please provide details about the emergency situation:</p>
       <form id="emergencyForm">
         <div class="row">
           <h4 for="roomNumber">Room Number</h4>
@@ -282,8 +279,8 @@
           <input type="text" id="description" name="description" required />
         </div>
 
-        <div class="row" style="justify-content: end;">
-          <button type="button" class="btn btn-cancel" onclick="closeEmergencyModal()">Cancel</button>
+        <div class="row">
+          <button type="button" class="btn" onclick="closeEmergencyModal()">Cancel</button>
           <button type="submit" class="btn btn-red">Send Emergency Alert</button>
         </div>
       </form>
@@ -292,7 +289,7 @@
 
   <div class="modal-overlay" id="staffModal">
     <div class="tracker-ui modal">
-      <div class="modal-header" style="color: #6666ff;" id="staffModalTitle">
+      <div class="modal-header btn-blue" id="staffModalTitle">
         Add New Staff
       </div>
       
@@ -327,20 +324,20 @@
 
         <div class="row">
           <h4>Assigned Rooms</h4>
-          <button type="button" class="room-btn" style="box-sizing: border-box !important; margin: 0;" onclick="toggleRoomList()">
+          <button type="button" class="room-btn btn-auto" onclick="toggleRoomList()">
             Show/Hide Rooms ▼
           </button>
         </div>
         
         <div>
-          <div id="roomChecklistContainer" style="display: none; width: max-content; margin-top: 5px; margin-left: auto;">
-            <div id="roomChecklist" style="max-height: 150px; overflow-y: auto; background: rgba(0,0,0,0.5); padding: 10px; border: 1px solid #888; border-radius: 5px;">
-              <span style="color: #888;">Loading...</span>
+          <div id="roomChecklistContainer">
+            <div id="roomChecklist">
+              <span class="faded-font">Loading...</span>
             </div>
           </div>
         </div>
 
-        <div class="row" style="justify-content: center; margin-top: 20px;">
+        <div class="row center">
           <button type="button" class="btn btn-cancel btn-auto" onclick="closeStaffModal()">Cancel</button>
           <button type="submit" class="btn btn-yellow btn-auto">Save Staff</button>
         </div>

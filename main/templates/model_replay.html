@@ -30,17 +30,17 @@
         <h1>HU Digital Twin</h1>
       </div>
       <div style="flex: 2;"> 
-        <div style="display: flex; flex-direction: row; justify-content: space-evenly">
+        <div class="nav-headers">
           {% if session.get('department') == 'Facilities' %}
-            <button class="header" onclick="window.location.href='/facility_home'">Home</button>
+            <button class="btn-header" onclick="window.location.href='/facility_home'">Home</button>
           {% elif session.get('department') == 'Security' %}
-            <button class="header" onclick="window.location.href='/security_home'">Home</button>
+            <button class="btn-header" onclick="window.location.href='/security_home'">Home</button>
           {% else %}
-            <button class="header" onclick="window.location.href='/dashboard'">Home</button>
+            <button class="btn-header" onclick="window.location.href='/dashboard'">Home</button>
           {% endif %}
-          <button class="header selected" onclick="window.location.href='/model'">Model</button>
-          <button class="header" onclick="window.location.href='/live_model'">Live Model</button>
-          <button class="header" onclick="window.location.href='/'">Log Out</button>
+          <button class="btn-header selected" onclick="window.location.href='/model'">Model</button>
+          <button class="btn-header" onclick="window.location.href='/live_model'">Live Model</button>
+          <button class="btn-header" onclick="window.location.href='/'">Log Out</button>
         </div>
       </div>
       
