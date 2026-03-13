@@ -603,6 +603,11 @@ def api_session():
     return jsonify({'department': dept})
 
 if __name__ == '__main__':
+    # --- START THE REDIS LISTENER HERE ---
+    print("🚀 Booting up server and starting background tasks...")
+    start_redis_listener()
+    # -------------------------------------
+
     # app.run(host='0.0.0.0', port=1767, debug=True)
     socketio.run(app, 
                 host='0.0.0.0',  # Listen on all interfaces

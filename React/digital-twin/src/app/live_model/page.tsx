@@ -60,7 +60,7 @@ return (
           <div className="flex justify-center mb-4!">
             <div 
               id="data-status" 
-              className="bg-[#555] text-white font-bold py-2 px-6 rounded-full shadow-lg transition-all duration-300"
+              className="bg-[#555] fill shadow-lg transition-all duration-300 w-full text-center text-3xl p-4! rounded-xl! mt-4!"
             >
               Waiting...
             </div>
@@ -69,7 +69,7 @@ return (
           {/* Room Stats */}
           <RoomStatsPanel department={department} isLive={true}/>
           
-          <ModelControlsPanel />
+          <ModelControlsPanel isReplay = {true}/>
           
           {/* Hidden Variables for Three.js */}
           <div style={{ display: "none" }}>
