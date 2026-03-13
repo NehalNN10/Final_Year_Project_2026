@@ -114,16 +114,13 @@ export function renderFrame(index) {
         }
     } else {
         if (uiElements.uiName) {
-            uiElements.uiName.innerText = "N/A";
-            uiElements.uiName.style.color = "#ff4444";
+            uiElements.uiName.innerText = "--";
         }
         if (uiElements.uiID) {
-            uiElements.uiID.innerText = "N/A";
-            uiElements.uiID.style.color = "#ff4444";
+            uiElements.uiID.innerText = "--";
         }
         if (uiElements.uiFloor) {
-            uiElements.uiFloor.innerText = "N/A";
-            uiElements.uiFloor.style.color = "#ff4444";
+            uiElements.uiFloor.innerText = "--";
         }
     }
         

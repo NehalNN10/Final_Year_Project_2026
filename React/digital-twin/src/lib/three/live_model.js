@@ -3,7 +3,7 @@ import { io } from 'socket.io-client';
 import { initVariables } from './variables.js';
 import { initScene, scene, camera, renderer, controls } from './scene.js';
 import { loadAssets, buildWorld, createMarker } from './world.js';
-import { renderFrame } from './simulation.js';
+import { renderLiveFrame } from './live_simulation.js';
 
 let animationFrameId;
 let currentContainer = null;
@@ -85,7 +85,7 @@ function updateLiveUI(trackCount) {
         occupancyEl.textContent = `${trackCount} people`;
         
         // This clears any inline colors so your Tailwind 'text-black' class works perfectly!
-        occupancyEl.style.color = ""; 
+        occupancyEl.style.backgroundColor = "#00ff88";
     }
 }
 
@@ -110,18 +110,13 @@ function animate() {
 
     if (Math.random() < 0.02) removeStaleMarkers();
     
-    // This updates the room stats (Temperature, AC, Lights) using the crosshair
-    renderFrame(0); 
+    // --- THIS REPLACES renderFrame(0) and the Clock Override! ---
+    // This raycasts the room names and updates the live clock perfectly.
+    renderLiveFrame(); 
     
-    // --- FIX: OVERWRITE THE CLOCK WITH REAL-WORLD TIME ---
-    const now = new Date();
-    const dateEl = document.getElementById('ui-iot-date');
-    const timeEl = document.getElementById('ui-iot-time');
-    
-    // Updates to current date (e.g., 25/10/2023) and time (e.g., 14:30:00)
-    if (dateEl) dateEl.innerText = now.toLocaleDateString(); 
-    if (timeEl) timeEl.innerText = now.toLocaleTimeString([], { hour12: false });
-    // -----------------------------------------------------
+    // This forces the Occupancy UI to exactly match the active 3D dots.
+    updateLiveUI(trackMarkers.size); 
+    // ------------------------------------------------------------
     
     if (controls) controls.update();
     if (renderer && scene && camera) renderer.render(scene, camera);
@@ -148,6 +143,11 @@ export async function initLiveEngine(container) {
     setStatus(false);
     socket = io("http://localhost:1767");
 
+    // 🛑 ADD THIS DEBUG BLOCK:
+    socket.onAny((eventName, ...args) => {
+        console.log(`[SOCKET DEBUG] Received event: "${eventName}"`, args);
+    });
+
     socket.on('connect', () => {
         console.log('✅ Connected to server');
         socket.emit('request_tracking_data');
@@ -159,7 +159,9 @@ export async function initLiveEngine(container) {
             const position = track.region === 'MAIN_VIEW' ? { x: track.x, z: track.z } : { x: track.z, z: track.x };
             updateTrackMarker(compositeId, position, track.region);
         });
-        updateLiveUI(trackingDataArray.length);
+        
+        // --- FIX 2: TRUST THE 3D ENGINE COUNT ---
+        updateLiveUI(trackMarkers.size); 
     });
 
     socket.on('live_tracking_update', (trackData) => {
@@ -172,7 +174,9 @@ export async function initLiveEngine(container) {
         const position = trackData.region === 'MAIN_VIEW' ? { x: trackData.x, z: trackData.z } : { x: trackData.z, z: trackData.x };
         
         updateTrackMarker(compositeId, position, trackData.region);
-        if (trackData.occupancy !== undefined) updateLiveUI(trackData.occupancy);
+
+        // Force the UI to display the exact number of active 3D tracking markers!
+        updateLiveUI(trackMarkers.size);
     });
 
     socket.on('disconnect', () => setStatus(false));
