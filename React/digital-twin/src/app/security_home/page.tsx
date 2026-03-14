@@ -61,17 +61,25 @@ export default function SecurityHome() {
     return () => clearInterval(interval);
   }, [roomsData]);
 
-  // --- Handlers ---
   const handleEmergencySubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    const res = await fetch('/send_emergency_alert', {
-      method: 'POST', headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ room_number: emergencyForm.roomNumber, occupancy_count: emergencyForm.occupancy, description: emergencyForm.description })
+
+    const res = await fetch('/api/send_emergency_alert', { 
+      method: 'POST', 
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ 
+        room_number: emergencyForm.roomNumber, 
+        occupancy_count: emergencyForm.occupancy, 
+        description: emergencyForm.description 
+      })
     });
+    
     if (res.ok) {
       alert('Emergency alert sent!');
       setEmergencyModalOpen(false);
       setEmergencyForm({ roomNumber: "", occupancy: "", description: "" });
+    } else {
+      alert('Error sending alert.'); 
     }
   };
 
@@ -94,7 +102,7 @@ export default function SecurityHome() {
         <div className="row boxes">
           
           {/* Column 1: Alerts */}
-          <div className="tracker-ui scroll outer box min-w-70">
+          <div className="tracker-ui scroll outer box basis-70">
             <h3 className="font-bold">Occupancy Alerts</h3>
             {/* Dynamic Alerts will map here later */}
             <div className="tracker-ui mt-4 p-4 text-gray-400 text-center">
@@ -103,7 +111,7 @@ export default function SecurityHome() {
           </div>
 
           {/* Column 2: Rooms Table */}
-          <div className="tracker-ui scroll outer box min-w-120">
+          <div className="tracker-ui scroll outer box basis-120">
             <div className="row mt-0! font-bold">
               <h3 className="flex-2">Rooms Real-Time Data</h3>
               <h3 className="flex-1 text-right!"> ⏰ <span>{currentTimeSpan}</span></h3>
@@ -149,7 +157,7 @@ export default function SecurityHome() {
               <FormRow label="Description" value={emergencyForm.description} onChange={e => setEmergencyForm({...emergencyForm, description: e.target.value})} />
 
               <div className="row mt-4! justify-center!">
-                <button type="button" className="btn btn-auto" onClick={() => setEmergencyModalOpen(false)}>Cancel</button>
+                <button type="button" className="btn btn-green btn-auto" onClick={() => setEmergencyModalOpen(false)}>Cancel</button>
                 <button type="submit" className="btn btn-red btn-auto">Send</button>
               </div>
             </form>

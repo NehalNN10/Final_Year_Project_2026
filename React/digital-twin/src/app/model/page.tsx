@@ -48,7 +48,7 @@ return (
   <>
     <Navbar department={department} />
 
-      <div className="main" style={{ display: 'flex', height: 'calc(100vh - 70px)' }}>
+      <div className="main">
         
         {/* Model Container */}
         <div id="model-container" ref={containerRef}>

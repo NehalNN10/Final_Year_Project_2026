@@ -7,7 +7,6 @@
 
 body { 
     margin: 0; 
-    overflow: hidden; 
     font-family: 'League Spartan', sans-serif !important; 
     background-color: #131313;
 }
@@ -93,18 +92,18 @@ tr {
 }
 
 .box {
-    flex: 1;  
+    flex-grow: 1; 
+    flex-shrink: 1;  
     max-height: 67.5vh !important; 
-    overflow-y: auto;
+    overflow-y: auto !important;
+    overflow-x: auto !important;
 }
 
 .boxes {
-
     @apply items-start gap-5 flex-wrap;
     width: 100%; 
     align-items: normal !important; 
     margin-top: 0px; 
-    overflow-y: hidden; 
     padding: 20px;
 }
 
@@ -217,7 +216,7 @@ tr {
 }
 
 .content {
-    max-height: 500px;
+    @apply max-h-125;
     opacity: 1;
     transition: max-height 0.3s ease, opacity 0.3s ease;
 }
@@ -283,7 +282,7 @@ tr {
 }
 
 .fill {
-    @apply px-3! py-1! text-black font-bold;
+    @apply px-3! py-2! text-black font-bold;
     border-radius: 20px;
 }
 
@@ -318,9 +317,15 @@ tr {
     margin-left: 10px;
 }
 
+.main {
+    display: flex;
+    height: calc(100vh - var(--main-nav));
+    position: relative;
+}
+
 .main-home {
     padding: 30px 3vw !important;
-    max-height: calc(100vh - 10rem); 
+    height: calc(100vh - var(--main-nav)); 
     overflow-y: auto;
     
 }
@@ -345,7 +350,7 @@ tr {
     border: 2px solid #00ff88;
     border-radius: 10px;
     padding: 40px;
-    max-width: 500px;
+    @apply max-w-125;
     width: 90%;
     box-shadow: 0 0 50px rgba(0, 255, 136, 0.3);
     background: #000000;
@@ -405,11 +410,10 @@ tr {
     margin-top: 15px;
 }
 
-.scroll {
-    pointer-events: auto !important; /* CRITICAL: Allows clicking the header */
+/* .scroll {
     transition: all 0.3s ease;
-    overflow: hidden; /* Needed for the slide animation */
-}
+    overflow: hidden;
+} */
 
 .scrubber {
     @apply grow ml-1 h-full bg-[#333] border border-[#888] rounded accent-[#00ff88] cursor-pointer hover:border-[#008800] hover:shadow-[0_0_20px_rgba(0,255,136,0.6)] hover:bg-[0_0_20px_rgba(0,255,136,0.6)] transition-all;
@@ -473,12 +477,10 @@ tr {
 }
 #float {
     position: absolute;
-    top: calc(3.5rem);
-    left: 0px;
     padding: 20px;
     z-index: 100;
     width: 23rem;
-    height: calc(100vh - 100px);
+    height: 100%;
     overflow-y: auto;
     overflow-x: hidden;
     background: transparent; 
@@ -487,7 +489,7 @@ tr {
 }
 
 #roomChecklist {
-    max-height: 150px; 
+    @apply max-h-37.5;
     overflow-y: auto; 
     background: rgba(0,0,0,0.5); 
     padding: 10px; 
@@ -500,6 +502,26 @@ tr {
     width: max-content; 
     margin-top: 5px; 
     margin-left: auto;
+}
+
+::-webkit-scrollbar {
+    width: 7px;
+    height: 7px;
+}
+::-webkit-scrollbar-track {
+    background: rgba(0,0,0,0.1); 
+}
+::-webkit-scrollbar-thumb {
+    background: #00ff88; 
+    border-radius: 3px;
+}
+::-webkit-scrollbar-thumb:hover {
+    background: #00cc6a; /* Slightly darker green when hovered */
+}
+
+html {
+    scrollbar-width: thin; /* Makes the scrollbar 7px/thin */
+    scrollbar-color: #00ff88 #131313; /* Thumb color, then Track color */
 }
 
 @keyframes slideUp {

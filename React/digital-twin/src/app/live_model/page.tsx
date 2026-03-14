@@ -60,7 +60,7 @@ return (
           <div className="flex justify-center mb-4!">
             <div 
               id="data-status" 
-              className="bg-[#555] fill shadow-lg transition-all duration-300 w-full text-center text-3xl p-4! rounded-xl! mt-4!"
+              className="bg-[#555] fill shadow-lg transition-all duration-300 w-full text-center text-3xl p-4! rounded-xl!"
             >
               Waiting...
             </div>

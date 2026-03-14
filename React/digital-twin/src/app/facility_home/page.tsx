@@ -63,7 +63,7 @@ export default function FacilityHome() {
   // --- Handlers ---
   const handleEmergencySubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    const res = await fetch('/send_facilities_alert', {
+    const res = await fetch('/api/send_facilities_alert', {
       method: 'POST', 
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({ 
@@ -112,27 +112,27 @@ export default function FacilityHome() {
         
         {/* Top Alerts Row */}
         <div className="row boxes">
-          <div className="tracker-ui scroll outer box min-w-70">
+          <div className="tracker-ui scroll outer box basis-70">
             <h3 className="font-bold">AC Alerts</h3>
             <div className="tracker-ui mt-4 p-4 text-gray-400 text-center">No active alerts.</div>
           </div>
-          <div className="tracker-ui scroll outer box min-w-70">
+          <div className="tracker-ui scroll outer box basis-70">
             <h3 className="font-bold">Lights Alerts</h3>
             <div className="tracker-ui mt-4 p-4 text-gray-400 text-center">No active alerts.</div>
           </div>
-          <div className="tracker-ui scroll outer box min-w-70">
+          <div className="tracker-ui scroll outer box basis-70">
             <h3 className="font-bold">Temperature Alerts</h3>
             <div className="tracker-ui mt-4 p-4 text-gray-400 text-center">No active alerts.</div>
           </div>
 
             {/* Real-Time Data Table */}
-            <div className="tracker-ui scroll outer box min-w-220">
+            <div className="tracker-ui scroll outer box basis-220">
                 <div className="row mt-0! font-bold">
                 <h3 className="flex-2">Rooms Real-Time Data</h3>
                 <h3 className="flex-1 text-right"> ⏰ <span>{currentTimeSpan}</span></h3>
                 </div>
                 
-                <table className="scroll table w-full mt-4">
+                <table className="scroll table w-full mt-4 min-w-205">
                 <thead>
                     <tr>
                     <th style={{width:'15%'}}>ID</th>
@@ -212,7 +212,7 @@ export default function FacilityHome() {
               <FormRow label="Description" value={emergencyForm.description} onChange={e => setEmergencyForm({...emergencyForm, description: e.target.value})} />
               
               <div className="row mt-4! justify-center!">
-                <button type="button" className="btn btn-auto" onClick={() => setEmergencyModalOpen(false)}>Cancel</button>
+                <button type="button" className="btn btn-green btn-auto" onClick={() => setEmergencyModalOpen(false)}>Cancel</button>
                 <button type="submit" className="btn btn-red btn-auto">Send Alert</button>
               </div>
             </form>

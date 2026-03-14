@@ -10,8 +10,8 @@ const leagueSpartan = League_Spartan({
 });
 
 export const metadata: Metadata = {
-  title: "HU Digital Twin - Login",
-  description: "Digital Twin dashboard for Habib University",
+  title: "HU Digital Twin",
+  description: "Digital Twin for Habib University",
 };
 
 export default function RootLayout({
