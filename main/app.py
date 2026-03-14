@@ -602,6 +602,11 @@ def api_session():
     dept = session.get('department', 'Security') 
     return jsonify({'department': dept})
 
+@app.route('/api/logout', methods=['POST'])
+def api_logout():
+    session.clear() 
+    return jsonify({'success': True, 'message': 'Logged out successfully'}), 200
+
 if __name__ == '__main__':
     # --- START THE REDIS LISTENER HERE ---
     print("🚀 Booting up server and starting background tasks...")

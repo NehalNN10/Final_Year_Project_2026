@@ -6,9 +6,17 @@ export default function Navbar({ department }: { department: string }) {
   const router = useRouter();
   const pathname = usePathname(); // This hook tells us what page we are currently on
 
-  const handleLogout = () => {
-    // Add any logout logic here later (like clearing session/cookies)
-    router.push("/");
+  const handleLogout = async () => {
+    try {
+      // 1. Tell the Flask backend to destroy the session cookie
+      await fetch('/api/logout', { method: 'POST' });
+      document.cookie = "department=; expires=Thu, 01 Jan 1970 00:00:00 UTC; path=/;";
+      
+      window.location.href = '/'; 
+      
+    } catch (error) {
+      console.error("Failed to log out:", error);
+    }
   };
 
   const routes: Record<string, string> = {
