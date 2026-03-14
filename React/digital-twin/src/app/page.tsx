@@ -26,6 +26,8 @@ export default function Login() {
 
       if (response.ok) {
         const data = await response.json();
+
+        document.cookie = `department=${data.department}; path=/`;
         
         // Next.js client-side routing based on department
         if (data.department === "Security") {
