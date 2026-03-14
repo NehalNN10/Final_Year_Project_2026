@@ -54,7 +54,7 @@ export default function StaffModal({
             <>
               <div className="row">
                 <h4>Rooms</h4>
-                <button type="button" className="btn btn-auto m-0!" onClick={() => setShowRoomList(!showRoomList)}>
+                <button type="button" className="btn btn-green btn-auto m-0!" onClick={() => setShowRoomList(!showRoomList)}>
                   {showRoomList ? "Hide ▲" : "Show ▼"}
                 </button>
               </div>
@@ -73,7 +73,7 @@ export default function StaffModal({
           )}
           
           <div className="row justify-center! mt-4!">
-            <button type="button" className="btn btn-auto" onClick={onClose}>Cancel</button>
+            <button type="button" className="btn btn-green btn-auto" onClick={onClose}>Cancel</button>
             <button type="submit" className={`btn ${staffForm.id ? "btn-yellow" : "btn-blue"} btn-auto`}>
               {staffForm.id ? 'Save' : 'Add'}
             </button>

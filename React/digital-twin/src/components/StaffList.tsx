@@ -79,7 +79,7 @@ export default function StaffList({ staffList, staffRooms, department }: StaffLi
   return (
     <>
       {/* The List UI */}
-      <div className="tracker-ui scroll outer box min-w-90">
+      <div className="tracker-ui scroll outer box basis-90">
         <div className="row mt-0! font-bold">
           <h3>Staff Information</h3>
           <button className="btn btn-blue btn-auto m-0!" onClick={() => openStaffModal()}>
@@ -88,7 +88,7 @@ export default function StaffList({ staffList, staffRooms, department }: StaffLi
         </div>
         <div className="flex flex-wrap items-stretch gap-2 mt-4">
             {staffList.map(staff => (
-            <div key={staff.id} className="tracker-ui mt-4 p-4! flex-1 min-w-78">
+            <div key={staff.id} className="tracker-ui mt-4 p-4! flex-1 basis-78">
                 <div className="row m-0! font-bold">
                 <h4 className="m-0 flex-5">{staff.name}</h4>
                 <div className="row m-0! gap-2 flex-2 justify-end!">
