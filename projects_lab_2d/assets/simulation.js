@@ -1,17 +1,18 @@
 import * as THREE from "three";
-import { createMarker } from "./world.js";
+import { createMarker, createObject } from "./world.js";
 import { camera, controls } from "./scene.js";
 //1200
 export const playback = {
   frame: 0,
-  maxFrames: 22000,
+  maxFrames: 2200,
   playing: true,
   speed: 1,
 };
 
 const FILE_PATH = "../csv_files";
 
-const tracker = `${FILE_PATH}/trim_files/combined_frames_trimmed.csv`;
+// const tracker = `${FILE_PATH}/trim_files/combined_frames_trimmed.csv`;
+const tracker = `../test_files/nehal_tracks_output_2.csv`;
 const iot = `${FILE_PATH}/temp_files_15min/cs_lab_iot_15min.csv`;
 const track_count = `${FILE_PATH}/temp_files_15min/combined_count_15min.csv`;
 
@@ -215,8 +216,8 @@ export async function loadSimulationData(onLoadComplete) {
         tLines.slice(1).forEach((line) => {
           const cols = line.split(",");
           const frame = parseInt(cols[frameIdx]);
-          const id = `${cols[idIdx]}_${cols[camIdx]}`;
-          //const id = parseInt(cols[idIdx]);
+          // const id = `${cols[idIdx]}_${cols[camIdx]}`;
+          const id = parseInt(cols[idIdx]);
           const x = parseFloat(cols[xIdx]);
           const z = parseFloat(cols[zIdx]);
          
@@ -238,7 +239,7 @@ export async function loadSimulationData(onLoadComplete) {
           if (!trackMarkers.has(id)) {
             const PERSON_COLOR = 0x00ff88;
             // create marker with the track id as label for debugging
-            const marker = createMarker(0, 0, PERSON_COLOR, 0.15);
+            const marker = createMarker(0, 0, PERSON_COLOR, 0.15, id);
             marker.visible = false;
             trackMarkers.set(id, marker);
           }
@@ -307,7 +308,17 @@ export async function loadSimulationData(onLoadComplete) {
   }
   if (onLoadComplete) onLoadComplete();
 }
-//const dummy = createMarker(9, 7.5, "red", 0.1);
+// const dummy = createMarker(-1.5, 7.3, "red", 0.1);
+const dummy11 = createMarker(-2.2875, 1.5, "white", 0.1);
+const dummy12 = createMarker(-2.2875, 1.02, "white", 0.1);
+const dummy13 = createMarker(-3.475, 1.02, "white", 0.1);
+const dummy14 = createMarker(-3.25, 1.5, "white", 0.1);
+
+// const dummy21 = createMarker(-3, 3, "red", 0.1);
+// const dummy22 = createMarker(-4.25, 4.5, "red", 0.1);
+// const dummy23 = createMarker(1.25, 4.5, "red", 0.1);
+// const dummy24 = createMarker(1.25, 3, "red", 0.1);
+
 // const cam1 = createMarker(-8.65, 9, "white", 0.1, "Camera 1");
 // const cam2 = createMarker(-8.65, -1.5, "white", 0.1, "Camera 2");
 // const cam3 = createMarker(8.5, -5, "white", 0.1, "Camera 3");
