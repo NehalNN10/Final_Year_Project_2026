@@ -14,6 +14,7 @@ class User(db.Document):
     email = db.StringField(nullable=True, unique=True)
     password = db.StringField(required=True)
     role = db.ReferenceField(Role, required=True)
+    name = db.StringField()
 
 class Rooms(db.Document):
     room_id = db.StringField(required=True, unique=True)
