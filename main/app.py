@@ -4,7 +4,8 @@ import redis
 from threading import Thread
 from dotenv import load_dotenv
 
-from flask import Flask, request, session, jsonify
+from flask import Flask, request, session, jsonify, send_from_directory
+from flask_cors import CORS  # <--- ADD THIS
 from flask_socketio import SocketIO, emit, disconnect
 from werkzeug.security import generate_password_hash, check_password_hash
 
@@ -19,6 +20,8 @@ BASE_DIR = os.path.dirname(os.path.abspath(__file__))
 CSV_DIR = os.path.abspath(os.path.join(BASE_DIR, '..', 'csv_files'))
 
 app = Flask(__name__)
+CORS(app) # <--- ADD THIS LINE to allow Next.js to fetch files/APIs!
+
 app.secret_key = os.getenv("SECRET_KEY", "fallback_secret_key_change_in_production")
 
 mongo_uri = os.getenv("MONGODB_URI") 
@@ -37,6 +40,12 @@ live_tracking_data = {}
 redis_thread = None
 
 socketio = SocketIO(app, cors_allowed_origins="*", async_mode='threading')
+
+from flask import send_from_directory
+
+@app.route('/temp_files_15min/<path:filename>')
+def serve_temp_files_15min(filename):
+    return send_from_directory(os.path.join(CSV_DIR, 'temp_files_15min'), filename)
 
 # ---------------------------------------------------------
 # BACKGROUND TASKS & SOCKETS

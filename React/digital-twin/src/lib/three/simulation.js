@@ -10,7 +10,7 @@ export const playback = {
     speed: 1
 };
 
-export const tracker = `/temp_files_15min/combined_frames_15min.csv`;
+export const tracker = `http://localhost:1767/temp_files_15min/interpolated_cam2.csv`;
 export const globalCount = 18;
 
 export const raycaster = new THREE.Raycaster();
