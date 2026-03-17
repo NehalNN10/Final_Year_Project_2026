@@ -58,6 +58,8 @@ export function initScene(container) {
     controls = new OrbitControls(camera, renderer.domElement);
     controls.enableDamping = true;
     controls.dampingFactor = 0.05;
+    controls.enableRotate = true; 
+    controls.screenSpacePanning = false; 
     controls.maxPolarAngle = Math.PI / 2;
 
     scene.add(camera);
