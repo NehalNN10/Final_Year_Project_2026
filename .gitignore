@@ -15,6 +15,11 @@ fyp_venv/
 .vscode/
 .idea/
 
+#Package files (probably different for all)
+
+React/digital-twin/package.json
+React/digital-twin/package-lock.json
+
 tracking-key.pem
 
 mps_experiments/vids
