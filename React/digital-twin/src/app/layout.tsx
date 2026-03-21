@@ -21,8 +21,7 @@ export default function RootLayout({
 }>) {
   return (
     <html lang="en">
-      {/* 2. Inject the CSS variable into the body */}
-      <body className={leagueSpartan.variable}>
+      <body className={leagueSpartan.variable} suppressHydrationWarning>
         {children}
       </body>
     </html>

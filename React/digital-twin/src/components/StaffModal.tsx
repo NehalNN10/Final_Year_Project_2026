@@ -29,7 +29,7 @@ export default function StaffModal({
 
   return (
     <div className="modal-overlay active" onClick={(e) => e.target === e.currentTarget && onClose()}>
-      <div className="tracker-ui modal text-white overflow-y-auto max-h-[60vh]">
+      <div className="tracker-ui modal text-white overflow-y-auto! max-h-[80vh]">
         <div className={`modal-header p-4 text-3xl ${staffForm.id ? "text-[#fc3]" : "text-[#88f]"}`}>
           {staffForm.id ? "Edit Staff" : "Add Staff"}
         </div>

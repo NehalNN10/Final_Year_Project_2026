@@ -1,19 +1,19 @@
-"use client"; // Required because we are using the useRouter hook for navigation
+"use client";
 
 import { useRouter, usePathname } from "next/navigation";
+import { Home, Box, Activity, LogOut } from "lucide-react";
+import IntButton from "./IntButton";
 
+// --- 2. YOUR MAIN NAVBAR ---
 export default function Navbar({ department }: { department: string }) {
   const router = useRouter();
-  const pathname = usePathname(); // This hook tells us what page we are currently on
+  const pathname = usePathname();
 
   const handleLogout = async () => {
     try {
-      // 1. Tell the Flask backend to destroy the session cookie
       await fetch('/api/logout', { method: 'POST' });
       document.cookie = "department=; expires=Thu, 01 Jan 1970 00:00:00 UTC; path=/;";
-      
       window.location.href = '/'; 
-      
     } catch (error) {
       console.error("Failed to log out:", error);
     }
@@ -28,42 +28,23 @@ export default function Navbar({ department }: { department: string }) {
   const homeNav = department ? routes[department] || "/" : "/";
 
   return (
-    <div className="main-nav">
-      <div className="flex-1 font-bold">
-        <h1>HU Digital Twin</h1>
+    <nav>
+      <div className="nav-left">
+        <h1>
+          HU Digital Twin
+        </h1>
       </div>
       
-      <div style={{ flex: 2 }}>
-        <div className="nav-headers">
-          <button 
-            className={`btn-header ${pathname === homeNav ? "selected" : ""}`} 
-            onClick={() => router.push(homeNav)}
-          >
-            Home
-          </button>
-          
-          <button 
-            className={`btn-header ${pathname === "/model" ? "selected" : ""}`} 
-            onClick={() => router.push("/model")}
-          >
-            Model
-          </button>
-          
-          <button 
-            className={`btn-header ${pathname === "/live_model" ? "selected" : ""}`} 
-            onClick={() => router.push("/live_model")}
-          >
-            Live Model
-          </button>
-          
-          <button 
-            className="btn-header" 
-            onClick={handleLogout}
-          >
-            Log Out
-          </button>
-        </div>
+      <div className="nav-center">
+        <IntButton icon={Home} label="Home" isActive={pathname === homeNav} onClick={() => router.push(homeNav)} classes="btn-header" />
+        <IntButton icon={Box} label="Model" isActive={pathname === "/model"} onClick={() => router.push("/model")} classes="btn-header" />
+        <IntButton icon={Activity} label="Live Model" isActive={pathname === "/live_model"} onClick={() => router.push("/live_model")} classes="btn-header" />
       </div>
-    </div>
+
+      <div className="nav-right">
+        <IntButton icon={LogOut} label="Log Out" onClick={handleLogout} classes={"btn-header btn-red"} />
+      </div>
+      
+    </nav>
   );
 }
