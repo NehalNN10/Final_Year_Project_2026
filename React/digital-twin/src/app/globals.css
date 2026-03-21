@@ -9,6 +9,8 @@ body {
     margin: 0; 
     font-family: 'League Spartan', sans-serif !important; 
     background-color: #131313;
+    overflow-y: auto;
+
 }
 
 button {
@@ -103,7 +105,7 @@ tr {
     @apply items-start gap-5 flex-wrap;
     width: 100%; 
     align-items: normal !important; 
-    margin-top: 0px; 
+    margin-top: 0 !important; 
     padding: 20px;
 }
 
@@ -136,6 +138,18 @@ tr {
   padding-right: 20px;
 }
 
+.btn-base {
+    @apply overflow-hidden whitespace-nowrap transition-all duration-300 ease-in-out;
+}
+
+.btn-inactive {
+    @apply max-w-30 opacity-100 ml-2;
+}
+
+.btn-active {
+    @apply max-w-0 opacity-0 group-hover:max-w-30 group-hover:opacity-100 group-hover:ml-2;
+}
+
 .btn-blue {
     background-color: #6666ff !important;
     border: 1px solid #000;
@@ -165,6 +179,7 @@ tr {
 }
 
 .btn-header {
+    display: flex;
     text-decoration: none;
     font-size: 1.3rem;
     padding: 10px 15px;
@@ -172,6 +187,8 @@ tr {
     border-radius: 8px;
     background: transparent;
     transition: all 0.3s ease;
+    align-items: center;
+    justify-content: center;
 }
 
 .btn-header:hover {
@@ -182,9 +199,9 @@ tr {
 }
 
 .btn-list {
-    max-width: 2.5rem !important; 
+    flex-basis: 2.5rem !important; 
     margin: 0; 
-    padding: 5px 0px;
+    padding: 5px 5px;
 }
 
 .btn-red {
@@ -200,6 +217,7 @@ tr {
     color: #fff !important;
     cursor: pointer;
 }
+
 
 .btn-yellow {
     background-color: #ffcc33 !important;
@@ -319,32 +337,78 @@ tr {
 
 .main {
     display: flex;
-    height: calc(100vh - var(--main-nav));
+    height: calc(100vh - 4.5rem);
     position: relative;
 }
 
 .main-home {
-    padding: 30px 3vw !important;
-    height: calc(100vh - var(--main-nav)); 
-    overflow-y: auto;
-    
+    padding: 1rem 2vw !important;
+    height: calc(100vh - 8.5rem); 
 }
 
-.main-nav {
+/* .main-nav {
+    position: sticky;
     display: flex;
     flex-direction: row;
     align-items: center;
     justify-content: space-between;
-    background-color: rgba(0, 0, 0, 0.8);
+    background-color: rgba(0, 0, 0, 0.95);
     padding: 0.5rem 2rem;
     border-bottom: 2px solid #00ff88;
     top: 0;
     width: 100%;
+    height: 5rem;
     z-index: 150;
     display: flex;
     flex-direction: row;
     color: white;
-} 
+
+    background-color: rgba(15, 15, 15, 0.4); 
+    
+    backdrop-filter: blur(12px);
+    -webkit-backdrop-filter: blur(12px);
+    transform: translateZ(0);
+}  */
+
+nav {
+    position: sticky;
+    top: 0;
+    width: 100%;
+    height: 4.5rem;
+    z-index: 150;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding-left: 2rem; 
+    padding-right: 2rem;
+    color: #ffffff;
+    background-color: rgba(0, 0, 0, 0.67);
+    backdrop-filter: blur(12px);    
+    border-bottom: 2px solid #00ff88;
+}
+
+.nav-left, .nav-right {
+    display: flex;
+    align-items: center;
+    
+}
+
+.nav-left {
+    font-weight: bold;
+}
+
+.nav-right {
+    justify-content: flex-end;
+    flex-basis: 12.5rem;
+}
+
+.nav-center {
+    display: flex;
+    flex: 1;
+    justify-content: center;
+    align-items: center;
+    gap: 1.5rem;
+}
 
 .modal { 
     border: 2px solid #00ff88;
@@ -441,6 +505,7 @@ tr {
     @apply mt-0! text-black flex items-center font-bold justify-between;
 
     padding: 0.5rem 2rem;
+    height: 4rem !important;
     font-size: 1.8rem;
     background-color: #ffffff;
     color: #000000;

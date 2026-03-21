@@ -2,7 +2,8 @@
 
 import { useState, useEffect } from "react";
 import StaffModal from "./StaffModal";
-
+import IntButton from "./IntButton"
+import { Plus, Pencil, Trash } from "lucide-react"
 // It only needs the raw data from the main page now!
 interface StaffListProps {
   staffList: any[];
@@ -16,7 +17,7 @@ export default function StaffList({ staffList, staffRooms, department }: StaffLi
   const [availableRoles, setAvailableRoles] = useState<any[]>([]);
   const [availableRooms, setAvailableRooms] = useState<any[]>([]);
   const [staffForm, setStaffForm] = useState({ 
-    id: "", user_id: "", name: "", email: "", password: "", role: "", assigned_rooms: [] as string[] 
+    id: "", user_id: "", name: "", email: "", password: "", role: "Security Officer", assigned_rooms: [] as string[] 
   });
 
   // Fetch roles and rooms just for this component
@@ -40,13 +41,35 @@ export default function StaffList({ staffList, staffRooms, department }: StaffLi
   // --- Functions moved from the main page! ---
   const openStaffModal = async (staff: any = null) => {
     if (staff) {
-      setStaffForm({ ...staff, password: "", assigned_rooms: [] });
+      // SAFE EDIT: Provide fallbacks so 'null' from the database never breaks React!
+      setStaffForm({ 
+        id: staff.id || "", 
+        user_id: staff.user_id || "", 
+        name: staff.name || "", 
+        email: staff.email || "", 
+        password: "", 
+        role: staff.role || availableRoles[0]?.name || "Security Officer", 
+        assigned_rooms: [] 
+      });
+
+      // Fetch the rooms assigned to this user
       const res = await fetch(`/api/user_assignments/${staff.id}`);
       const data = await res.json();
       setStaffForm(prev => ({ ...prev, assigned_rooms: data.assigned_rooms || [] }));
+      
     } else {
-      setStaffForm({ id: "", user_id: "", name: "", email: "", password: "", role: "", assigned_rooms: [] });
+      // SAFE ADD: Ensure no fields are undefined, and grab the first available role from the dropdown!
+      setStaffForm({ 
+        id: "", 
+        user_id: "", 
+        name: "", 
+        email: "", 
+        password: "", 
+        role: availableRoles[0]?.name || "Security Officer", 
+        assigned_rooms: [] 
+      });
     }
+    
     setStaffModalOpen(true);
   };
 
@@ -80,20 +103,18 @@ export default function StaffList({ staffList, staffRooms, department }: StaffLi
     <>
       {/* The List UI */}
       <div className="tracker-ui scroll outer box basis-90">
-        <div className="row mt-0! font-bold">
-          <h3>Staff Information</h3>
-          <button className="btn btn-blue btn-auto m-0!" onClick={() => openStaffModal()}>
-            <h4>Add Staff</h4>
-          </button>
-        </div>
+        <h3 className="row mt-0! font-bold">
+          <span>Staff Information</span>
+          <IntButton icon={Plus} label="Add User" onClick={openStaffModal} classes={"btn-header btn-blue btn-auto m-0!"} />
+        </h3>
         <div className="flex flex-wrap items-stretch gap-2 mt-4">
             {staffList.map(staff => (
             <div key={staff.id} className="tracker-ui mt-4 p-4! flex-1 basis-78">
                 <div className="row m-0! font-bold">
-                <h4 className="m-0 flex-5">{staff.name}</h4>
-                <div className="row m-0! gap-2 flex-2 justify-end!">
-                    <button className="btn btn-yellow btn-list m-0!" onClick={() => openStaffModal(staff)}>✏️</button>
-                    <button className="btn btn-red btn-list m-0!" onClick={() => deleteStaff(staff.id)}>🗑️</button>
+                <h4 className="m-0 flex-3">{staff.name}</h4>
+                <div className="row m-0! gap-2 flex-1 justify-end!">
+                  <IntButton icon={Pencil} label="Edit User" onClick={() => openStaffModal(staff)} classes={"btn btn-yellow btn-list m-0!"} />
+                  <IntButton icon={Trash} label="Delete User" onClick={() => deleteStaff(staff.id)} classes={"btn btn-red btn-list m-0!"} />
                 </div>
                 </div>
                 <div><span className="text-[#999]">{staff.user_id} - {staff.email} <br/> {staff.role}</span></div>
@@ -119,6 +140,7 @@ export default function StaffList({ staffList, staffRooms, department }: StaffLi
           setStaffForm={setStaffForm}
           availableRoles={availableRoles}
           availableRooms={availableRooms}
+          toggleRoom={toggleRoom}
         />
       )}
     </>
