@@ -4,15 +4,14 @@ import { useState, useEffect } from "react";
 import StaffModal from "./StaffModal";
 import IntButton from "./IntButton"
 import { Plus, Pencil, Trash } from "lucide-react"
-// It only needs the raw data from the main page now!
+
 interface StaffListProps {
   staffList: any[];
   staffRooms?: any;
-  department: string; // Passed down so the modal knows whether to show Rooms
+  department: string;
 }
 
 export default function StaffList({ staffList, staffRooms, department }: StaffListProps) {
-  // --- States moved from the main page! ---
   const [isStaffModalOpen, setStaffModalOpen] = useState(false);
   const [availableRoles, setAvailableRoles] = useState<any[]>([]);
   const [availableRooms, setAvailableRooms] = useState<any[]>([]);
@@ -20,7 +19,6 @@ export default function StaffList({ staffList, staffRooms, department }: StaffLi
     id: "", user_id: "", name: "", email: "", password: "", role: "Security Officer", assigned_rooms: [] as string[] 
   });
 
-  // Fetch roles and rooms just for this component
   useEffect(() => {
     if (department === "Security") {
       fetch("/api/security_info")
@@ -42,34 +40,19 @@ export default function StaffList({ staffList, staffRooms, department }: StaffLi
   const openStaffModal = async (staff: any = null) => {
     if (staff) {
       // SAFE EDIT: Provide fallbacks so 'null' from the database never breaks React!
-      setStaffForm({ 
-        id: staff.id || "", 
-        user_id: staff.user_id || "", 
-        name: staff.name || "", 
-        email: staff.email || "", 
-        password: "", 
-        role: staff.role || availableRoles[0]?.name || "Security Officer", 
-        assigned_rooms: [] 
+      setStaffForm({ id: staff.id || "", user_id: staff.user_id || "", name: staff.name || "", email: staff.email || "", 
+        password: "", role: staff.role || availableRoles[0]?.name || "Security Officer", assigned_rooms: [] 
       });
 
-      // Fetch the rooms assigned to this user
       const res = await fetch(`/api/user_assignments/${staff.id}`);
       const data = await res.json();
       setStaffForm(prev => ({ ...prev, assigned_rooms: data.assigned_rooms || [] }));
       
     } else {
-      // SAFE ADD: Ensure no fields are undefined, and grab the first available role from the dropdown!
-      setStaffForm({ 
-        id: "", 
-        user_id: "", 
-        name: "", 
-        email: "", 
-        password: "", 
-        role: availableRoles[0]?.name || "Security Officer", 
-        assigned_rooms: [] 
+      setStaffForm({ id: "", user_id: "", name: "", email: "", password: "", 
+        role: availableRoles[0]?.name || "Security Officer", assigned_rooms: [] 
       });
     }
-    
     setStaffModalOpen(true);
   };
 
@@ -101,7 +84,6 @@ export default function StaffList({ staffList, staffRooms, department }: StaffLi
 
   return (
     <>
-      {/* The List UI */}
       <div className="tracker-ui scroll outer box basis-90">
         <h3 className="row mt-0! font-bold">
           <span>Staff Information</span>
@@ -120,10 +102,10 @@ export default function StaffList({ staffList, staffRooms, department }: StaffLi
                 <div><span className="text-[#999]">{staff.user_id} - {staff.email} <br/> {staff.role}</span></div>
                 {staffRooms && (
                 <>
-                    <div className="mt-2">
-                    <span>Rooms Assigned: </span>
-                    <span className="text-[#999]">{staffRooms[staff.user_id]?.length > 0 ? staffRooms[staff.user_id].join(", ") : "N/A"}</span>
-                    </div>
+                  <div className="mt-2">
+                  <span>Rooms Assigned: </span>
+                  <span className="text-[#999]">{staffRooms[staff.user_id]?.length > 0 ? staffRooms[staff.user_id].join(", ") : "N/A"}</span>
+                  </div>
                 </>
                 )}
             </div>
@@ -131,7 +113,6 @@ export default function StaffList({ staffList, staffRooms, department }: StaffLi
         </div>
       </div>
 
-      {/* The Modal perfectly encapsulated inside the component! */}
       {isStaffModalOpen && (
         <StaffModal 
           onClose={() => setStaffModalOpen(false)}

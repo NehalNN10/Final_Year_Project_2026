@@ -1,4 +1,6 @@
 "use client";
+import StatRow from "./StatRow";
+import { MapPin, Calendar, Clock, User, Thermometer, AirVent, Lightbulb } from "lucide-react";
 
 interface RoomStatsPanelProps {
   department: string;
@@ -8,41 +10,38 @@ interface RoomStatsPanelProps {
 export default function RoomStatsPanel({ department, isLive = false }: RoomStatsPanelProps) {
   return (
     <div className="tracker-ui outer p-4!">
-      <h3 className="row font-bold mt-0!">
-        <span>
-          <span>📍 &nbsp; </span>
-          <span id="ui-room-name">--</span>
-        </span>
+      <h3 className="flex gap-2 items-center font-bold mt-0! justify-start! text-[#0f8]">
+        <StatRow icon={MapPin} label="--" id="ui-room-name" size="32"/>
       </h3>
       
       <div className="content" id="ui-content">
-        <div className="row">
-            <span id="ui-room-id">--</span>
-            <span id="ui-room-floor">--</span>
+        <div className="row font-bold text-[#aaa]">
+          <span id="ui-room-id">--</span>
+          <span id="ui-room-floor">--</span>
         </div>
 
-        <div className="row">
-          <span><span> 📅 </span><span id="ui-iot-date">??</span></span>
-          <span><span> ⏰ </span><span id="ui-iot-time" className="font-bold value">??</span></span>
+        <div className="row text-[#ccc]">
+          <StatRow icon={Calendar} label="--" id="ui-iot-date" />
+          <StatRow icon={Clock} label="--" id="ui-iot-time" />
         </div>
 
         <div className="row border-t border-t-[#888] mt-4! pt-4!" id="occupancy">
-          <span id="ui-iot-occu-header">Occupancy:</span>
-          <span className="fill" id="ui-iot-occupancy">Detecting...</span>
+          <StatRow icon={User} label="Occupancy: " id="ui-iot-occu-header" id2="ui-iot-occupancy"/>
         </div>
 
         {!isLive && department !== "Security" && (
           <div id="iot-data">
             <div className="row">
-                <span> 🌡️ Temperature: </span>
-                <span className="fill" id="ui-iot-temp">??</span>
+              <StatRow icon={Thermometer} label="Temperature: " id2="ui-iot-temp"/>
             </div>
-
+            
             <div className="row">
-                <span>❄️ AC: </span>
-                <span className="fill" id="ui-iot-ac">--</span>
-                <span>💡 Lights: </span>
-                <span className="fill" id="ui-iot-lights">--</span>
+              <div className="flex gap-2 items-center">
+                <StatRow icon={AirVent} label="AC: " id2="ui-iot-ac"/>
+              </div>
+              <div className="flex gap-2 items-center">
+                <StatRow icon={Lightbulb} label="Lights: " id2="ui-iot-lights"/>
+              </div>
             </div>
           </div>
         )}

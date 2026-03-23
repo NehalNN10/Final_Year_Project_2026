@@ -65,16 +65,35 @@ input[type="text"]:hover, input[type="password"]:hover, input[type="number"]:hov
 }
 
 table {
-    border-collapse: collapse; /* Merges borders */
-    border-radius: 8px;
-    border-style: hidden; /* Hides the square corners from cells */
-    box-shadow: 0 0 0 1px #888; /* Fakes a border */
-    overflow: hidden; /* Clips the square corners */
+    border-collapse: collapse; 
+    border-radius: 0px;
+    border-style: hidden; 
+    box-shadow: 0 0 0 1px #888; 
 }
 
 th, td {
+    padding: 15px;
     text-align: left;
-    padding: 20px;
+
+}
+
+.iot {
+    @apply hidden min-[50rem]:inline;
+}
+
+.th-small-iot {
+    @apply inline min-[50rem]:hidden mx-auto;
+}
+
+.small {
+    @apply min-[50rem]:hidden flex items-center;
+}
+
+.small-iot {
+    /* 1. Changed flex to inline-flex */
+    /* 2. Added w-fit to stop the stretching */
+    /* 3. Added mx-auto to keep it perfectly centered under the header! */
+    @apply flex items-center justify-center gap-1 w-fit mx-auto; 
 }
 
 tr {
@@ -142,11 +161,11 @@ tr {
     @apply overflow-hidden whitespace-nowrap transition-all duration-300 ease-in-out;
 }
 
-.btn-inactive {
+.btn-active {
     @apply max-w-30 opacity-100 ml-2;
 }
 
-.btn-active {
+.btn-inactive {
     @apply max-w-0 opacity-0 group-hover:max-w-30 group-hover:opacity-100 group-hover:ml-2;
 }
 
@@ -300,7 +319,7 @@ tr {
 }
 
 .fill {
-    @apply px-3! py-2! text-black font-bold;
+    @apply px-3! py-1.5! text-black font-bold;
     border-radius: 20px;
 }
 
@@ -381,20 +400,20 @@ nav {
     justify-content: space-between;
     padding-left: 2rem; 
     padding-right: 2rem;
-    color: #ffffff;
-    background-color: rgba(0, 0, 0, 0.67);
-    backdrop-filter: blur(12px);    
+    color: white;
+    background: rgba(0, 0, 0, 0.67);
+    backdrop-filter: blur(20px) !important;    
     border-bottom: 2px solid #00ff88;
 }
 
 .nav-left, .nav-right {
     display: flex;
     align-items: center;
-    
 }
 
 .nav-left {
     font-weight: bold;
+    min-width: 15rem;
 }
 
 .nav-right {
@@ -514,7 +533,6 @@ nav {
 
 .table {
     width: 100%;
-    border-collapse: collapse;
     margin-top: 10px;
 }
 
@@ -528,13 +546,9 @@ nav {
     pointer-events: none;
     border: 1px solid #888888;
     pointer-events: auto !important; /* CRITICAL: Allows clicking the header */
+    backdrop-filter: blur(20px) !important;   
     transition: all 0.3s ease;
     overflow: hidden; /* Needed for the slide animation */
-}
-
-.value {
-    border-radius: 8px;
-    
 }
 
 #model-container {

@@ -102,15 +102,12 @@ export function renderFrame(index) {
         // Safe Check: Only update if React hasn't deleted the element yet!
         if (uiElements.uiName) {
             uiElements.uiName.innerText = roomInf.name;
-            uiElements.uiName.style.color = "#00ff88";
         }
         if (uiElements.uiID) {
             uiElements.uiID.innerText = roomInf.room_id;
-            uiElements.uiID.style.color = "#ffffff";
         }
         if (uiElements.uiFloor) {
             uiElements.uiFloor.innerText = roomInf.room_floor;
-            uiElements.uiFloor.style.color = "#ffffff";
         }
     } else {
         if (uiElements.uiName) {
@@ -145,14 +142,14 @@ export function renderFrame(index) {
             if (uiElements.uiAC) {
                 // const ac = row['ac']; 
                 const ac = row.ac;
-                uiElements.uiAC.innerText = ac ? "• ON" : "- OFF";
+                uiElements.uiAC.innerText = ac ? "ON" : "OFF";
                 uiElements.uiAC.style.backgroundColor = ac ? "#00ff88" : "#ff4444";
             }
 
             if (uiElements.uiLights) {
                 // const l = row['lights'];
                 const l = row.lights;
-                uiElements.uiLights.innerText = l ? "• ON" : "- OFF";
+                uiElements.uiLights.innerText = l ? "ON" : "OFF";
                 uiElements.uiLights.style.backgroundColor = l ? "#00ff88" : "#ff4444";
             }
         }
