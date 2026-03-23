@@ -54,7 +54,7 @@ export default function Navbar({ department }: { department: string }) {
 
         <div className="nav-right gap-2">
           <IntButton icon={LogOut} label="Log Out" onClick={handleLogout} classes={"btn-header btn-red"} />
-          <IntButton icon={MoreVertical} label="Menus" onClick={() => setIsMenuOpen(!isMenuOpen)} classes={"btn-header btn-green text-black!"} />
+          <IntButton icon={MoreVertical} label="Menus" onClick={() => setIsMenuOpen(!isMenuOpen)} classes={"btn-header btn-green text-black! md:hidden!"} />
         </div>
       </nav>
 
