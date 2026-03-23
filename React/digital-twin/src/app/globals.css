@@ -313,7 +313,7 @@ tr {
 }
 
 .formInput {
-    @apply w-2/3 text-black;
+    @apply w-2/3 text-black h-[45px] block; 
 }
 
 .login {
