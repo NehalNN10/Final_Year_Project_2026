@@ -34,6 +34,7 @@ export default function StaffModal({
           {staffForm.id ? "Edit Staff" : "Add Staff"}
         </div>
         
+        <div className="overflow-y-auto max-h-[60vh] pr-4">
         <form onSubmit={onSubmit}>
           {/* --- REFACTORED FORM ROWS --- */}
           <FormRow label="Username/ID" value={staffForm.user_id} onChange={e => setStaffForm({...staffForm, user_id: e.target.value})}  />
@@ -79,6 +80,7 @@ export default function StaffModal({
             </button>
           </div>
         </form>
+        </div>
       </div>
     </div>
   );
