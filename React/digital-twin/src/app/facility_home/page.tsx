@@ -1,9 +1,12 @@
 "use client";
 
 import { useState, useEffect } from "react";
+import { Clock, Users, Thermometer, Wind, Lightbulb, LightbulbOff, Check, X, User, UserMinus } from "lucide-react";
 import Navbar from "../../components/Navbar";
 import StaffList from "../../components/StaffList";
 import FormRow from "../../components/FormRow";
+import StatRow from "@/components/StatRow";
+import { statSync } from "fs";
 
 
 export default function FacilityHome() {
@@ -125,60 +128,118 @@ export default function FacilityHome() {
             <div className="tracker-ui mt-4 p-4 text-gray-400 text-center">No active alerts.</div>
           </div>
 
-            {/* Real-Time Data Table */}
-            <div className="tracker-ui scroll outer box basis-220">
-                <div className="row mt-0! font-bold">
-                <h3 className="flex-2">Rooms Real-Time Data</h3>
-                <h3 className="flex-1 text-right"> ⏰ <span>{currentTimeSpan}</span></h3>
-                </div>
-                
-                <table className="scroll table w-full mt-4 min-w-205">
+          {/* Real-Time Data Table */}
+          <div className="tracker-ui outer box basis-220 overflow-hidden flex flex-col">
+            <h3 className="row mt-0! font-bold shrink-0">
+              <span className="flex-2">Rooms Real-Time Data</span>
+              <StatRow icon={Clock} label={currentTimeSpan} size="32"/>
+            </h3>
+            <div className="w-full overflow-x-auto mt-4 pb-2">
+{/* 1. Removed min-w-175 and table-fixed. Added whitespace-nowrap to stop text wrapping! */}
+              <table className="table w-full border-separate border-spacing-0 whitespace-nowrap">
                 <thead>
-                    <tr>
-                    <th style={{width:'15%'}}>ID</th>
-                    <th style={{width:'33%'}}>Room Name</th>
-                    <th style={{width:'13%'}}>Occupancy</th>
-                    <th style={{width:'13%'}}>Temperature</th>
-                    <th style={{width:'13%'}}>AC</th>
-                    <th style={{width:'13%'}}>Lights</th>
-                    </tr>
+                  <tr>
+                    {/* 2. Added w-[1%] to shrink-wrap the ID column */}
+                    <th className="w-[1%] sticky left-0 z-20 bg-black shadow-[2px_0_5px_rgba(0,0,0,0.5)]">
+                      ID
+                    </th>
+                    
+                    {/* 3. Room Name stays w-full to absorb all extra space on Desktop */}
+                    <th className="hidden min-[43rem]:table-cell w-full text-left">
+                      Room Name
+                    </th>
+                    
+                    {/* 4. Removed hardcoded widths from status columns so they share space evenly on mobile! */}
+                    <th className="text-center!">
+                      <span className="iot">Occupancy</span>
+                      <Users size={24} className="th-small-iot" />
+                    </th>
+                    <th className="text-center!">
+                      <span className="iot">Temperature</span>
+                      <Thermometer size={24} className="th-small-iot" />
+                    </th>
+                    <th className="text-center!">
+                      <span className="iot">AC</span>
+                      <Wind size={24} className="th-small-iot" />
+                    </th>
+                    <th className="text-center!">
+                      <span className="iot">Lights</span>
+                      <Lightbulb size={24} className="th-small-iot" />
+                    </th>
+                  </tr>
                 </thead>
                 <tbody>
-                    {roomsData.map(room => {
-                    // Fallback to our dummy missing-data object if stats aren't loaded yet
+                  {roomsData.map(room => {
                     const stats = currentRoomStats[room.room_id] || { occupancy: "--", temperature: "--", ac: null, lights: null };
-                    
-                    // 1. Determine if we actually have data for this room
                     const hasData = stats.occupancy !== "--";
 
-                    // 2. Set Text and Colors based on data availability
-                    const occText = hasData ? (stats.occupancy > 0 ? "Occupied" : "Vacant") : "--";
-                    const occColor = hasData ? (stats.occupancy > 0 ? "#ff4444" : "#00ff88") : "#ffffff"; // White if missing
+                    const isOccupied = hasData && stats.occupancy > 0;
+                    const occColor = hasData ? (isOccupied ? "#ff4444" : "#00ff88") : "#ffffff";
                     
+                    const isAcOn = stats.ac;
+                    const acColor = stats.ac !== null ? (isAcOn ? "#00ff88" : "#ff4444") : "#ffffff";
+                    
+                    const isLightsOn = stats.lights;
+                    const lightsColor = stats.lights !== null ? (isLightsOn ? "#00ff88" : "#ff4444") : "#ffffff";
+
                     const tempText = hasData ? `${stats.temperature} °C` : "--";
-                    const tempColor = getTempColor(stats.temperature); // getTempColor already handles "--"
-                    
-                    const acText = stats.ac !== null ? (stats.ac ? "• ON" : "- OFF") : "--";
-                    const acColor = stats.ac !== null ? (stats.ac ? "#00ff88" : "#ff4444") : "#ffffff";
-                    
-                    const lightsText = stats.lights !== null ? (stats.lights ? "• ON" : "- OFF") : "--";
-                    const lightsColor = stats.lights !== null ? (stats.lights ? "#00ff88" : "#ff4444") : "#ffffff";
+                    const tempTextSmall = hasData ? `${Math.round(stats.temperature)}°` : "--";
+                    const tempColor = getTempColor(stats.temperature);
 
                     return (
-                        <tr key={room.id}>
-                        <td>{room.room_id}</td>
-                        <td>{room.name}</td>
-                        <td><span className="fill" style={{ backgroundColor: occColor }}>{occText}</span></td>
-                        <td><span className="fill" style={{ backgroundColor: tempColor }}>{tempText}</span></td>
-                        <td><span className="fill" style={{ backgroundColor: acColor }}>{acText}</span></td>
-                        <td><span className="fill" style={{ backgroundColor: lightsColor }}>{lightsText}</span></td>
-                        </tr>
+                      <tr key={room.id}>
+                        {/* 5. Matches the w-[1%] from the header */}
+                        <td className="w-[1%] sticky left-0 z-10 bg-black font-bold shadow-[2px_0_5px_rgba(0,0,0,0.5)]">
+                          {room.room_id}
+                        </td>
+                        <td className="hidden min-[43rem]:table-cell">{room.name}</td>
+                        <td className="text-center!">
+                          <span className="fill small-iot" style={{ backgroundColor: occColor }}>
+                            {hasData ? (
+                              <>
+                                <span className="small">{isOccupied ? <User size={24}/> : <UserMinus size={24}/>}</span>
+                                <span className="iot">{isOccupied ? "Occupied" : "Vacant"}</span>
+                              </>
+                            ) : "--"}
+                          </span>
+                        </td>
+                        <td className="text-center!">
+                          <span className="fill small-iot" style={{ backgroundColor: tempColor }}>
+                            {hasData ? (
+                              <>
+                                <span className="small">{tempTextSmall}</span>
+                                <span className="iot">{tempText}</span>
+                              </>
+                            ) : "--"}
+                          </span>
+                        </td>
+                        <td className="text-center!">
+                          <span className="fill small-iot" style={{ backgroundColor: acColor }}>
+                            {stats.ac !== null ? (
+                              <>
+                                <span className="small">{isAcOn ? <Wind size={24} className="animate-pulse"/> : <X size={24}/>}</span>
+                                <span className="iot">{isAcOn ? "• ON" : "- OFF"}</span>
+                              </>
+                            ) : "--"}
+                          </span>
+                        </td>
+                        <td className="text-center!">
+                          <span className="fill small-iot" style={{ backgroundColor: lightsColor }}>
+                            {stats.lights !== null ? (
+                              <>
+                                <span className="small">{isLightsOn ? <Lightbulb size={24}/> : <LightbulbOff size={24}/>}</span>
+                                <span className="iot">{isLightsOn ? "• ON" : "- OFF"}</span>
+                              </>
+                            ) : "--"}
+                          </span>
+                        </td>
+                      </tr>
                     );
-                    })}
+                  })}
                 </tbody>
-                </table>
+              </table>
             </div>
-          {/* Column 3: Staff List */}
+          </div>
           {currentRole === 'Facilities Admin' && (
             <StaffList 
               staffList={staffList}

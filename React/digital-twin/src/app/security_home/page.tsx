@@ -1,6 +1,8 @@
 "use client";
 
 import { useState, useEffect } from "react";
+import { Clock } from "lucide-react";
+import StatRow from "@/components/StatRow";
 import Navbar from "../../components/Navbar";
 import StaffList from "../../components/StaffList";
 import FormRow from "../../components/FormRow";
@@ -93,7 +95,7 @@ export default function SecurityHome() {
         <span>Security Dashboard</span>
         {currentRole === 'Security Admin' && (
           <button className="btn btn-red btn-auto m-0! py-1!" onClick={() => setEmergencyModalOpen(true)}>
-            <h2 className="font-bold text-white text-xl">Send Emergency Alert</h2>
+            <h2 className="font-bold text-white text-xl">Send Alert</h2>
           </button>
         )}
       </div>
@@ -112,27 +114,29 @@ export default function SecurityHome() {
 
           {/* Column 2: Rooms Table */}
           <div className="tracker-ui scroll outer box basis-120">
-            <div className="row mt-0! font-bold">
-              <h3 className="flex-2">Rooms Real-Time Data</h3>
-              <h3 className="flex-1 text-right!"> ⏰ <span>{currentTimeSpan}</span></h3>
+            <h3 className="row mt-0! font-bold shrink-0">
+              <span className="flex-2">Rooms Real-Time Data</span>
+              <StatRow icon={Clock} label={currentTimeSpan} size="32"/>
+            </h3>
+            <div className="w-full overflow-x-auto mt-4 pb-2">
+              <table className="scroll table w-full mt-4">
+                <thead>
+                  <tr><th style={{width:'22%'}}>ID</th><th style={{width:'40%'}}>Name</th><th style={{width:'13%'}}>Occupancy</th></tr>
+                </thead>
+                <tbody>
+                  {roomsData.map(room => {
+                    const count = currentRoomStats[room.room_id]?.occupancy;
+                    const bgColor = count > room.max_occupancy ? "#ff4444" : (count !== "--" && count !== 0) ? "#00ff88" : "#ffffff";
+                    return (
+                      <tr key={room.id}>
+                        <td>{room.room_id}</td><td>{room.name}</td>
+                        <td><span className="fill" style={{ backgroundColor: bgColor }}>{count ?? "??"}</span></td>
+                      </tr>
+                    );
+                  })}
+                </tbody>
+              </table>
             </div>
-            <table className="scroll table w-full mt-4">
-              <thead>
-                <tr><th style={{width:'22%'}}>ID</th><th style={{width:'40%'}}>Name</th><th style={{width:'13%'}}>Occupancy</th></tr>
-              </thead>
-              <tbody>
-                {roomsData.map(room => {
-                  const count = currentRoomStats[room.room_id]?.occupancy;
-                  const bgColor = count > room.max_occupancy ? "#ff4444" : (count !== "--" && count !== 0) ? "#00ff88" : "#ffffff";
-                  return (
-                    <tr key={room.id}>
-                      <td>{room.room_id}</td><td>{room.name}</td>
-                      <td><span className="fill" style={{ backgroundColor: bgColor }}>{count ?? "??"}</span></td>
-                    </tr>
-                  );
-                })}
-              </tbody>
-            </table>
           </div>
 
           {/* Column 3: Staff List */}

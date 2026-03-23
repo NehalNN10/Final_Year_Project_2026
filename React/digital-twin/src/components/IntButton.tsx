@@ -12,7 +12,7 @@ export default function IntButton ({ icon: Icon, label, onClick, isActive = fals
   return (
     <button className={`group ${isActive ? "selected" : ""} ${classes}`} onClick={onClick}>
       <Icon size="20" />
-      <span className={`btn-base ${isActive ? "btn-inactive" : "btn-active"}`}> {label}</span>
+      <span className={`btn-base ${isActive ? "btn-active" : "btn-inactive"}`}> {label}</span>
     </button>
   );
 };
