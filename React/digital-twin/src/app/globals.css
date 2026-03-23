@@ -390,11 +390,9 @@ tr {
 }  */
 
 nav {
-    position: sticky;
-    top: 0;
+    /* WE DELETED POSITION: STICKY, TOP, AND Z-INDEX FROM HERE */
     width: 100%;
     height: 4.5rem;
-    z-index: 150;
     display: flex;
     align-items: center;
     justify-content: space-between;
