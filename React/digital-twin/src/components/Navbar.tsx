@@ -3,7 +3,7 @@
 import { useState } from "react"; // <-- 1. Import useState
 import { useRouter, usePathname } from "next/navigation";
 // <-- 2. Import MoreVertical (3 dots) and X for the toggle button
-import { Home, Box, Activity, LogOut, MoreVertical, X } from "lucide-react";
+import { Home, Box, Activity, LogOut, MoreVertical, X, Wrench } from "lucide-react";
 import IntButton from "./IntButton";
 
 export default function Navbar({ department }: { department: string }) {
@@ -50,7 +50,14 @@ export default function Navbar({ department }: { department: string }) {
           <IntButton icon={Home} label="Home" isActive={pathname === homeNav} onClick={() => router.push(homeNav)} classes="btn-header" />
           <IntButton icon={Box} label="Model" isActive={pathname === "/model"} onClick={() => router.push("/model")} classes="btn-header" />
           <IntButton icon={Activity} label="Live Model" isActive={pathname === "/live_model"} onClick={() => router.push("/live_model")} classes="btn-header" />
-        </div>
+          <IntButton 
+          icon={Wrench} 
+          label="Sandbox" 
+          isActive={pathname === "/sandbox"} 
+          onClick={() => router.push("/sandbox")} 
+          classes="btn-header" 
+        />
+      </div>
 
         <div className="nav-right gap-2">
           <IntButton icon={LogOut} label="Log Out" onClick={handleLogout} classes={"btn-header btn-red"} />
