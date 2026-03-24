@@ -22,7 +22,7 @@ export const floorPlane = new THREE.Plane(new THREE.Vector3(0, 1, 0), 0);
 // Create a variable to hold the result
 export const intersectionPoint = new THREE.Vector3();
 
-function displayCurrentDateTime() {
+function getDate() {
     const now = new Date();
   
     const options = { 
@@ -175,7 +175,7 @@ export function renderFrame(index) {
     }
 
     if (uiElements.uiDate) {
-        displayCurrentDateTime();
+        getDate();
     }
         
     // --- NEW CODE START: TIME CALCULATION ---

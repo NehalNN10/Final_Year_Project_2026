@@ -6,12 +6,19 @@ export const roomInfo = {};
 export const iot = {};
 
 // We will call this function right before booting the 3D world!
-export async function initVariables() {
+export async function initRoomInfo() {
     roomInfo["C-007"] = await getRoomInfo("C-007");
     roomInfo["C-006"] = await getRoomInfo("C-006");
+}
 
+export async function initRoomData() {
     iot["C-007"] = await getRoomData("C-007");
     iot["C-006"] = await getRoomData("C-006");
+}
+
+export async function initVariables() {
+    await initRoomInfo();
+    await initRoomData();
 }
 
 export async function getRoomData(roomId) {
@@ -44,4 +51,16 @@ export function getRoom(x, z) {
         return "C-006";
     }
     return null;
+}
+
+export function getTime() {
+    const now = new Date();
+    return now.toLocaleTimeString('en-US', { hour12: true });
+}
+
+// Format Real-Time Date
+export function getDate() {
+    const now = new Date();
+    const options = { weekday: 'short', month: 'short', day: 'numeric', year: 'numeric' };
+    return now.toLocaleDateString('en-US', options);
 }

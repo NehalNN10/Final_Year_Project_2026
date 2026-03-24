@@ -79,7 +79,7 @@ export function getLiveTrackMarkers() {
     return livePlayback.trackCount;
 }
 
-export function getFormattedTime() {
+export function getTime() {
     const now = new Date();
     return now.toLocaleTimeString('en-US', { 
         hour: '2-digit', 
@@ -88,7 +88,7 @@ export function getFormattedTime() {
     });
 }
 
-function displayCurrentDateTime() {
+function getDate() {
     const now = new Date();
   
     const options = { 
@@ -180,12 +180,12 @@ export function renderFrame() {
     //     }
 
         if (uiElements.uiDate) {
-           displayCurrentDateTime();
+           getDate();
         }
             
         // --- NEW CODE START: TIME CALCULATION ---
         if (uiElements.uiTime) {
-            uiElements.uiTime.innerText = getFormattedTime();
+            uiElements.uiTime.innerText = getTime();
         }
 
         // if (uiElements.uiOccupancy) {

@@ -22,7 +22,7 @@ export const floorPlane = new THREE.Plane(new THREE.Vector3(0, 1, 0), 0);
 // Create a variable to hold the result
 export const intersectionPoint = new THREE.Vector3();
 
-function displayCurrentDateTime(dateElement) {
+function getDate(dateElement) {
     if (!dateElement) return; // Safety check
     
     const now = new Date();
@@ -61,8 +61,7 @@ export function renderFrame(index) {
         uiName: document.getElementById('ui-room-name'),
         uiID: document.getElementById('ui-room-id'),
         uiFloor: document.getElementById('ui-room-floor'),
-        uiCoords: document.getElementById('ui-coords'),
-        uiIot: document.getElementById('iot-data')
+        uiCoords: document.getElementById('ui-coords')
     };
 
     const deptEl = document.getElementById('department');
@@ -124,8 +123,7 @@ export function renderFrame(index) {
 
 
     if (row) {
-        if (department !== "Security" && uiElements.uiIot) {
-            uiElements.uiIot.style.display = "block";
+        if (department !== "Security") {
 
             if (uiElements.uiTemp) {
                 // const t = parseFloat(row['temp']);
@@ -191,7 +189,7 @@ export function renderFrame(index) {
     }
 
     if (uiElements.uiDate) {
-        displayCurrentDateTime(uiElements.uiDate); // <-- Pass it here!
+        getDate(uiElements.uiDate); // <-- Pass it here!
     }
         
     // --- NEW CODE START: TIME CALCULATION ---

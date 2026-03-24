@@ -50,14 +50,8 @@ export default function Navbar({ department }: { department: string }) {
           <IntButton icon={Home} label="Home" isActive={pathname === homeNav} onClick={() => router.push(homeNav)} classes="btn-header" />
           <IntButton icon={Box} label="Model" isActive={pathname === "/model"} onClick={() => router.push("/model")} classes="btn-header" />
           <IntButton icon={Activity} label="Live Model" isActive={pathname === "/live_model"} onClick={() => router.push("/live_model")} classes="btn-header" />
-          <IntButton 
-          icon={Wrench} 
-          label="Sandbox" 
-          isActive={pathname === "/sandbox"} 
-          onClick={() => router.push("/sandbox")} 
-          classes="btn-header" 
-        />
-      </div>
+          <IntButton icon={Wrench} label="Sandbox" isActive={pathname === "/sandbox"} onClick={() => router.push("/sandbox")} classes="btn-header" />
+        </div>
 
         <div className="nav-right gap-2">
           <IntButton icon={LogOut} label="Log Out" onClick={handleLogout} classes={"btn-header btn-red"} />
@@ -70,6 +64,7 @@ export default function Navbar({ department }: { department: string }) {
           <IntButton icon={Home} label="Home" isActive={pathname === homeNav} onClick={() => handleNav(homeNav)} classes="btn-header !justify-start w-full" />
           <IntButton icon={Box} label="Model" isActive={pathname === "/model"} onClick={() => handleNav("/model")} classes="btn-header !justify-start w-full" />
           <IntButton icon={Activity} label="Live Model" isActive={pathname === "/live_model"} onClick={() => handleNav("/live_model")} classes="btn-header !justify-start w-full" />
+          <IntButton icon={Wrench} label="Sandbox" isActive={pathname === "/sandbox"} onClick={() => handleNav("/sandbox")} classes="btn-header !justify-start w-full" />
         </div>
       )}
     </header>
