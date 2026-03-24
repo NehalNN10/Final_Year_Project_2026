@@ -1,7 +1,7 @@
 import * as THREE from 'three';
 import { OrbitControls } from 'jsm/controls/OrbitControls.js';
 import { loadAssets, buildWorld } from "./assets/world.js";
-import { renderFrame, livePlayback, createLiveMarker, updateLiveMarker, getFormattedTime } from "./assets/live_simulation.js";
+import { renderFrame, livePlayback, createLiveMarker, updateLiveMarker, getTime } from "./assets/live_simulation.js";
 import { scene, camera, renderer, controls } from "./assets/scene.js";
 
 const socket = io();

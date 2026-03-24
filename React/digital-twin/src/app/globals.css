@@ -253,7 +253,7 @@ tr {
 }
 
 .content {
-    @apply max-h-125;
+    @apply max-h-125 overflow-hidden;
     opacity: 1;
     transition: max-height 0.3s ease, opacity 0.3s ease;
 }
@@ -314,6 +314,18 @@ tr {
     border: 2px solid rgba(0,0,0,1);
 }
 
+.content-expand {
+    @apply grid transition-all duration-300 ease-in-out
+}
+
+.expanded {
+    @apply grid-rows-[1fr] opacity-100 mt-2;
+}
+
+.collapsed {
+    @apply grid-rows-[0fr] opacity-0 mt-0 pointer-events-none;
+}
+
 .faded-font {
     color: #888; 
 }
@@ -333,6 +345,10 @@ tr {
 
 .formInput {
     @apply w-2/3 text-black h-[45px] block; 
+}
+
+.header {
+    @apply flex justify-between items-center cursor-pointer select-none border-b border-transparent hover:border-[#00ff88] transition-all pb-1;
 }
 
 .login {
@@ -544,7 +560,7 @@ nav {
     pointer-events: none;
     border: 1px solid #888888;
     pointer-events: auto !important; /* CRITICAL: Allows clicking the header */
-    backdrop-filter: blur(20px) !important;   
+    backdrop-filter: blur(1rem) !important;   
     transition: all 0.3s ease;
     overflow: hidden; /* Needed for the slide animation */
 }
@@ -556,7 +572,8 @@ nav {
     position: absolute;
     padding: 20px;
     z-index: 100;
-    width: 23rem;
+    width: 25vw;
+    min-width: 17rem;
     height: 100%;
     overflow-y: auto;
     overflow-x: hidden;
