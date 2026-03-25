@@ -158,7 +158,6 @@ def send_alert():
     try:
         room_number = data.get('room_number')
         occupancy_count = data.get('occupancy_count')
-        description = data.get('description', '')
 
         recipients = []
         if room_number:
@@ -172,9 +171,9 @@ def send_alert():
             raise ValueError('No recipient email configured for this room or DEFAULT_EMERGENCY_RECIPIENT not set.')
 
         for rcpt in recipients:
-            send_emergency_alert(room_number, occupancy_count, rcpt, description)
+            send_emergency_alert(room_number, occupancy_count, rcpt)
 
-        print(f"Emergency Alert Sent - Room: {room_number}, Occupancy: {occupancy_count}, Description: {description}, recipients={recipients}")
+        print(f"Emergency Alert Sent - Room: {room_number}, Occupancy: {occupancy_count}, recipients={recipients}")
         return jsonify({'success': True, 'message': 'Emergency alert sent successfully!', 'recipients': recipients}), 200
     except Exception as e:
         print(f"Error sending emergency alert: {e}")
@@ -298,6 +297,8 @@ def delete_staff():
         user = User.objects(id=data['id']).first()
         if user:
             user.delete()
+            SecurityEmails.objects(user=user).delete()
+            
             return jsonify({'success': True}), 200
         return jsonify({'error': 'User not found'}), 404
     except Exception as e:

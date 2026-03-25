@@ -13,10 +13,6 @@ export default function SecurityHome() {
   const [staffRooms, setStaffRooms] = useState<any>({});
   const [roomsData, setRoomsData] = useState<any[]>([]);
   const [currentRole, setCurrentRole] = useState("Security Admin");
-
-  const [isEmergencyModalOpen, setEmergencyModalOpen] = useState(false);
-
-  const [emergencyForm, setEmergencyForm] = useState({ roomNumber: "", occupancy: "", description: "" });
   
   const [currentRoomStats, setCurrentRoomStats] = useState<any>({});
   const [currentTimeSpan, setCurrentTimeSpan] = useState("...");
@@ -63,25 +59,34 @@ export default function SecurityHome() {
     return () => clearInterval(interval);
   }, [roomsData]);
 
-  const handleEmergencySubmit = async (e: React.FormEvent) => {
-    e.preventDefault();
+  const handleSendAllAlerts = async () => {
+    // Failsafe to prevent accidental clicks
+    if (!window.confirm("🚨 Are you sure you want to trigger a campus-wide emergency alert for ALL rooms")) return;
 
-    const res = await fetch('/api/send_emergency_alert', { 
-      method: 'POST', 
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ 
-        room_number: emergencyForm.roomNumber, 
-        occupancy_count: emergencyForm.occupancy, 
-        description: emergencyForm.description 
-      })
-    });
-    
-    if (res.ok) {
-      alert('Emergency alert sent!');
-      setEmergencyModalOpen(false);
-      setEmergencyForm({ roomNumber: "", occupancy: "", description: "" });
-    } else {
-      alert('Error sending alert.'); 
+    try {
+      // Create an array of fetch promises for every room
+      const alertPromises = roomsData.map(room => {
+        // Grab the live occupancy at this exact second
+        const liveStats = currentRoomStats[room.room_id] || {};
+        const currentOccupancy = liveStats.occupancy !== "--" ? liveStats.occupancy : 0;
+
+        return fetch('/api/send_emergency_alert', { 
+          method: 'POST', 
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ 
+            room_number: room.room_id, 
+            occupancy_count: currentOccupancy
+          })
+        });
+      });
+
+      // Fire them all off at the same time
+      await Promise.all(alertPromises);
+      alert('✅ Mass emergency alerts successfully sent to all rooms!');
+
+    } catch (error) {
+      console.error("Error sending mass alerts:", error);
+      alert('❌ Error sending alerts. Check the console.'); 
     }
   };
 
@@ -94,8 +99,8 @@ export default function SecurityHome() {
       <div className="side-nav row mt-0! text-black">
         <span>Security Dashboard</span>
         {currentRole === 'Security Admin' && (
-          <button className="btn btn-red btn-auto m-0! py-1!" onClick={() => setEmergencyModalOpen(true)}>
-            <h2 className="font-bold text-white text-xl">Send Alert</h2>
+          <button className="btn btn-red btn-auto m-0! py-1!" onClick={handleSendAllAlerts}>
+            <h2 className="font-bold text-white text-xl">Create Emergency</h2>
           </button>
         )}
       </div>
@@ -149,25 +154,6 @@ export default function SecurityHome() {
           )}
         </div>
       </div>
-
-      {/* EMERGENCY MODAL */}
-      {isEmergencyModalOpen && (
-        <div className="modal-overlay active" onClick={(e) => e.target === e.currentTarget && setEmergencyModalOpen(false)}>
-          <div className="tracker-ui modal text-white">
-            <div className="modal-header p-4 text-3xl text-[#f33]">🚨 EMERGENCY ALERT 🚨</div>
-            <form onSubmit={handleEmergencySubmit}>
-              <FormRow label="Room Name" value={emergencyForm.roomNumber} onChange={e => setEmergencyForm({...emergencyForm, roomNumber: e.target.value})}/>
-              <FormRow label="Occupancy" type="number" value={emergencyForm.occupancy} onChange={e => setEmergencyForm({...emergencyForm, occupancy: e.target.value})} />
-              <FormRow label="Description" value={emergencyForm.description} onChange={e => setEmergencyForm({...emergencyForm, description: e.target.value})} />
-
-              <div className="row mt-4! justify-center!">
-                <button type="button" className="btn btn-green btn-auto" onClick={() => setEmergencyModalOpen(false)}>Cancel</button>
-                <button type="submit" className="btn btn-red btn-auto">Send</button>
-              </div>
-            </form>
-          </div>
-        </div>
-      )}
     </div>
   );
 }
