@@ -52,9 +52,9 @@ export default function SimulationControlsPanel() {
 
       <div className={`content-expand ${isExpanded ? "expanded" : "collapsed"}`}>
         <div className="content" id="sim-content">
-          <div className="flex items-center my-3 text-[#ccc]">
-            <div className="w-1/3 text-left pr-2">Speed</div>
-            <div className="w-2/3 flex items-center justify-end h-5">
+          <div className="flex items-center my-3 text-[#ccc] flex-wrap">
+            <div className="w-20 text-left shrink-0">Speed</div>
+            <div className="flex-1 flex items-center justify-end h-5">
               <input 
                 type="range" min="0.1" max="5" step="0.1" defaultValue="1" id="speed-scrubber"
                 className="scrubber"
@@ -77,9 +77,9 @@ export default function SimulationControlsPanel() {
           </div>
 
           {/* Scrubber Row (Matches dat.gui 40/60 split) */}
-          <div className="flex items-center my-3 text-[#ccc]">
-            <div className="w-1/3 text-left pr-2">Scrubber</div>
-            <div className="w-2/3 flex items-center justify-end h-5">
+          <div className="flex flex-wrap items-center my-3 text-[#ccc]">
+            <div className="w-20 text-left pr-2">Scrubber</div>
+            <div className="flex-1 flex items-center justify-end h-5">
               <input 
                 type="range" min="0" max="22499" step="1" defaultValue="0" id="frame-scrubber"
                 className="scrubber"

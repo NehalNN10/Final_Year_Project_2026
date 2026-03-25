@@ -5,13 +5,6 @@ import { FPS, LOOP_DURATION, iot, getRoom, roomInfo, getDate, getTime } from "./
 export class SandboxSimulation {
     constructor(engine) {
         this.engine = engine; 
-        
-        this.playback = {
-            frame: 0,
-            maxFrames: FPS * LOOP_DURATION,
-            playing: true,
-            speed: 1
-        };
 
         this.spawnedPeople = [];
 
@@ -31,13 +24,14 @@ export class SandboxSimulation {
     }
 
     // --- NEW TARGETED ROOM CONTROLS ---
+    toggleOccu() {
+        if (this.currentRoom) {
+            this.roomIoT[this.currentRoom].occupancy = this.roomIoT[this.currentRoom].occupancy === 0 ? 20 : 0;
+        }
+    }
+
     toggleAC() {
         if (this.currentRoom) {
-            // Failsafe: if room data doesn't exist yet, create it
-            if (!this.roomIoT[this.currentRoom]) {
-                this.roomIoT[this.currentRoom] = { occupancy: 0, temp: 25.0, ac: false, lights: false };
-            }
-            // Flip the AC state for THIS room only!
             this.roomIoT[this.currentRoom].ac = !this.roomIoT[this.currentRoom].ac;
             console.log(`AC in ${this.currentRoom} is now ${this.roomIoT[this.currentRoom].ac ? "ON" : "OFF"}`);
         }
@@ -45,10 +39,6 @@ export class SandboxSimulation {
 
     toggleLights() {
         if (this.currentRoom) {
-            if (!this.roomIoT[this.currentRoom]) {
-                this.roomIoT[this.currentRoom] = { occupancy: 0, temp: 25.0, ac: false, lights: false };
-            }
-            // Flip the Lights state for THIS room only!
             this.roomIoT[this.currentRoom].lights = !this.roomIoT[this.currentRoom].lights;
         }
     }
@@ -70,9 +60,16 @@ export class SandboxSimulation {
         
         if (hit) {
             const id = "SandboxNPC_" + Date.now();
+            
+            // Note: Make sure X is first, then Z!
             const marker = createMarker(this.intersectionPoint.z, this.intersectionPoint.x, 0x00ff88, 0.2, id);
             
             marker.visible = true;
+            
+            // 🌟 THE FIX: Brand the exact coordinates into the object's brain
+            marker.userData.gridX = this.intersectionPoint.x;
+            marker.userData.gridZ = this.intersectionPoint.z;
+            
             this.spawnedPeople.push(marker); 
             
             const targetRoom = getRoom(this.intersectionPoint.x, this.intersectionPoint.z);
@@ -121,7 +118,54 @@ export class SandboxSimulation {
         }
     }
 
-    renderFrame(index) {
+    removeAll() {
+        // 1. Physically remove all the 3D models from the scene first!
+        for (const person of this.spawnedPeople) {
+            this.engine.scene.remove(person);
+        }
+
+        // 2. Now it is safe to empty our tracking array
+        this.spawnedPeople = [];
+
+        // 3. Reset the IoT data (with the correct capital 'T'!)
+        for (const room in this.roomIoT) {
+            this.roomIoT[room].occupancy = 0;
+        }
+        
+        console.log("Sandbox cleared!");
+    }
+
+    removeAllRoom() {
+        this.raycaster.setFromCamera(this.screenCenter, this.engine.camera);
+        const hit = this.raycaster.ray.intersectPlane(this.floorPlane, this.intersectionPoint);
+
+        if (hit) {
+            const targetRoom = getRoom(this.intersectionPoint.x, this.intersectionPoint.z);
+
+            if (targetRoom) {
+                for (let i = this.spawnedPeople.length - 1; i >= 0; i--) {
+                    const person = this.spawnedPeople[i];
+                    
+                    // 🌟 THE FIX: Read from our custom stamped data!
+                    const trueX = person.userData.gridX;
+                    const trueZ = person.userData.gridZ;
+                    
+                    if (getRoom(trueX, trueZ) === targetRoom) {
+                        this.engine.scene.remove(person);
+                        this.spawnedPeople.splice(i, 1);
+                    }
+                }
+
+                if (this.roomIoT[targetRoom]) {
+                    this.roomIoT[targetRoom].occupancy = 0;
+                }
+                
+                console.log(`Room ${targetRoom} is now completely empty!`);
+            }
+        }
+    }
+
+    renderFrame() {
         const uiElements = {
             uiOccupancy: document.getElementById('ui-iot-occupancy'),
             uiOccuHeader: document.getElementById('ui-iot-occu-header'),
@@ -136,6 +180,7 @@ export class SandboxSimulation {
         };
 
         // Sandbox Controls Elements
+        const btnOccu = document.getElementById('sandbox-btn-occu');
         const btnAC = document.getElementById('sandbox-btn-ac');
         const btnLights = document.getElementById('sandbox-btn-lights');
         const scrubTemp = document.getElementById('temp-scrubber');
@@ -172,10 +217,12 @@ export class SandboxSimulation {
         if (roomInf && row && department !== "Security") {
             if (btnAC) btnAC.className = row.ac ? "btn btn-green m-0! flex-1!" : "btn btn-red m-0! flex-1!";
             if (btnLights) btnLights.className = row.lights ? "btn btn-green m-0! flex-1!" : "btn btn-red m-0! flex-1!";
+            if (btnOccu) btnOccu.className = row.occupancy === 0 ? "btn btn-green m-0! flex-1!" : "btn btn-red m-0! flex-1!";
         } else {
             // Grey out the buttons if looking at a hallway!
             if (btnAC) btnAC.className = "btn bg-gray-700 m-0! flex-1! pointer-events-none";
             if (btnLights) btnLights.className = "btn bg-gray-700 m-0! flex-1! pointer-events-none";
+            if (btnOccu) btnOccu.className = "btn bg-gray-700 m-0! flex-1! pointer-events-none";
         }
         // ----------------------------------------------------
 
