@@ -1,7 +1,7 @@
 "use client";
 
 import { useState } from "react";
-import { ChevronDown, ChevronUp } from "lucide-react";
+import { Camera, ChevronDown, ChevronUp, ListRestart } from "lucide-react";
 
 interface ModelControlsPanelProps {
     isReplay?: boolean;
@@ -39,7 +39,7 @@ export default function ModelControlsPanel({ isReplay = false }: ModelControlsPa
             className="btn btn-green mx-0! mb-0!" 
             onClick={() => import("../lib/three/ui.js").then(mod => mod.resetCameraView())}
           >
-            📷 Reset Camera
+            <Camera size={20} /> <span className="ml-2">Reset Camera</span>
           </button>
           {!isReplay && (
               <button 
@@ -52,7 +52,7 @@ export default function ModelControlsPanel({ isReplay = false }: ModelControlsPa
                   });
               }}
               >
-              Model Replay
+                <ListRestart size={20} /> <span className="ml-2">Model Replay</span>
               </button>
           )}
         </div>

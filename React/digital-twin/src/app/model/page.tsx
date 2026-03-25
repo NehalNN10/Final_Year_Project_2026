@@ -4,11 +4,13 @@ import { useEffect, useRef, useState } from "react";
 import Navbar from "../../components/Navbar";
 import RoomStatsPanel from "../../components/RoomStatsPanel";
 import ModelControlsPanel from "../../components/ModelControlsPanel";
-
+import { ChevronLeft, ChevronRight } from "lucide-react";
 
 export default function DigitalTwinModel() {
   const containerRef = useRef<HTMLDivElement>(null);
   const [department, setDepartment] = useState("Loading...");
+
+  const [isSidebarOpen, setIsSidebarOpen] = useState(true);
 
   useEffect(() => {
     async function fetchSession() {
@@ -46,30 +48,38 @@ export default function DigitalTwinModel() {
 
 return (
   <>
-    <Navbar department={department} />
+      <Navbar department={department} />
 
-      <div className="main">
+      <div className="main flex w-full" style={{ height: 'calc(100vh - 4.5rem)' }}>
         
-        {/* Model Container */}
+        <div className={`float ${isSidebarOpen ? "w-[max(17rem,25vw)]" : "w-0"}`}>
+          <div className="w-full h-full overflow-hidden relative">
+            
+            <div className="h-full overflow-y-auto overflow-x-hidden p-5 w-[max(17rem, 25vw)]">
+              <RoomStatsPanel department={department} />
+              
+              <ModelControlsPanel />
+              
+              <div style={{ display: "none" }}>
+                <span id="department">{department}</span>
+                <span id="live">true</span>
+              </div>
+            </div>
+          </div>
+
+          <button 
+            onClick={() => setIsSidebarOpen(!isSidebarOpen)}
+            className="absolute top-4 -right-7 z-50 bg-[#131313] text-[#00ff88] py-3 px-1 rounded-r-lg transition-colors shadow-[5px_0_10px_rgba(0,0,0,0.5)] flex items-center justify-center cursor-pointer"
+            title="Toggle Sidebar"
+          >
+            {isSidebarOpen ? <ChevronLeft size={24} /> : <ChevronRight size={24} />}
+          </button>
+        </div>
+
         <div id="model-container" ref={containerRef}>
           <div className="crosshair"></div>
         </div>
 
-        {/* Floating UI Panel */}
-        <div className="scroll" id="float">
-          
-          {/* Room Stats */}
-          <RoomStatsPanel department={department} />
-          
-          <ModelControlsPanel />
-          
-          {/* Hidden Variables for Three.js */}
-          <div style={{ display: "none" }}>
-            <span id="department">{department}</span>
-            <span id="live">true</span>
-          </div>
-
-        </div>
       </div>
     </>
   );

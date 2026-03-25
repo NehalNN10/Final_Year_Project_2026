@@ -64,39 +64,8 @@ export class SandboxEngine {
                 this.camera.updateProjectionMatrix();
             }
         }
-
-        const dt = (t - this.lastTime) / 1000;
-        this.lastTime = t;
-
-        const liveEl = document.getElementById('live');
-        const LIVE_MODE = liveEl ? liveEl.textContent.trim() === 'true' : false;
-        
-        const pb = this.simulation.playback;
-
-        if (pb.maxFrames > 0) {
-            if (LIVE_MODE) {
-                const targetFrame = this.getLiveFrame();
-                if (targetFrame > pb.maxFrames) pb.frame = pb.maxFrames;
-                else pb.frame = targetFrame;
-                pb.playing = true;
-            } else if (pb.playing) {
-                pb.frame += dt * FPS * pb.speed;
-                if (pb.frame > pb.maxFrames) pb.frame = 0;
-            }
             
-            const currentFrameIdx = Math.floor(pb.frame);
-            
-            this.simulation.renderFrame(currentFrameIdx);
-            
-            if (currentFrameIdx !== this.lastRenderedFrame) {
-                this.lastRenderedFrame = currentFrameIdx;
-                
-                const scrubber = document.getElementById('frame-scrubber');
-                if (scrubber) scrubber.value = currentFrameIdx;
-                const scrubText = document.getElementById('frame-scrubber-text');
-                if (scrubText) scrubText.value = currentFrameIdx;
-            }
-        }
+        this.simulation.renderFrame();
         
         if (this.controls) this.controls.update();
         if (this.renderer && this.scene && this.camera) this.renderer.render(this.scene, this.camera);
