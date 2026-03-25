@@ -65,6 +65,8 @@ input[type="text"]:hover, input[type="password"]:hover, input[type="number"]:hov
 }
 
 table {
+    border-right: none;
+    border-left: none;
     border-collapse: collapse; 
     border-radius: 0px;
     border-style: hidden; 
