@@ -126,11 +126,13 @@ def api_login():
         return jsonify({'error': 'Incorrect password.'}), 401
     else:
         session['user_id'] = str(user.id)
+        session['name'] = user.name
         session['department'] = user.role.department
         session['role'] = user.role.name 
         
         return jsonify({
             'success': True,
+            'name': user.name,
             'department': user.role.department,
             'role': user.role.name,
             'user_id': user.user_id
@@ -143,8 +145,9 @@ def api_logout():
 
 @app.route('/api/session', methods=['GET'])
 def api_session():
-    dept = session.get('department', 'Security') 
-    return jsonify({'department': dept})
+    dept = session.get('department') 
+    name = session.get('name')
+    return jsonify({'department': dept}, {'name': name})
 
 
 # ---------------------------------------------------------
@@ -298,7 +301,7 @@ def delete_staff():
         if user:
             user.delete()
             SecurityEmails.objects(user=user).delete()
-            
+
             return jsonify({'success': True}), 200
         return jsonify({'error': 'User not found'}), 404
     except Exception as e:
@@ -428,7 +431,8 @@ def api_security_home_data():
             'staff_list': staff_list,
             'staff_rooms': staff_rooms,
             'rooms': rooms_data,
-            'current_role': session.get('role', 'Security Admin') 
+            'current_role': session.get('role') ,
+            'name': session.get('name')
         }), 200
     except Exception as e:
         return jsonify({'error': str(e)}), 500
@@ -480,7 +484,8 @@ def api_facility_home_data():
         return jsonify({
             'staff_list': staff_list,  
             'rooms': rooms_data,
-            'current_role': session.get('role', 'Facilities Admin')
+            'current_role': session.get('role'),
+            'name': session.get('name')
         }), 200
     except Exception as e:
         return jsonify({'error': str(e)}), 500

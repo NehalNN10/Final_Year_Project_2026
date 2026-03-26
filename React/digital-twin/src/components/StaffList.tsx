@@ -86,7 +86,7 @@ export default function StaffList({ staffList, staffRooms, department }: StaffLi
     <>
       <div className="tracker-ui scroll outer box basis-90">
         <h3 className="row mt-0! font-bold">
-          <span>Staff Information</span>
+          <span>{department} Staff</span>
           <IntButton icon={Plus} label="Add User" onClick={openStaffModal} classes={"btn-header btn-blue btn-auto m-0!"} />
         </h3>
         <div className="flex flex-wrap items-stretch gap-2 mt-4">
