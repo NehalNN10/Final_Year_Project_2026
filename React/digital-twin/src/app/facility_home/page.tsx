@@ -1,18 +1,18 @@
 "use client";
 
 import { useState, useEffect } from "react";
-import { Clock, Users, Thermometer, Wind, Lightbulb, LightbulbOff, Check, X, User, UserMinus } from "lucide-react";
+import { Clock, Users, Thermometer, Wind, Lightbulb, LightbulbOff, Check, X, User, UserMinus, AirVent } from "lucide-react";
 import Navbar from "../../components/Navbar";
 import StaffList from "../../components/StaffList";
 import FormRow from "../../components/FormRow";
 import StatRow from "@/components/StatRow";
-import { statSync } from "fs";
 
 
 export default function FacilityHome() {
   // --- States ---
   const [roomsData, setRoomsData] = useState<any[]>([]);
-  const [currentRole, setCurrentRole] = useState("Facilities Admin");
+  const [currentRole, setCurrentRole] = useState("Facilities Officer");
+    const [name, setName] = useState("");
   const [isEmergencyModalOpen, setEmergencyModalOpen] = useState(false);
 
   const [staffList, setStaffList] = useState<any[]>([]);
@@ -32,6 +32,7 @@ export default function FacilityHome() {
         setStaffList(data.staff_list || []);
         
         if (data.current_role) setCurrentRole(data.current_role);
+        if (data.name) setName(data.name);
       })
       .catch(err => console.error("Error fetching data:", err));
   }, []);
@@ -101,17 +102,22 @@ export default function FacilityHome() {
     <div className="min-h-screen bg-[#131313] text-white">
       <Navbar department="Facilities" />
 
-      {/* Side Nav */}
       <div className="side-nav row mt-0! text-black">
         <span>Facilities Dashboard</span>
-        {currentRole === 'Facilities Admin' && (
-          <button className="btn btn-red btn-auto m-0! py-1!" onClick={() => setEmergencyModalOpen(true)}>
-            <h2 className="m-0! font-bold text-white text-xl">Send Alert</h2>
-          </button>
-        )}
       </div>
 
       <div className="main-home scroll">
+        <div className="row px-5">
+          <div className="">
+            <h2 className="font-bold">Welcome, {name}!</h2>
+            <p className="text-gray-400">Facilities data and metrics will be displayed here.</p>
+          </div>
+          {currentRole === 'Facilities Admin' && (
+            <button className="btn btn-red btn-auto m-0! py-1!" onClick={() => setEmergencyModalOpen(true)}>
+            <h2 className="m-0! font-bold text-white text-xl">Send Alert</h2>
+          </button>
+          )}
+        </div>
         
         {/* Top Alerts Row */}
         <div className="row boxes">
@@ -139,17 +145,14 @@ export default function FacilityHome() {
               <table className="table w-full border-separate border-spacing-0 whitespace-nowrap">
                 <thead>
                   <tr>
-                    {/* 2. Added w-[1%] to shrink-wrap the ID column */}
                     <th className="w-[1%] sticky left-0 z-20 bg-black shadow-[2px_0_5px_rgba(0,0,0,0.5)]">
                       ID
                     </th>
                     
-                    {/* 3. Room Name stays w-full to absorb all extra space on Desktop */}
                     <th className="hidden min-[43rem]:table-cell w-full text-left">
                       Room Name
                     </th>
                     
-                    {/* 4. Removed hardcoded widths from status columns so they share space evenly on mobile! */}
                     <th className="text-center!">
                       <span className="iot">Occupancy</span>
                       <Users size={24} className="th-small-iot" />
@@ -160,7 +163,7 @@ export default function FacilityHome() {
                     </th>
                     <th className="text-center!">
                       <span className="iot">AC</span>
-                      <Wind size={24} className="th-small-iot" />
+                      <AirVent size={24} className="th-small-iot" />
                     </th>
                     <th className="text-center!">
                       <span className="iot">Lights</span>
