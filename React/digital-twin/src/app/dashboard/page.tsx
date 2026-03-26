@@ -94,13 +94,44 @@ export default function Dashboard() {
         description: emergencyForm.description 
       })
     });
-    
+
     if (res.ok) {
       alert('Facilities alert sent!');
       setEmergencyModalOpen(false);
       setEmergencyForm({ roomNumber: "", alertType: "AC", timeSince: "", description: "" });
     } else {
       alert('Error sending alert.');
+    }
+  };
+
+  const handleSendAllAlerts = async () => {
+    // Failsafe to prevent accidental clicks
+    if (!window.confirm("🚨 Are you sure you want to trigger a campus-wide emergency alert for ALL rooms")) return;
+
+    try {
+      // Create an array of fetch promises for every room
+      const alertPromises = roomsData.map(room => {
+        // Grab the live occupancy at this exact second
+        const liveStats = currentRoomStats[room.room_id] || {};
+        const currentOccupancy = liveStats.occupancy !== "--" ? liveStats.occupancy : 0;
+
+        return fetch('/api/send_emergency_alert', { 
+          method: 'POST', 
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ 
+            room_number: room.room_id, 
+            occupancy_count: currentOccupancy
+          })
+        });
+      });
+
+      // Fire them all off at the same time
+      await Promise.all(alertPromises);
+      alert('✅ Mass emergency alerts successfully sent to all rooms!');
+
+    } catch (error) {
+      console.error("Error sending mass alerts:", error);
+      alert('❌ Error sending alerts. Check the console.'); 
     }
   };
 
@@ -117,10 +148,10 @@ export default function Dashboard() {
   // --- UI Render ---
   return (
     <div className="min-h-screen bg-[#131313] text-white">
-      <Navbar department="Facilities" />
+      <Navbar department="Admin" />
 
       <div className="side-nav row mt-0! text-black">
-        <span>Facilities Dashboard</span>
+        <span>Admin Dashboard</span>
       </div>
 
       <div className="main-home scroll">
@@ -129,11 +160,14 @@ export default function Dashboard() {
             <h2 className="font-bold">Welcome, {name}!</h2>
             <p className="text-gray-400">Security data and metrics will be displayed here.</p>
           </div>
-          {currentRole === 'Facilities Admin' && (
+          <div className="flex flex-row gap-2">
             <button className="btn btn-red btn-auto m-0! py-1!" onClick={() => setEmergencyModalOpen(true)}>
-            <h2 className="m-0! font-bold text-white text-xl">Send Alert</h2>
-          </button>
-          )}
+              <h2 className="m-0! font-bold text-white text-xl">Send Alert</h2>
+            </button>
+            <button className="btn btn-red btn-auto m-0! py-1!" onClick={handleSendAllAlerts}>
+              <h2 className="font-bold text-white text-xl">Create Emergency</h2>
+            </button>
+          </div>
         </div>
         
         {/* Top Alerts Row */}
