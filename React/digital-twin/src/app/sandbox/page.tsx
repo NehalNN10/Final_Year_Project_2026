@@ -182,7 +182,6 @@ export default function SandboxModel() {
         <div id="model-container" ref={containerRef} className="flex-1 w-full h-full relative overflow-hidden bg-black/50">
           <div className="crosshair"></div>
         </div>
-        
       </div>
     </>
   );
