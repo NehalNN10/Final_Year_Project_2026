@@ -1,7 +1,7 @@
 "use client";
 
 import { useState, useEffect } from "react";
-import { Clock } from "lucide-react";
+import { Clock, User, Users } from "lucide-react";
 import StatRow from "@/components/StatRow";
 import Navbar from "../../components/Navbar";
 import StaffList from "../../components/StaffList";
@@ -12,7 +12,8 @@ export default function SecurityHome() {
   const [staffList, setStaffList] = useState<any[]>([]);
   const [staffRooms, setStaffRooms] = useState<any>({});
   const [roomsData, setRoomsData] = useState<any[]>([]);
-  const [currentRole, setCurrentRole] = useState("Security Admin");
+  const [currentRole, setCurrentRole] = useState("Security Officer");
+  const [name, setName] = useState("");
   
   const [currentRoomStats, setCurrentRoomStats] = useState<any>({});
   const [currentTimeSpan, setCurrentTimeSpan] = useState("...");
@@ -28,6 +29,7 @@ export default function SecurityHome() {
         setStaffRooms(data.staff_rooms || {});
         setRoomsData(data.rooms || []);
         if (data.current_role) setCurrentRole(data.current_role);
+        if (data.name) setName(data.name);
       })
       .catch(err => console.error("Error fetching data:", err));
   }, []);
@@ -98,16 +100,23 @@ export default function SecurityHome() {
       {/* Side Nav */}
       <div className="side-nav row mt-0! text-black">
         <span>Security Dashboard</span>
-        {currentRole === 'Security Admin' && (
-          <button className="btn btn-red btn-auto m-0! py-1!" onClick={handleSendAllAlerts}>
-            <h2 className="font-bold text-white text-xl">Create Emergency</h2>
-          </button>
-        )}
       </div>
 
       <div className="main-home scroll">
-        <div className="row boxes">
-          
+
+        <div className="row px-5">
+          <div className="">
+            <h2 className="font-bold">Welcome, {name}!</h2>
+            <p className="text-gray-400">Security data and metrics will be displayed here.</p>
+          </div>
+          {currentRole === 'Security Admin' && (
+            <button className="btn btn-red btn-auto m-0! py-1!" onClick={handleSendAllAlerts}>
+              <h2 className="font-bold text-white text-xl">Create Emergency</h2>
+            </button>
+          )}
+        </div>
+
+        <div className="row boxes">  
           {/* Column 1: Alerts */}
           <div className="tracker-ui scroll outer box basis-70">
             <h3 className="font-bold">Occupancy Alerts</h3>
@@ -117,25 +126,48 @@ export default function SecurityHome() {
             </div>
           </div>
 
-          {/* Column 2: Rooms Table */}
-          <div className="tracker-ui scroll outer box basis-120">
+          <div className="tracker-ui outer box basis-220 overflow-hidden flex flex-col">
             <h3 className="row mt-0! font-bold shrink-0">
               <span className="flex-2">Rooms Real-Time Data</span>
               <StatRow icon={Clock} label={currentTimeSpan} size="32"/>
             </h3>
             <div className="w-full overflow-x-auto mt-4 pb-2">
-              <table className="scroll table w-full mt-4">
+              <table className="table w-full border-separate border-spacing-0 whitespace-nowrap">
                 <thead>
-                  <tr><th style={{width:'22%'}}>ID</th><th style={{width:'40%'}}>Name</th><th style={{width:'13%'}}>Occupancy</th></tr>
+                  <tr>
+                    <th className="w-[1%] sticky left-0 z-20 bg-black shadow-[2px_0_5px_rgba(0,0,0,0.5)]">
+                      ID
+                    </th>
+                    
+                    <th className="hidden min-[26rem]:table-cell w-full text-left">
+                      Room Name
+                    </th>
+                    
+                    <th className="text-center!">
+                      <span className="iot min-[30rem]:inline!">Occupancy</span>
+                      <Users size={24} className="th-small-iot min-[30rem]:hidden!" />
+                    </th>
+                  </tr>
                 </thead>
                 <tbody>
                   {roomsData.map(room => {
-                    const count = currentRoomStats[room.room_id]?.occupancy;
+                    const stats = currentRoomStats[room.room_id] || { occupancy: "--", temperature: "--", ac: null, lights: null };
+
+                    const count = stats.occupancy;
                     const bgColor = count > room.max_occupancy ? "#ff4444" : (count !== "--" && count !== 0) ? "#00ff88" : "#ffffff";
+
                     return (
                       <tr key={room.id}>
-                        <td>{room.room_id}</td><td>{room.name}</td>
-                        <td><span className="fill" style={{ backgroundColor: bgColor }}>{count ?? "??"}</span></td>
+                        {/* 5. Matches the w-[1%] from the header */}
+                        <td className="w-[1%] sticky left-0 z-10 bg-black font-bold shadow-[2px_0_5px_rgba(0,0,0,0.5)]">
+                          {room.room_id}
+                        </td>
+                        <td className="hidden min-[26rem]:table-cell">{room.name}</td>
+                        <td className="text-center!">
+                          <span className="fill small-iot" style={{ backgroundColor: bgColor }}>
+                            {count ?? "??"}
+                          </span>
+                        </td>
                       </tr>
                     );
                   })}
