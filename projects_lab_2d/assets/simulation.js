@@ -4,7 +4,7 @@ import { camera, controls } from "./scene.js";
 //1200
 export const playback = {
   frame: 0,
-  maxFrames: 2200,
+  maxFrames: 40000,
   playing: true,
   speed: 1,
 };
