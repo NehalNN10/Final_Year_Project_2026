@@ -491,6 +491,28 @@ def api_facility_home_data():
         return jsonify({'error': str(e)}), 500
 
 
+#will uncomment this once the esp32 is ready.....
+# @app.route('/data', methods=['POST'])
+# def receive_esp32_data():
+#     data = request.get_json(silent=True)
+#
+#     if not data:
+#         return jsonify({'success': False, 'error': 'Invalid or missing JSON'}), 400
+#
+#     temperature = data.get('temperature')
+#     lidar_light = data.get('lidar_light')
+#
+#     print('ESP32 data received:', data)
+#
+#     return jsonify({
+#         'success': True,
+#         'received': {
+#             'temperature': temperature,
+#             'lidar_light': lidar_light
+#         }
+#     }), 200
+
+
 if __name__ == '__main__':
     print("🚀 Booting up server and starting background tasks...")
     start_redis_listener()
