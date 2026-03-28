@@ -225,6 +225,8 @@ export function renderFrame(index) {
     }
 }
 
+let density = new Float32Array(80 * 80);
+
 export function updateHeatmap(markers) {
     const gridCols = 80;
     const gridRows = 80;
@@ -233,8 +235,13 @@ export function updateHeatmap(markers) {
     const xMin = -9, xMax = 9;
     const zMin = -9, zMax = 8.75;
 
+    const coolingFactor = 0.98; 
+    for (let i = 0; i < density.length; i++) {
+        density[i] *= coolingFactor; 
+    }
+
     // Step 1: Accumulate raw counts
-    const density = new Float32Array(gridCols * gridRows);
+    // const density = new Float32Array(gridCols * gridRows);
     markers.forEach(marker => {
         const gx = Math.floor(((marker.position.x - xMin) / (xMax - xMin)) * gridCols);
         const gy = Math.floor(((marker.position.z - zMin) / (zMax - zMin)) * gridRows);
@@ -269,7 +276,8 @@ export function updateHeatmap(markers) {
 
     
     // Red appears when smoothed density >= this many people per grid cell
-    const densityCap = 3; // tune this to your scenario
+    // const densityCap = 3; // tune this to your scenario
+    const densityCap = 30; // tune this to your scenario
     const normalized = smoothed.map(d => Math.min(d / densityCap, 1.0));
 
     // Step 4: Render with SMOOTH color interpolation (no hard bands)
