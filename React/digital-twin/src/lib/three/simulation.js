@@ -2,15 +2,18 @@ import * as THREE from "three";
 import { createMarker } from "./world.js";
 import { FPS, LOOP_DURATION, iot, getRoom, roomInfo } from "./variables.js";
 import { camera, controls} from "./scene.js";
+import { heatmapCtx, heatmapTexture, heatmapSize, heatmapWidth, heatmapHeight} from "./scene.js";
+import { all } from "three/tsl";
 
 export const playback = {
     frame: 0,
     maxFrames: FPS * LOOP_DURATION,
     playing: true,
-    speed: 1
+    speed: 1,
+    showHeatmap: false
 };
 
-export const tracker = `http://localhost:1767/temp_files_15min/interpolated_cam2.csv`;
+export const tracker = `http://localhost:1767/temp_files_15min/combined_frames_15min.csv`;
 export const globalCount = 18;
 
 export const raycaster = new THREE.Raycaster();
@@ -48,6 +51,7 @@ let trackMarkers = new Map();
 let globalCountData = new Map();
 
 
+
 export function renderFrame(index) {
 
     const uiElements = {
@@ -79,7 +83,7 @@ export function renderFrame(index) {
     const roomInf = room ? roomInfo[room] : null;
     const seconds = Math.floor(index / FPS);
     const row = room ? iot[room][seconds] : null;
-
+    const allmarkers = [];
     if (room == "C-007") {
         if (index < globalTrackFrames.length) {
             const realFrameNumber = globalTrackFrames[index];
@@ -90,12 +94,27 @@ export function renderFrame(index) {
                     if (marker) {
                         marker.position.x = d.z; 
                         marker.position.z = d.x;
-                        marker.visible = true;
+
+                        //for toggle feature comment this out
+                        // marker.visible = true;
+
+                        //for toggle feature uncomment this
+                        marker.visible = playback.showHeatmap ? false : true;
                     }
+                   
+                    allmarkers.push(marker);
                 });
             }
         }
     }
+    //update heatmap every frame
+  
+    
+    //for toggle feature uncomment below line
+    if (playback.showHeatmap) updateHeatmap(allmarkers);
+
+    //for toggle feature comment this out
+    // updateHeatmap(allmarkers); 
 
     if (roomInf) {
         // Safe Check: Only update if React hasn't deleted the element yet!
@@ -207,6 +226,123 @@ export function renderFrame(index) {
     }
 }
 
+let density = new Float32Array(80 * 80);
+
+export function updateHeatmap(markers) {
+    const gridCols = 80;
+    const gridRows = 80;
+    const smoothSigma = 4.0; // slightly wider spread looks more natural
+
+    const xMin = -9, xMax = 9;
+    const zMin = -9, zMax = 8.75;
+
+    const coolingFactor = 0.98; 
+    for (let i = 0; i < density.length; i++) {
+        density[i] *= coolingFactor; 
+    }
+
+    // Step 1: Accumulate raw counts
+    // const density = new Float32Array(gridCols * gridRows);
+    markers.forEach(marker => {
+        const gx = Math.floor(((marker.position.x - xMin) / (xMax - xMin)) * gridCols);
+        const gy = Math.floor(((marker.position.z - zMin) / (zMax - zMin)) * gridRows);
+        if (gx >= 0 && gx < gridCols && gy >= 0 && gy < gridRows) {
+            density[gy * gridCols + gx] += 1;
+        }
+    });
+
+    // Step 2: Gaussian smoothing — weighted SUM (not average)
+    const smoothed = new Float32Array(gridCols * gridRows);
+    const radius = Math.ceil(3 * smoothSigma);
+
+    for (let y = 0; y < gridRows; y++) {
+        for (let x = 0; x < gridCols; x++) {
+            let sum = 0;
+
+            for (let dy = -radius; dy <= radius; dy++) {
+                for (let dx = -radius; dx <= radius; dx++) {
+                    const nx = x + dx;
+                    const ny = y + dy;
+                    if (nx >= 0 && nx < gridCols && ny >= 0 && ny < gridRows) {
+                        const w = Math.exp(-(dx*dx + dy*dy) / (2 * smoothSigma * smoothSigma));
+                        sum += density[ny * gridCols + nx] * w;
+                        // NO weightSum — keep as sum, not average
+                    }
+                }
+            }
+            smoothed[y * gridCols + x] = sum;
+        }
+    }
+    console.log('peak smoothed value:', Math.max(...smoothed));
+
+    
+    // Red appears when smoothed density >= this many people per grid cell
+    // const densityCap = 3; // tune this to your scenario
+    const densityCap = 120; // tune this to your scenario
+    const normalized = smoothed.map(d => Math.min(d / densityCap, 1.0));
+
+    // Step 4: Render with SMOOTH color interpolation (no hard bands)
+    const imageData = heatmapCtx.createImageData(heatmapWidth, heatmapHeight);
+    const data = imageData.data;
+
+    // Standard crowd heatmap color stops: transparent → blue → cyan → green → yellow → red
+    const colorStops = [
+        { t: 0.00, r: 0,   g: 0,   b: 150, a: 80  }, 
+        // ---------------------------------
+        { t: 0.15, r: 0,   g: 0,   b: 255, a: 120 }, // Soft blue
+        { t: 0.35, r: 0,   g: 255, b: 255, a: 160 }, // Cyan
+        { t: 0.55, r: 0,   g: 255, b: 0,   a: 200 }, // Green
+        { t: 0.80, r: 255, g: 255, b: 0,   a: 220 }, // Yellow
+        { t: 1.00, r: 255, g: 0,   b: 0,   a: 245 }, // Red
+    ];
+
+    function sampleColor(t) {
+        // Find bracketing stops and lerp between them
+        let lo = colorStops[0];
+        let hi = colorStops[colorStops.length - 1];
+        for (let i = 0; i < colorStops.length - 1; i++) {
+            if (t >= colorStops[i].t && t <= colorStops[i + 1].t) {
+                lo = colorStops[i];
+                hi = colorStops[i + 1];
+                break;
+            }
+        }
+        const f = (hi.t === lo.t) ? 0 : (t - lo.t) / (hi.t - lo.t);
+        return {
+            r: Math.round(lo.r + f * (hi.r - lo.r)),
+            g: Math.round(lo.g + f * (hi.g - lo.g)),
+            b: Math.round(lo.b + f * (hi.b - lo.b)),
+            a: Math.round(lo.a + f * (hi.a - lo.a)),
+        };
+    }
+
+    for (let py = 0; py < heatmapHeight; py++) {
+        for (let px = 0; px < heatmapWidth; px++) {
+            const gx = (px / heatmapWidth) * gridCols;
+            const gy = (py / heatmapHeight) * gridRows;
+
+            const x0 = Math.floor(gx), x1 = Math.min(x0 + 1, gridCols - 1);
+            const y0 = Math.floor(gy), y1 = Math.min(y0 + 1, gridRows - 1);
+            const fx = gx - x0, fy = gy - y0;
+
+            const d00 = normalized[y0 * gridCols + x0];
+            const d10 = normalized[y0 * gridCols + x1];
+            const d01 = normalized[y1 * gridCols + x0];
+            const d11 = normalized[y1 * gridCols + x1];
+            const densityValue = (d00*(1-fx) + d10*fx)*(1-fy) + (d01*(1-fx) + d11*fx)*fy;
+
+            const { r, g, b, a } = sampleColor(densityValue);
+            const idx = (py * heatmapWidth + px) * 4;
+            data[idx]   = r;
+            data[idx+1] = g;
+            data[idx+2] = b;
+            data[idx+3] = a;
+        }
+    }
+
+    heatmapCtx.putImageData(imageData, 0, 0);
+    heatmapTexture.needsUpdate = true;
+}
 export async function loadSimulationData(onLoadComplete) {
     globalTrackFrames = [];
     globalTrackData.clear();
