@@ -133,7 +133,7 @@ export async function initThreeEngine(container) {
         await loadAssets();
         console.log("Assets ready. Building world...");
         buildWorld(); 
-        setupHeatmap();
+        setupHeatmap(playback.showHeatmap);
         animate();
     } catch (err) {
         console.error("Critical Error loading assets:", err);

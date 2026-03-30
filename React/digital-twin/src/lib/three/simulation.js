@@ -2,14 +2,15 @@ import * as THREE from "three";
 import { createMarker } from "./world.js";
 import { FPS, LOOP_DURATION, iot, getRoom, roomInfo } from "./variables.js";
 import { camera, controls} from "./scene.js";
-import { heatmapCtx, heatmapTexture, heatmapSize, showHeatmap, heatmapWidth, heatmapHeight} from "./scene.js";
+import { heatmapCtx, heatmapTexture, heatmapSize, heatmapWidth, heatmapHeight} from "./scene.js";
 import { all } from "three/tsl";
 
 export const playback = {
     frame: 0,
     maxFrames: FPS * LOOP_DURATION,
     playing: true,
-    speed: 1
+    speed: 1,
+    showHeatmap: false
 };
 
 export const tracker = `http://localhost:1767/temp_files_15min/combined_frames_15min.csv`;
@@ -95,10 +96,10 @@ export function renderFrame(index) {
                         marker.position.z = d.x;
 
                         //for toggle feature comment this out
-                        marker.visible = true;
+                        // marker.visible = true;
 
                         //for toggle feature uncomment this
-                        //marker.visible = showHeatmap ? false : true;
+                        marker.visible = playback.showHeatmap ? false : true;
                     }
                    
                     allmarkers.push(marker);
@@ -110,10 +111,10 @@ export function renderFrame(index) {
   
     
     //for toggle feature uncomment below line
-    //updateHeatmap(showHeatmap ? allmarkers : []);
+    if (playback.showHeatmap) updateHeatmap(allmarkers);
 
     //for toggle feature comment this out
-    updateHeatmap(allmarkers); 
+    // updateHeatmap(allmarkers); 
 
     if (roomInf) {
         // Safe Check: Only update if React hasn't deleted the element yet!
