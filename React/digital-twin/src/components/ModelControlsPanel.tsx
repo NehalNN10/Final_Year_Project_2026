@@ -1,7 +1,8 @@
 "use client";
 
 import { useState } from "react";
-import { Camera, ChevronDown, ChevronUp, ListRestart } from "lucide-react";
+import { Camera, ChevronDown, ChevronUp, ListRestart, Radar } from "lucide-react";
+import IntButton from "./IntButton";
 
 interface ModelControlsPanelProps {
     isReplay?: boolean;
@@ -9,6 +10,9 @@ interface ModelControlsPanelProps {
 
 export default function ModelControlsPanel({ isReplay = false }: ModelControlsPanelProps) {
   const [isExpanded, setIsExpanded] = useState(true);
+  const [showHeatmap, setShowHeatmap] = useState(false);
+
+  const ui = "../lib/three/ui.js";
 
   return (
     <div className="tracker-ui outer p-4!">
@@ -36,8 +40,8 @@ export default function ModelControlsPanel({ isReplay = false }: ModelControlsPa
           </div>
 
           <button 
-            className="btn btn-green mx-0! mb-0!" 
-            onClick={() => import("../lib/three/ui.js").then(mod => mod.resetCameraView())}
+            className="btn btn-green mx-0! mb-0! mt-2!" 
+            onClick={() => import(ui).then(mod => mod.resetCameraView())}
           >
             <Camera size={20} /> <span className="ml-2">Reset Camera</span>
           </button>

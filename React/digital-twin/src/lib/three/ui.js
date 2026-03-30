@@ -1,5 +1,5 @@
 import * as THREE from "three";
-import { camera, controls, scene } from "./scene.js";
+import { camera, controls, heatmapPlane, scene, setupHeatmap } from "./scene.js";
 import { FPS } from "./variables.js";
 import { playback, renderFrame } from "./simulation.js";
 
@@ -13,6 +13,12 @@ export function resetCameraView() {
     camera.lookAt(0, 0, 0); 
     controls.target.set(0, 0, 0);
     controls.update();
+}
+
+export function toggleHeatmap() {
+    playback.showHeatmap = !playback.showHeatmap;
+    heatmapPlane.material.opacity = playback.showHeatmap ? 1 : 0;
+    return playback.showHeatmap;
 }
 
 export function toggleTheme() {

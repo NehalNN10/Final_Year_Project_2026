@@ -6,7 +6,6 @@ import { RGBELoader } from "three/examples/jsm/loaders/RGBELoader.js";
 
 export let scene, camera, renderer, controls;
 export let heatmapCanvas, heatmapCtx, heatmapTexture, heatmapPlane, heatmapSize, heatmapWidth, heatmapHeight;
-export let showHeatmap = true;
 export function initScene(container) {
     // Force a minimum size if container is briefly 0x0 during React hydration
     const w = container.clientWidth || window.innerWidth || 800;
@@ -164,7 +163,7 @@ export function initScene(container) {
 //     scene.add(heatmapPlane);
 // }
 
-export function setupHeatmap() {
+export function setupHeatmap(showHeatmap) {
     // ----------------- Heatmap Setup -----------------
     // Manual floor dimensions from 3D model
     const floorWidth = 18;   // X-axis

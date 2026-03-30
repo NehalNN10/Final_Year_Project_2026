@@ -137,7 +137,7 @@ tr {
     display: flex !important;
     justify-content: center !important;
     align-items: center;
-    border-radius: 5px;
+    border-radius: 8px;
     border: 1px solid #888;
     color: #fff;
     margin: 20px;
@@ -164,11 +164,25 @@ tr {
 }
 
 .btn-active {
-    @apply max-w-30 opacity-100 ml-2;
+    @apply max-w-50 opacity-100 ml-2;
 }
 
 .btn-inactive {
-    @apply max-w-0 opacity-0 group-hover:max-w-30 group-hover:opacity-100 group-hover:ml-2;
+    @apply max-w-0 opacity-0 group-hover:max-w-50 group-hover:opacity-100 group-hover:ml-2;
+}
+
+.btn-black {
+    background: rgba(0, 0, 0, 0.8);
+    backdrop-filter: blur(1rem) !important;
+    border: 1px solid #000;
+    color: white;
+}
+
+.btn-black:hover {
+    box-shadow: 0 0 20px rgba(0, 255, 128, 0.6) !important;
+    border: 1px solid #00ff88 !important;
+    color: #00ff88 !important;
+    cursor: pointer;
 }
 
 .btn-blue {
@@ -557,6 +571,7 @@ nav {
 
 .tracker-ui {
     background: rgba(0, 0, 0, 0.8);
+    backdrop-filter: blur(1rem) !important;
     color: white;
     margin-top: 10px;
     border-radius: 8px;
@@ -565,7 +580,6 @@ nav {
     pointer-events: none;
     border: 1px solid #888888;
     pointer-events: auto !important; /* CRITICAL: Allows clicking the header */
-    backdrop-filter: blur(1rem) !important;   
     transition: all 0.3s ease;
     overflow: hidden; /* Needed for the slide animation */
 }

@@ -4,13 +4,17 @@ import { useEffect, useRef, useState } from "react";
 import Navbar from "../../components/Navbar";
 import RoomStatsPanel from "../../components/RoomStatsPanel";
 import ModelControlsPanel from "../../components/ModelControlsPanel";
-import { ChevronLeft, ChevronRight } from "lucide-react";
+import { ChevronLeft, ChevronRight, Radar } from "lucide-react";
+import IntButton from "@/components/IntButton";
 
 export default function DigitalTwinModel() {
   const containerRef = useRef<HTMLDivElement>(null);
   const [department, setDepartment] = useState("Loading...");
 
   const [isSidebarOpen, setIsSidebarOpen] = useState(true);
+  const [showHeatmap, setShowHeatmap] = useState(false);
+
+  const ui = "../../lib/three/ui.js";
 
   useEffect(() => {
     async function fetchSession() {
@@ -43,14 +47,32 @@ export default function DigitalTwinModel() {
   }, [department]); 
 
   if (department === "Loading...") {
-  return <div className="loading-screen">Loading Digital Twin...</div>;
-}
+    return <div className="loading-screen">Loading Digital Twin...</div>;
+  }
 
-return (
-  <>
+  const handleToggleHeatmap = () => {
+    // Flip the React state so your UI knows what's happening
+    setShowHeatmap(!showHeatmap);
+    
+    // Tell the 3D engine to flip its heatmap state
+    import(ui).then(mod => {
+      mod.toggleHeatmap();
+    });
+  };
+
+  return (
+    <>
       <Navbar department={department} />
 
       <div className="main flex w-full" style={{ height: 'calc(100vh - 4.5rem)' }}>
+
+        <IntButton 
+          icon={Radar} 
+          size="30"
+          label={showHeatmap ? "Heatmap: ON" : "Heatmap: OFF"} 
+          onClick={handleToggleHeatmap} 
+          classes={`absolute top-5 right-5 btn btn-auto m-0! p-2! rounded-0 z-150 text-[1.25rem]! ${showHeatmap ? "btn-yellow" : "btn-black"}`} 
+        />
         
         <div className={`float ${isSidebarOpen ? "w-[max(17rem,25vw)]" : "w-0"}`}>
           <div className="w-full h-full overflow-hidden relative">
