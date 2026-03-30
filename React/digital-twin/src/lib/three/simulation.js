@@ -230,7 +230,7 @@ let density = new Float32Array(80 * 80);
 export function updateHeatmap(markers) {
     const gridCols = 80;
     const gridRows = 80;
-    const smoothSigma = 2.5; // slightly wider spread looks more natural
+    const smoothSigma = 4.0; // slightly wider spread looks more natural
 
     const xMin = -9, xMax = 9;
     const zMin = -9, zMax = 8.75;
@@ -277,7 +277,7 @@ export function updateHeatmap(markers) {
     
     // Red appears when smoothed density >= this many people per grid cell
     // const densityCap = 3; // tune this to your scenario
-    const densityCap = 30; // tune this to your scenario
+    const densityCap = 120; // tune this to your scenario
     const normalized = smoothed.map(d => Math.min(d / densityCap, 1.0));
 
     // Step 4: Render with SMOOTH color interpolation (no hard bands)
@@ -286,12 +286,13 @@ export function updateHeatmap(markers) {
 
     // Standard crowd heatmap color stops: transparent → blue → cyan → green → yellow → red
     const colorStops = [
-        { t: 0.00, r: 0,   g: 0,   b: 128, a: 0   }, // transparent dark blue
-        { t: 0.10, r: 0,   g: 0,   b: 255, a: 140 }, // blue
-        { t: 0.30, r: 0,   g: 255, b: 255, a: 180 }, // cyan
-        { t: 0.55, r: 0,   g: 255, b: 0,   a: 200 }, // green
-        { t: 0.75, r: 255, g: 255, b: 0,   a: 220 }, // yellow
-        { t: 1.00, r: 255, g: 0,   b: 0,   a: 245 }, // red
+        { t: 0.00, r: 0,   g: 0,   b: 150, a: 80  }, 
+        // ---------------------------------
+        { t: 0.15, r: 0,   g: 0,   b: 255, a: 120 }, // Soft blue
+        { t: 0.35, r: 0,   g: 255, b: 255, a: 160 }, // Cyan
+        { t: 0.55, r: 0,   g: 255, b: 0,   a: 200 }, // Green
+        { t: 0.80, r: 255, g: 255, b: 0,   a: 220 }, // Yellow
+        { t: 1.00, r: 255, g: 0,   b: 0,   a: 245 }, // Red
     ];
 
     function sampleColor(t) {
