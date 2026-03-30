@@ -4,7 +4,7 @@ import { camera, controls } from "./scene.js";
 //1200
 export const playback = {
   frame: 0,
-  maxFrames: 40000,
+  maxFrames: 2040,
   playing: true,
   speed: 1,
 };
@@ -309,15 +309,15 @@ export async function loadSimulationData(onLoadComplete) {
   if (onLoadComplete) onLoadComplete();
 }
 // const dummy = createMarker(-1.5, 7.3, "red", 0.1);
-const dummy11 = createMarker(-2.2875, 1.5, "white", 0.1);
-const dummy12 = createMarker(-2.2875, 1.02, "white", 0.1);
-const dummy13 = createMarker(-3.475, 1.02, "white", 0.1);
-const dummy14 = createMarker(-3.25, 1.5, "white", 0.1);
+const dummy11 = createMarker(9, 7.5, "red", 0.1);
+const dummy12 = createMarker(2.25, 7.5, "red", 0.1);
+const dummy13 = createMarker(2.25, 4.5, "red", 0.1);
+const dummy14 = createMarker(9, 4.5, "red", 0.1);
 
-// const dummy21 = createMarker(-3, 3, "red", 0.1);
-// const dummy22 = createMarker(-4.25, 4.5, "red", 0.1);
-// const dummy23 = createMarker(1.25, 4.5, "red", 0.1);
-// const dummy24 = createMarker(1.25, 3, "red", 0.1);
+const dummy21 = createMarker(8.75, 3, "red", 0.1);
+const dummy22 = createMarker(8.75, 4.5, "red", 0.1);
+const dummy23 = createMarker(1.25, 4.5, "red", 0.1);
+const dummy24 = createMarker(1.25, 3, "red", 0.1);
 
 // const cam1 = createMarker(-8.65, 9, "white", 0.1, "Camera 1");
 // const cam2 = createMarker(-8.65, -1.5, "white", 0.1, "Camera 2");
