@@ -167,11 +167,11 @@ export function setupHeatmap(showHeatmap) {
     // ----------------- Heatmap Setup -----------------
     // Manual floor dimensions from 3D model
     const floorWidth = 18;   // X-axis
-    const floorDepth = 17.75; // Z-axis
+    const floorDepth = 17.5; // Z-axis
     const aspectRatio = floorWidth / floorDepth; 
 
     // Canvas size: maintain high resolution but rectangular
-    const heatmapBaseSize = 1024;
+    const heatmapBaseSize = 128;
 
     heatmapWidth = heatmapBaseSize;
     heatmapHeight = Math.round(heatmapBaseSize / aspectRatio);
@@ -206,7 +206,7 @@ export function setupHeatmap(showHeatmap) {
     heatmapPlane.rotation.x = -Math.PI / 2;
     // Center it exactly on the floor
     heatmapPlane.position.x = ( -9 + 9 ) / 2;       // centerX = 0
-    heatmapPlane.position.z = ( -9 + 8.75 ) / 2;    // centerZ ≈ -0.125
+    heatmapPlane.position.z = ( -8.75 + 8.75 ) / 2;    // centerZ ≈ 0
     heatmapPlane.position.y = 2;                  // slightly above floor
     scene.add(heatmapPlane);
 }

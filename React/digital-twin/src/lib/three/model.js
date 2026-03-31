@@ -15,8 +15,6 @@ function getLiveFrame() {
     return currentLoopSeconds * FPS;
 }
 
-let heatmapThrottle = 0;
-
 function animate(t = 0) {
     animationFrameId = requestAnimationFrame(animate);
     
@@ -72,22 +70,6 @@ function animate(t = 0) {
             const scrubText = document.getElementById('frame-scrubber-text');
             if (scrubText) scrubText.value = currentFrameIdx;
         }
-    }
-
-    heatmapThrottle++;
-    
-    if (window.rooms) {
-        window.rooms.forEach(room => {
-            // ONLY run the heavy heatmap math every 10 frames!
-            if (heatmapThrottle >= 10) {
-                updateHeatmap(room); // (Use whatever your actual function name is here)
-            }
-        });
-    }
-
-    // Reset the throttle
-    if (heatmapThrottle >= 10) {
-        heatmapThrottle = 0;
     }
     
     if (controls) controls.update();
