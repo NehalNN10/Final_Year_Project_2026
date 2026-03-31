@@ -83,38 +83,87 @@ export function renderFrame(index) {
     const roomInf = room ? roomInfo[room] : null;
     const seconds = Math.floor(index / FPS);
     const row = room ? iot[room][seconds] : null;
-    const allmarkers = [];
-    if (room == "C-007") {
-        if (index < globalTrackFrames.length) {
-            const realFrameNumber = globalTrackFrames[index];
-            const detections = globalTrackData.get(realFrameNumber) || [];
-            if (department != "Facilities") {
-                detections.forEach(d => {
-                    const marker = trackMarkers.get(d.id);
-                    if (marker) {
-                        marker.position.x = d.z; 
-                        marker.position.z = d.x;
 
-                        //for toggle feature comment this out
-                        // marker.visible = true;
+    // const allmarkers = [];
 
-                        //for toggle feature uncomment this
-                        marker.visible = playback.showHeatmap ? false : true;
-                    }
-                   
-                    allmarkers.push(marker);
-                });
+    // if (index < globalTrackFrames.length) {
+    //     const realFrameNumber = globalTrackFrames[index];
+    //     const detections = globalTrackData.get(realFrameNumber) || [];
+    //     if (department != "Facilities") {
+    //         detections.forEach(d => {
+    //             const marker = trackMarkers.get(d.id);
+    //             if (marker) {
+    //                 marker.position.x = d.z; 
+    //                 marker.position.z = d.x;
+
+    //                 //for toggle feature comment this out
+    //                 marker.visible = true;
+
+    //                 //for toggle feature uncomment this
+    //                 // marker.visible = playback.showHeatmap ? false : true;
+    //             }
+                
+    //             allmarkers.push(marker);
+    //         });
+    //     }
+    // }
+
+    if (index < globalTrackFrames.length) {
+        const realFrameNumber = globalTrackFrames[index];
+        const detections = globalTrackData.get(realFrameNumber) || [];
+        if (department != "Facilities") {
+            const allmarkers = [];
+            detections.forEach(d => {
+                const marker = trackMarkers.get(d.id);
+                if (marker) {
+                    marker.position.x = d.z; 
+                    marker.position.z = d.x;
+
+                    //for toggle feature comment this out
+                    marker.visible = true;
+
+                    //for toggle feature uncomment this
+                    // marker.visible = playback.showHeatmap ? false : true;
+                }
+                
+                allmarkers.push(marker);
+
+                
+            });
+
+            if (typeof window.heatmapThrottle === 'undefined') window.heatmapThrottle = 0;
+                    
+            if (playback.showHeatmap) {
+                window.heatmapThrottle++;
+                // Only run the heavy math every 10 frames instead of every single frame
+                if (window.heatmapThrottle >= 5/playback.speed) {
+                    updateHeatmap(allmarkers);
+                    window.heatmapThrottle = 0;
+                }
             }
         }
     }
-    //update heatmap every frame
-  
-    
-    //for toggle feature uncomment below line
-    if (playback.showHeatmap) updateHeatmap(allmarkers);
 
-    //for toggle feature comment this out
-    // updateHeatmap(allmarkers); 
+    //for toggle feature uncomment below line
+    // Add the throttle counter above the condition
+    // if (typeof window.heatmapThrottle === 'undefined') window.heatmapThrottle = 0;
+    
+    // if (playback.showHeatmap) {
+    //     window.heatmapThrottle++;
+    //     // Only run the heavy math every 10 frames instead of every single frame
+    //     if (window.heatmapThrottle >= 5/playback.speed) {
+    //         updateHeatmap(allmarkers);
+    //         window.heatmapThrottle = 0;
+    //     }
+    // }
+
+    // window.heatmapThrottle++;
+    // // Only run the heavy math every 10 frames instead of every single frame
+    // if (window.heatmapThrottle >= 5/playback.speed) {
+    //     updateHeatmap(allmarkers);
+    //     window.heatmapThrottle = 0;
+    // }
+    
 
     if (roomInf) {
         // Safe Check: Only update if React hasn't deleted the element yet!

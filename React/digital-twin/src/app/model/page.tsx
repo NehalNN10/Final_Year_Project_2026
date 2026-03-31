@@ -77,7 +77,7 @@ export default function DigitalTwinModel() {
         <div className={`float ${isSidebarOpen ? "w-[max(17rem,25vw)]" : "w-0"}`}>
           <div className="w-full h-full overflow-hidden relative">
             
-            <div className="h-full overflow-y-auto overflow-x-hidden p-5 w-[max(17rem, 25vw)]">
+            <div className="h-full overflow-y-auto overflow-x-hidden p-5 pr-0! w-[max(17rem, 25vw)]">
               <RoomStatsPanel department={department} />
               
               <ModelControlsPanel />
@@ -91,7 +91,7 @@ export default function DigitalTwinModel() {
 
           <button 
             onClick={() => setIsSidebarOpen(!isSidebarOpen)}
-            className="absolute top-4 -right-8 z-50 bg-[#131313] text-[#00ff88] py-3 px-1 rounded-r-lg transition-colors shadow-[5px_0_10px_rgba(0,0,0,0.5)] flex items-center justify-center cursor-pointer"
+            className="sidebar-toggle"
             title="Toggle Sidebar"
           >
             {isSidebarOpen ? <ChevronLeft size={24} /> : <ChevronRight size={24} />}
