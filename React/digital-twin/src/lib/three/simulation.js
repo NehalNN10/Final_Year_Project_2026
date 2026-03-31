@@ -12,7 +12,7 @@ export const playback = {
     speed: 1,
     showHeatmap: false
 };
-//React\digital-twin\public\temp_files_15min\combined_frames_15min.csv
+
 export const tracker = `http://localhost:1767/temp_files_15min/combined_frames_15min.csv`;
 export const globalCount = 18;
 
@@ -83,28 +83,38 @@ export function renderFrame(index) {
     const roomInf = room ? roomInfo[room] : null;
     const seconds = Math.floor(index / FPS);
     const row = room ? iot[room][seconds] : null;
-    const allmarkers = [];
-    if (room == "C-007") {
-        if (index < globalTrackFrames.length) {
-            const realFrameNumber = globalTrackFrames[index];
-            const detections = globalTrackData.get(realFrameNumber) || [];
-            if (department != "Facilities") {
-                
-                detections.forEach(d => {
-                    if (!playback.showHeatmap) {
-                        const marker = trackMarkers.get(d.id);
-                        
-                        if (marker) {
-                            marker.position.x = d.z; 
-                            marker.position.z = d.x;
 
-                            marker.visible = true;
-                        }
+    const allmarkers = [];
+
+    if (index < globalTrackFrames.length) {
+        const realFrameNumber = globalTrackFrames[index];
+        const detections = globalTrackData.get(realFrameNumber) || [];
+        if (department != "Facilities") {
+            
+            detections.forEach(d => {
+                if (!playback.showHeatmap) {
+                    const marker = trackMarkers.get(d.id);
+
+                    if (marker) {
+                        marker.position.x = d.z; 
+                        marker.position.z = d.x;
+
+                        marker.visible = true;
                     }
-                    else {
-                        allmarkers.push(d);
-                    }
-                }); 
+                }
+                else allmarkers.push(d);
+            });
+            
+
+            if (typeof window.heatmapThrottle === 'undefined') window.heatmapThrottle = 0;
+                    
+            if (playback.showHeatmap) {
+                window.heatmapThrottle++;
+                // Only run the heavy math every 10 frames instead of every single frame
+                if (window.heatmapThrottle >= 5) {
+                    updateHeatmap(allmarkers);
+                    window.heatmapThrottle = 0;
+                }
             }
         }
     }
@@ -222,6 +232,16 @@ export function renderFrame(index) {
 
 let density = new Float32Array(80 * 80);
 
+const smoothSigma = 4.0;
+const radius = Math.ceil(3 * smoothSigma);
+const weightCache = new Float32Array((radius * 2 + 1) * (radius * 2 + 1));
+for (let dy = -radius; dy <= radius; dy++) {
+    for (let dx = -radius; dx <= radius; dx++) {
+        const w = Math.exp(-(dx*dx + dy*dy) / (2 * smoothSigma * smoothSigma));
+        weightCache[(dy + radius) * (radius * 2 + 1) + (dx + radius)] = w;
+    }
+}
+
 export function updateHeatmap(markers) {
     const gridCols = 80;
     const gridRows = 80;
@@ -249,7 +269,6 @@ export function updateHeatmap(markers) {
 
     // Step 2: Gaussian smoothing — weighted SUM (not average)
     const smoothed = new Float32Array(gridCols * gridRows);
-    const radius = Math.ceil(3 * smoothSigma);
 
     for (let y = 0; y < gridRows; y++) {
         for (let x = 0; x < gridCols; x++) {
@@ -260,16 +279,15 @@ export function updateHeatmap(markers) {
                     const nx = x + dx;
                     const ny = y + dy;
                     if (nx >= 0 && nx < gridCols && ny >= 0 && ny < gridRows) {
-                        const w = Math.exp(-(dx*dx + dy*dy) / (2 * smoothSigma * smoothSigma));
+                        // Grab the pre-calculated weight from the cache!
+                        const w = weightCache[(dy + radius) * (radius * 2 + 1) + (dx + radius)];
                         sum += density[ny * gridCols + nx] * w;
-                        // NO weightSum — keep as sum, not average
                     }
                 }
             }
             smoothed[y * gridCols + x] = sum;
         }
     }
-    console.log('peak smoothed value:', Math.max(...smoothed));
 
     
     // Red appears when smoothed density >= this many people per grid cell
@@ -377,8 +395,7 @@ export async function loadSimulationData(onLoadComplete) {
 
                     if (!globalTrackData.has(frame)) globalTrackData.set(frame, []);
                     globalTrackData.get(frame).push({ id, x, z });
-                    
-                    //trackmarkers is populated only when showheatmap is false
+
                     if (!trackMarkers.has(id) && !playback.showHeatmap) {
                         let hash = 0;
                         for (let i = 0; i < id.length; i++) hash = id.charCodeAt(i) + ((hash << 5) - hash);
@@ -387,7 +404,6 @@ export async function loadSimulationData(onLoadComplete) {
                         marker.visible = false;
                         trackMarkers.set(id, marker);
                     }
-                    //when showheatmap is true get data only through globalTrackData
                 });
                 globalTrackFrames = Array.from(globalTrackData.keys()).sort((a, b) => a - b);
             }
