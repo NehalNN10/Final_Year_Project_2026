@@ -12,7 +12,7 @@ export const playback = {
     speed: 1,
     showHeatmap: false
 };
-
+//React\digital-twin\public\temp_files_15min\combined_frames_15min.csv
 export const tracker = `http://localhost:1767/temp_files_15min/combined_frames_15min.csv`;
 export const globalCount = 18;
 
@@ -83,86 +83,31 @@ export function renderFrame(index) {
     const roomInf = room ? roomInfo[room] : null;
     const seconds = Math.floor(index / FPS);
     const row = room ? iot[room][seconds] : null;
-
-    // const allmarkers = [];
-
-    // if (index < globalTrackFrames.length) {
-    //     const realFrameNumber = globalTrackFrames[index];
-    //     const detections = globalTrackData.get(realFrameNumber) || [];
-    //     if (department != "Facilities") {
-    //         detections.forEach(d => {
-    //             const marker = trackMarkers.get(d.id);
-    //             if (marker) {
-    //                 marker.position.x = d.z; 
-    //                 marker.position.z = d.x;
-
-    //                 //for toggle feature comment this out
-    //                 marker.visible = true;
-
-    //                 //for toggle feature uncomment this
-    //                 // marker.visible = playback.showHeatmap ? false : true;
-    //             }
+    const allmarkers = [];
+    if (room == "C-007") {
+        if (index < globalTrackFrames.length) {
+            const realFrameNumber = globalTrackFrames[index];
+            const detections = globalTrackData.get(realFrameNumber) || [];
+            if (department != "Facilities") {
                 
-    //             allmarkers.push(marker);
-    //         });
-    //     }
-    // }
+                detections.forEach(d => {
+                    if (!playback.showHeatmap) {
+                        const marker = trackMarkers.get(d.id);
+                        
+                        if (marker) {
+                            marker.position.x = d.z; 
+                            marker.position.z = d.x;
 
-    if (index < globalTrackFrames.length) {
-        const realFrameNumber = globalTrackFrames[index];
-        const detections = globalTrackData.get(realFrameNumber) || [];
-        if (department != "Facilities") {
-            const allmarkers = [];
-            detections.forEach(d => {
-                const marker = trackMarkers.get(d.id);
-                if (marker) {
-                    marker.position.x = d.z; 
-                    marker.position.z = d.x;
-
-                    //for toggle feature comment this out
-                    marker.visible = true;
-
-                    //for toggle feature uncomment this
-                    // marker.visible = playback.showHeatmap ? false : true;
-                }
-                
-                allmarkers.push(marker);
-
-                
-            });
-
-            if (typeof window.heatmapThrottle === 'undefined') window.heatmapThrottle = 0;
-                    
-            if (playback.showHeatmap) {
-                window.heatmapThrottle++;
-                // Only run the heavy math every 10 frames instead of every single frame
-                if (window.heatmapThrottle >= 5/playback.speed) {
-                    updateHeatmap(allmarkers);
-                    window.heatmapThrottle = 0;
-                }
+                            marker.visible = true;
+                        }
+                    }
+                    else {
+                        allmarkers.push(d);
+                    }
+                }); 
             }
         }
     }
-
-    //for toggle feature uncomment below line
-    // Add the throttle counter above the condition
-    // if (typeof window.heatmapThrottle === 'undefined') window.heatmapThrottle = 0;
-    
-    // if (playback.showHeatmap) {
-    //     window.heatmapThrottle++;
-    //     // Only run the heavy math every 10 frames instead of every single frame
-    //     if (window.heatmapThrottle >= 5/playback.speed) {
-    //         updateHeatmap(allmarkers);
-    //         window.heatmapThrottle = 0;
-    //     }
-    // }
-
-    // window.heatmapThrottle++;
-    // // Only run the heavy math every 10 frames instead of every single frame
-    // if (window.heatmapThrottle >= 5/playback.speed) {
-    //     updateHeatmap(allmarkers);
-    //     window.heatmapThrottle = 0;
-    // }
     
 
     if (roomInf) {
@@ -293,8 +238,10 @@ export function updateHeatmap(markers) {
     // Step 1: Accumulate raw counts
     // const density = new Float32Array(gridCols * gridRows);
     markers.forEach(marker => {
-        const gx = Math.floor(((marker.position.x - xMin) / (xMax - xMin)) * gridCols);
-        const gy = Math.floor(((marker.position.z - zMin) / (zMax - zMin)) * gridRows);
+        // const gx = Math.floor(((marker.position.x - xMin) / (xMax - xMin)) * gridCols);
+        // const gy = Math.floor(((marker.position.z - zMin) / (zMax - zMin)) * gridRows);
+        const gx = Math.floor(((marker.x - xMin) / (xMax - xMin)) * gridCols);
+        const gy = Math.floor(((marker.z - zMin) / (zMax - zMin)) * gridRows);
         if (gx >= 0 && gx < gridCols && gy >= 0 && gy < gridRows) {
             density[gy * gridCols + gx] += 1;
         }
@@ -430,8 +377,9 @@ export async function loadSimulationData(onLoadComplete) {
 
                     if (!globalTrackData.has(frame)) globalTrackData.set(frame, []);
                     globalTrackData.get(frame).push({ id, x, z });
-
-                    if (!trackMarkers.has(id)) {
+                    
+                    //trackmarkers is populated only when showheatmap is false
+                    if (!trackMarkers.has(id) && !playback.showHeatmap) {
                         let hash = 0;
                         for (let i = 0; i < id.length; i++) hash = id.charCodeAt(i) + ((hash << 5) - hash);
                         const color = new THREE.Color(`hsl(${Math.abs(hash) % 360}, 70%, 50%)`);
@@ -439,6 +387,7 @@ export async function loadSimulationData(onLoadComplete) {
                         marker.visible = false;
                         trackMarkers.set(id, marker);
                     }
+                    //when showheatmap is true get data only through globalTrackData
                 });
                 globalTrackFrames = Array.from(globalTrackData.keys()).sort((a, b) => a - b);
             }
