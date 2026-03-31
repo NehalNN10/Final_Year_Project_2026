@@ -191,6 +191,9 @@ export function setupHeatmap(showHeatmap) {
     heatmapTexture.wrapS = THREE.ClampToEdgeWrapping;
     heatmapTexture.wrapT = THREE.ClampToEdgeWrapping;
 
+    heatmapTexture.repeat.x = -1;
+    heatmapTexture.offset.x = 1;
+
     heatmapPlane = new THREE.Mesh(
         new THREE.PlaneGeometry(floorWidth, floorDepth, 16, 16), // Match actual floor
         new THREE.MeshBasicMaterial({
@@ -204,6 +207,7 @@ export function setupHeatmap(showHeatmap) {
     // Position and rotate the plane to match floor
     heatmapPlane.material.opacity = showHeatmap ? 1 : 0;
     heatmapPlane.rotation.x = -Math.PI / 2;
+    heatmapPlane.rotation.z = Math.PI/2; // Flip to match floor orientation
     // Center it exactly on the floor
     heatmapPlane.position.x = ( -9 + 9 ) / 2;       // centerX = 0
     heatmapPlane.position.z = ( -8.75 + 8.75 ) / 2;    // centerZ ≈ 0
