@@ -192,7 +192,7 @@ export function setupHeatmap(showHeatmap) {
     heatmapTexture.wrapT = THREE.ClampToEdgeWrapping;
 
     heatmapPlane = new THREE.Mesh(
-        new THREE.PlaneGeometry(floorWidth, floorDepth), // Match actual floor
+        new THREE.PlaneGeometry(floorWidth, floorDepth, 16, 16), // Match actual floor
         new THREE.MeshBasicMaterial({
             map: heatmapTexture,
             transparent: true,
@@ -207,6 +207,6 @@ export function setupHeatmap(showHeatmap) {
     // Center it exactly on the floor
     heatmapPlane.position.x = ( -9 + 9 ) / 2;       // centerX = 0
     heatmapPlane.position.z = ( -9 + 8.75 ) / 2;    // centerZ ≈ -0.125
-    heatmapPlane.position.y = 0.1;                  // slightly above floor
+    heatmapPlane.position.y = 2;                  // slightly above floor
     scene.add(heatmapPlane);
 }

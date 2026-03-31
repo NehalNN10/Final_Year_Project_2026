@@ -5,13 +5,17 @@ import Navbar from "../../components/Navbar";
 import RoomStatsPanel from "../../components/RoomStatsPanel";
 import ModelControlsPanel from "../../components/ModelControlsPanel";
 import SimulationControlsPanel from "../../components/SimulationControlsPanel";
-import { ChevronLeft, ChevronRight } from "lucide-react";
+import { ChevronLeft, ChevronRight, Radar } from "lucide-react";
+import IntButton from "@/components/IntButton";
 
 export default function ModelReplay() {
   const containerRef = useRef<HTMLDivElement>(null);
   const [department, setDepartment] = useState("Loading...");
 
   const [isSidebarOpen, setIsSidebarOpen] = useState(true);
+  const [showHeatmap, setShowHeatmap] = useState(false);
+
+  const ui = "../../lib/three/ui.js";
 
   useEffect(() => {
     async function fetchSession() {
@@ -43,6 +47,16 @@ export default function ModelReplay() {
     };
   }, [department]); 
 
+  const handleToggleHeatmap = () => {
+    // Flip the React state so your UI knows what's happening
+    setShowHeatmap(!showHeatmap);
+    
+    // Tell the 3D engine to flip its heatmap state
+    import(ui).then(mod => {
+      mod.toggleHeatmap();
+    });
+  };
+
   if (department === "Loading...") {
     return <div className="loading-screen text-white bg-[#131313] h-screen flex justify-center items-center">Loading Replay...</div>;
   }
@@ -52,11 +66,19 @@ export default function ModelReplay() {
       <Navbar department={department} />
 
       <div className="main flex w-full" style={{ height: 'calc(100vh - 4.5rem)' }}>
+
+        <IntButton 
+          icon={Radar} 
+          size="30"
+          label={showHeatmap ? "Heatmap: ON" : "Heatmap: OFF"} 
+          onClick={handleToggleHeatmap} 
+          classes={`absolute top-5 right-5 btn btn-auto m-0! p-2! rounded-0 z-150 text-[1.25rem]! ${showHeatmap ? "btn-yellow" : "btn-black"}`} 
+        />
         
         <div className={`float ${isSidebarOpen ? "w-[max(17rem,25vw)]" : "w-0"}`}>
           <div className="w-full h-full overflow-hidden relative">
             
-            <div className="h-full overflow-y-auto overflow-x-hidden p-5 w-[max(17rem, 25vw)]">
+            <div className="h-full overflow-y-auto overflow-x-hidden p-5 pr-0! w-[max(17rem, 25vw)]">
               <RoomStatsPanel department={department} />
           
               <SimulationControlsPanel />
@@ -72,7 +94,7 @@ export default function ModelReplay() {
 
           <button 
             onClick={() => setIsSidebarOpen(!isSidebarOpen)}
-            className="absolute top-4 -right-9 z-50 bg-[#131313] border border-l-0 border-[#00ff88]/50 hover:border-[#00ff88] text-[#00ff88] py-3 px-1 rounded-r-lg transition-colors shadow-[5px_0_10px_rgba(0,0,0,0.5)] flex items-center justify-center cursor-pointer"
+            className="sidebar-toggle"
             title="Toggle Sidebar"
           >
             {isSidebarOpen ? <ChevronLeft size={24} /> : <ChevronRight size={24} />}
