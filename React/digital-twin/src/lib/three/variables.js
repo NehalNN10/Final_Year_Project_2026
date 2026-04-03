@@ -21,18 +21,48 @@ export async function initVariables() {
     await initRoomData();
 }
 
+// export async function getRoomData(roomId) {
+//     try {
+//         const response = await fetch(`/api/room_data?room_id=${roomId}`);
+//         if (!response.ok) throw new Error(`HTTP error! Status: ${response.status}`);
+//         const data = await response.json();
+//         return data.room_data;
+//     } catch (error) {
+//         console.error("Failed to fetch room data:", error.message);
+//         return []; // Return empty array on fail so app doesn't crash
+//     }
+// }
 export async function getRoomData(roomId) {
     try {
         const response = await fetch(`/api/room_data?room_id=${roomId}`);
         if (!response.ok) throw new Error(`HTTP error! Status: ${response.status}`);
         const data = await response.json();
-        return data.room_data;
+        const rows = data.room_data;
+
+        // Convert array to seconds-keyed lookup
+        // Each row covers 900 seconds (15 mins), expand them out
+        const secondsMap = {};
+        const intervalSeconds = LOOP_DURATION; // 15 minutes per row
+
+        rows.forEach((row, i) => {
+            const start = i * intervalSeconds;
+            const end = start + intervalSeconds;
+            for (let s = start; s < end; s++) {
+                secondsMap[s] = {
+                    occupancy: row.occupancy,
+                    temperature: row.temperature,
+                    ac: row.ac,
+                    lights: row.lights
+                };
+            }
+        });
+
+        return secondsMap;
     } catch (error) {
         console.error("Failed to fetch room data:", error.message);
-        return []; // Return empty array on fail so app doesn't crash
+        return {};
     }
 }
-
 export async function getRoomInfo(roomId) {
     try {
         const response = await fetch(`/api/room_info?room_id=${roomId}`);
