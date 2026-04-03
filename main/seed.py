@@ -2,6 +2,7 @@ from app import app
 from models import db, User, Role, Rooms, SecurityEmails, RoomData
 from werkzeug.security import generate_password_hash
 import pandas as pd
+from app import check_energy_waste_automated
 
 # Connect to the app context to access the DB
 with app.app_context():
@@ -153,3 +154,8 @@ with app.app_context():
         ).save()
 
     print("Database seeded successfully!")
+    
+# print("Seeding complete. Running automated alert check...")
+# invokes the automated facilities alert if we edit the csv manually 
+
+# check_energy_waste_automated("C-007")
