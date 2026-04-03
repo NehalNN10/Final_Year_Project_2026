@@ -142,7 +142,7 @@ def send_facilities_alert(room_number, alert_type, time_since, recipient, descri
         mailServer.login(username, password)
         mailServer.sendmail(sender, recipient, msg.as_string())
         mailServer.close()
-        print(f"Emergency alert sent successfully to {recipient}!")
+        print(f"Facilities alert sent successfully to {recipient}!")
     except Exception as e:
         print(f"Failed to send email: {e}")
 
