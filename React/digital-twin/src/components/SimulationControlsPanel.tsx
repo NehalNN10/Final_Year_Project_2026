@@ -1,10 +1,12 @@
 "use client";
 
 import { useState } from "react";
-import { ChevronDown, ChevronUp } from "lucide-react";
+import { ChevronDown, ChevronUp, FastForward, Pause, Play, Rewind, RotateCcw } from "lucide-react";
+import IntButton from "./IntButton";
 
 export default function SimulationControlsPanel() {
   const [isExpanded, setIsExpanded] = useState(true);
+  const [isPlaying, setIsPlaying] = useState(false);
   const ui = "../lib/three/ui.js";
 
   const onChangeScrubberText = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -39,6 +41,16 @@ export default function SimulationControlsPanel() {
     if (speedSlider) speedSlider.value = val.toString();
   };
   
+  const handleIsPlaying = () => {
+    // Flip the React state so your UI knows what's happening
+    setIsPlaying(!isPlaying);
+    
+    // Tell the 3D engine to flip its heatmap state
+    import(ui).then(mod => {
+      mod.togglePlayPause();
+    });
+  };
+
   return (
     <div className="tracker-ui outer p-4!">
       <div className="header" onClick={() => setIsExpanded(!isExpanded)}>
@@ -81,7 +93,7 @@ export default function SimulationControlsPanel() {
             <div className="w-20 text-left pr-2">Scrubber</div>
             <div className="flex-1 flex items-center justify-end h-5">
               <input 
-                type="range" min="0" max="22499" step="1" defaultValue="0" id="frame-scrubber"
+                type="range" min="0.00" max="899.96" step="0.04" defaultValue="0.00" id="frame-scrubber"
                 className="scrubber"
                 onChange={(e) => {
                   import(ui).then(mod => mod.scrubFrame(e.target.value));
@@ -102,48 +114,16 @@ export default function SimulationControlsPanel() {
           </div>
 
           {/* Media Buttons Row (Using your .btn-track class!) */}
-          <div className="row flex justify-between gap-2 mt-4!">
-            <button 
-              className="btn btn-green flex-1 m-0!" 
-              onClick={() => import(ui).then(mod => mod.rewindSim())}
-            >
-              &lt;&lt; -5s
-            </button>
-            
-            <button 
-              className="btn btn-green flex-1 m-0!" 
-              onClick={(e) => {
-                // 1. Capture the button element IMMEDIATELY before the async call
-                const btnElement = e.currentTarget; 
-                
-                import(ui).then(mod => {
-                  const isPlaying = mod.togglePlayPause();
-                  // 2. Use the captured element instead of 'e.currentTarget'
-                  btnElement.innerText = isPlaying ? "Pause" : "Play";
-                });
-              }}
-            >
-              Play
-            </button>
-            
-            <button 
-              className="btn btn-green flex-1 m-0!" 
-              onClick={() => import(ui).then(mod => mod.fastForwardSim())}
-            >
-              +5s &gt;&gt;
-            </button>
-          </div>
+          <div className="row flex justify-between gap-2 mt-4! flex-wrap">
 
-          {/* Reset Button */}
-          <div className="row mt-3!">
-            <button 
-              className="btn btn-green w-full m-0!" 
-              onClick={() => import(ui).then(mod => mod.resetSim())}
-            >
-              Reset Playback
-            </button>
-          </div>
+            <IntButton icon={Rewind} label={"-5s"} onClick={() => import(ui).then(mod => mod.rewindSim())} classes="btn btn-green flex-1 m-0!" />
 
+            <IntButton icon={isPlaying ? Pause : Play} label={isPlaying ? "Pause" : "Play"} onClick={handleIsPlaying} classes="btn btn-green flex-1 m-0!" />
+            
+            <IntButton icon={FastForward} label={"+5s"} onClick={() => import(ui).then(mod => mod.fastForwardSim())} classes="btn btn-green flex-1 m-0!" />
+
+            <IntButton icon={RotateCcw} label={"Reset Playback"} onClick={() => import(ui).then(mod => mod.resetSim())} classes="btn btn-green flex-1 m-0!" />
+          </div>
         </div>
       </div>
     </div>

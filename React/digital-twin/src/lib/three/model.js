@@ -61,14 +61,21 @@ function animate(t = 0) {
         
         // We keep the sliders inside the IF block to save performance. 
         // Only update the HTML sliders if the timeline actually ticked forward.
+        // We keep the sliders inside the IF block to save performance. 
         if (currentFrameIdx !== lastRenderedFrame) {
             lastRenderedFrame = currentFrameIdx;
             
+            const currentSecond = (currentFrameIdx / FPS).toFixed(2);
+            
             const scrubber = document.getElementById('frame-scrubber');
-            if (scrubber) scrubber.value = currentFrameIdx;
+            if (scrubber && !scrubber.matches(':active')) { 
+                scrubber.value = currentSecond;
+            }
             
             const scrubText = document.getElementById('frame-scrubber-text');
-            if (scrubText) scrubText.value = currentFrameIdx;
+            if (scrubText && document.activeElement !== scrubText) { 
+                scrubText.value = currentSecond;
+            }
         }
     }
     
@@ -113,19 +120,19 @@ export async function initThreeEngine(container) {
     }
 
     // --- 2. DATA LOAD & UI SYNC ---
+    // --- 2. DATA LOAD & UI SYNC ---
     loadSimulationData(() => {
         const scrubber = document.getElementById('frame-scrubber');
         
-        // This will now use the capped maximum we set above!
         if (scrubber) {
-            scrubber.max = playback.maxFrames;
-            scrubber.value = Math.floor(playback.frame);
+            // Set the slider max to total SECONDS instead of total frames
+            scrubber.max = (playback.maxFrames / FPS).toFixed(2); 
+            scrubber.value = (playback.frame / FPS).toFixed(2);
         }
         
-        // Force the text box to show the correct starting frame immediately
         const scrubText = document.getElementById('frame-scrubber-text');
         if (scrubText) {
-            scrubText.value = Math.floor(playback.frame);
+            scrubText.value = (playback.frame / FPS).toFixed(2);
         }
     });
 

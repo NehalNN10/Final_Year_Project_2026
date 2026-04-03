@@ -56,6 +56,6 @@ export function changeSpeed(value) {
 }
 
 export function scrubFrame(value) {
-    playback.frame = parseInt(value, 10);
+    playback.frame = parseFloat(value) * FPS;
     renderFrame(Math.floor(playback.frame));
 }
