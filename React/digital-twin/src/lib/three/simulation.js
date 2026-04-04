@@ -112,7 +112,7 @@ export function renderFrame(index) {
             }
 
             const currentStreak = zeroOccupancyTracker[roomId] || 0;
-            const emptyForFiveMins = currentStreak >= 60;
+            const emptyForXmins = currentStreak >= 120; //2mins
             const wasteDetected = roomRow.ac || roomRow.lights;
 
             // Dynamic time string based on actual streak
@@ -122,19 +122,19 @@ export function renderFrame(index) {
                 ? `${streakMinutes} min ${streakSeconds} sec`
                 : `${streakSeconds} sec`;
 
-            if (currentStreak >= 270 && !emptyForFiveMins) {
+            if (currentStreak >= 270 && !emptyForXmins) {
                 console.log(`[${roomId}] ⏳ Almost there — ${300 - currentStreak}s until alert fires`);
             }
 
-            if (emptyForFiveMins && !wasteDetected) {
-                console.log(`[${roomId}] ℹ️ 5 min empty BUT ac=${roomRow.ac} lights=${roomRow.lights} — no waste, no alert`);
+            if (emptyForXmins && !wasteDetected) {
+                console.log(`[${roomId}] ℹ️ 2 min empty BUT ac=${roomRow.ac} lights=${roomRow.lights} — no waste, no alert`);
             }
 
-            if (emptyForFiveMins && wasteDetected && alertCooldown[roomId]) {
+            if (emptyForXmins && wasteDetected && alertCooldown[roomId]) {
                 console.log(`[${roomId}] 🔕 Alert condition met but cooldown active — already sent`);
             }
 
-            if (emptyForFiveMins && wasteDetected && !alertCooldown[roomId]) {
+            if (emptyForXmins && wasteDetected && !alertCooldown[roomId]) {
                 alertCooldown[roomId] = true;
 
                 const wasted = [];
