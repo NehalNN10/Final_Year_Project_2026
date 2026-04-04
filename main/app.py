@@ -493,79 +493,79 @@ def api_facility_home_data():
 # ---------------------------------------------------------
 # AUTOMATING ALERTS
 # ----------------------------------------------------------
-from datetime import datetime, timedelta
+# from datetime import datetime, timedelta
 
-def check_energy_waste_automated(room_id_str):
-    """Checks the database for 30 minutes of 0 occupancy + AC On."""
-    with app.app_context():
-        room = Rooms.objects(room_id=room_id_str).first()
-        if not room:
-            print(f"Room {room_id_str} not found.")
-            return
+# def check_energy_waste_automated(room_id_str):
+#     """Checks the database for 30 minutes of 0 occupancy + AC On."""
+#     with app.app_context():
+#         room = Rooms.objects(room_id=room_id_str).first()
+#         if not room:
+#             print(f"Room {room_id_str} not found.")
+#             return
 
-        # 30 minutes = 1800 seconds (rows)
-        # We fetch the latest 1800 entries for this room
-        recent_data = RoomData.objects(room=room).order_by('-time').limit(1800)
-        print(f"Checking energy waste for Room {room_id_str} - fetched {len(recent_data)} recent entries.")
+#         # 30 minutes = 1800 seconds (rows)
+#         # We fetch the latest 1800 entries for this room
+#         recent_data = RoomData.objects(room=room).order_by('-time').limit(1800)
+#         print(f"Checking energy waste for Room {room_id_str} - fetched {len(recent_data)} recent entries.")
         
-        if len(recent_data) < 1800:
-            print(f"Not enough data yet ({len(recent_data)}/1800 rows).")
-            return
+#         if len(recent_data) < 1800:
+#             print(f"Not enough data yet ({len(recent_data)}/1800 rows).")
+#             return
 
-        # Check if ALL 1800 rows meet the criteria
-        waste_detected = all(d.occupancy == 0 and d.ac == True for d in recent_data)
-        print(f"First entry: {recent_data[0].occupancy}, {recent_data[0].ac} | Last entry: {recent_data[1799].occupancy}, {recent_data[1799].ac} | Waste Detected: {waste_detected}")
+#         # Check if ALL 1800 rows meet the criteria
+#         waste_detected = all(d.occupancy == 0 and d.ac == True for d in recent_data)
+#         print(f"First entry: {recent_data[0].occupancy}, {recent_data[0].ac} | Last entry: {recent_data[1799].occupancy}, {recent_data[1799].ac} | Waste Detected: {waste_detected}")
 
-        if waste_detected:
-            # Get Facilities Recipients (Logic from your User/Role models)
-            recipients = [u.email for u in User.objects 
-                         if u.role and u.role.department == 'Facilities' 
-                         and u.email and not u.email.endswith('@none')]
+#         if waste_detected:
+#             # Get Facilities Recipients (Logic from your User/Role models)
+#             recipients = [u.email for u in User.objects 
+#                          if u.role and u.role.department == 'Facilities' 
+#                          and u.email and not u.email.endswith('@none')]
 
-            for rcpt in recipients:
-                send_facilities_alert(room_id_str, "Energy Waste", "30 mins", rcpt, 
-                                      "AUTOMATED: AC left on in empty room.")
-            print(f"✅ Automated Alert Sent to {len(recipients)} recipients.")
-        else:
-            print("Keep monitoring... conditions for alert not met.")
+#             for rcpt in recipients:
+#                 send_facilities_alert(room_id_str, "Energy Waste", "30 mins", rcpt, 
+#                                       "AUTOMATED: AC left on in empty room.")
+#             print(f"✅ Automated Alert Sent to {len(recipients)} recipients.")
+#         else:
+#             print("Keep monitoring... conditions for alert not met.")
             
-@app.route('/api/test/trigger_waste', methods=['POST'])
-def trigger_waste_test():
-    """Manually injects 30 mins of waste data into MongoDB and triggers the automated alert."""
-    try:
-        room = Rooms.objects(room_id="C-007").first()
-        if not room:
-            return jsonify({"error": "Room C-007 not found in DB"}), 404
+# @app.route('/api/test/trigger_waste', methods=['POST'])
+# def trigger_waste_test():
+#     """Manually injects 30 mins of waste data into MongoDB and triggers the automated alert."""
+#     try:
+#         room = Rooms.objects(room_id="C-007").first()
+#         if not room:
+#             return jsonify({"error": "Room C-007 not found in DB"}), 404
 
-        #Clear previous data for this room to ensure a clean test
-        RoomData.objects(room=room).delete()
-        print("Old data for C-007 cleared.")
+#         #Clear previous data for this room to ensure a clean test
+#         RoomData.objects(room=room).delete()
+#         print("Old data for C-007 cleared.")
 
-        #Create 1800 rows (simulating 30 minutes at 1 row per second)
-        test_entries = []
-        for i in range(1800):
-            test_entries.append(RoomData(
-                room=room,
-                time=str(i),  # Simulated timestamp
-                occupancy=0,
-                ac="On"=="On",      
-                temperature=22.0,
-                lights="Off"=="On"
-            ))
+#         #Create 1800 rows (simulating 30 minutes at 1 row per second)
+#         test_entries = []
+#         for i in range(1800):
+#             test_entries.append(RoomData(
+#                 room=room,
+#                 time=str(i),  # Simulated timestamp
+#                 occupancy=0,
+#                 ac="On"=="On",      
+#                 temperature=22.0,
+#                 lights="Off"=="On"
+#             ))
 
-        RoomData.objects.insert(test_entries)
-        print(f"📥 1800 rows of test data injected for {room.room_id}.")
-        check_energy_waste_automated("C-007")
+#         RoomData.objects.insert(test_entries)
+#         print(f"📥 1800 rows of test data injected for {room.room_id}.")
+#         check_energy_waste_automated("C-007")
 
-        return jsonify({
-            "status": "success",
-            "message": "Test data injected. Automated alert check performed."
-        }), 200
+#         return jsonify({
+#             "status": "success",
+#             "message": "Test data injected. Automated alert check performed."
+#         }), 200
 
-    except Exception as e:
-        print(f"Test Trigger Error: {e}")
-        return jsonify({"status": "error", "message": str(e)}), 500
-#will uncomment this once the esp32 is ready.....
+#     except Exception as e:
+#         print(f"Test Trigger Error: {e}")
+#         return jsonify({"status": "error", "message": str(e)}), 500
+# #will uncomment this once the esp32 is ready.....
 # @app.route('/data', methods=['POST'])
 # def receive_esp32_data():
 #     data = request.get_json(silent=True)
