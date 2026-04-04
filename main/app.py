@@ -490,6 +490,7 @@ def api_facility_home_data():
     except Exception as e:
         return jsonify({'error': str(e)}), 500
 
+
 # #will uncomment this once the esp32 is ready.....
 # @app.route('/data', methods=['POST'])
 # def receive_esp32_data():
