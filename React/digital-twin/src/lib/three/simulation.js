@@ -25,6 +25,9 @@ export const floorPlane = new THREE.Plane(new THREE.Vector3(0, 1, 0), 0);
 // Create a variable to hold the result
 export const intersectionPoint = new THREE.Vector3();
 
+const zeroOccupancyTracker = {}; // { roomId: secondsCount }
+const alertCooldown = {};        // { roomId: boolean }
+let lastSecond = -1;             // prevents counting same second multiple times
 function getDate(dateElement) {
     if (!dateElement) return; // Safety check
     
@@ -82,6 +85,92 @@ export function renderFrame(index) {
     const room = hit ? getRoom(intersectionPoint.x, intersectionPoint.z) : null;
     const roomInf = room ? roomInfo[room] : null;
     const seconds = Math.floor(index / FPS);
+    
+
+    // Only run once per second, not every frame
+    if (seconds !== lastSecond) {
+        lastSecond = seconds;
+
+        Object.keys(iot).forEach(roomId => {
+            const roomRow = iot[roomId][seconds];
+            if (!roomRow) {
+                console.log(`[${roomId}] ⚠️ No IoT row found for second ${seconds}`);
+                return;
+            }
+
+            console.log(`[${roomId}] second=${seconds} | occupancy=${roomRow.occupancy} | ac=${roomRow.ac} | lights=${roomRow.lights} | zeroStreak=${zeroOccupancyTracker[roomId] || 0}s`);
+
+            if (roomRow.occupancy === 0) {
+                zeroOccupancyTracker[roomId] = (zeroOccupancyTracker[roomId] || 0) + 1;
+                console.log(`[${roomId}] 🟡 Zero occupancy — streak now ${zeroOccupancyTracker[roomId]}s / 300s needed`);
+            } else {
+                if (zeroOccupancyTracker[roomId] > 0) {
+                    console.log(`[${roomId}] 🟢 Occupancy restored (was ${zeroOccupancyTracker[roomId]}s) — resetting streak`);
+                }
+                zeroOccupancyTracker[roomId] = 0;
+                alertCooldown[roomId] = false; // reset so next empty period can trigger again
+            }
+
+            const currentStreak = zeroOccupancyTracker[roomId] || 0;
+            const emptyForXmins = currentStreak >= 120; //2mins
+            const wasteDetected = roomRow.ac || roomRow.lights;
+
+            // Dynamic time string based on actual streak
+            const streakMinutes = Math.floor(currentStreak / 60);
+            const streakSeconds = currentStreak % 60;
+            const timeSinceStr = streakMinutes > 0 
+                ? `${streakMinutes} min ${streakSeconds} sec`
+                : `${streakSeconds} sec`;
+
+            if (currentStreak >= 270 && !emptyForXmins) {
+                console.log(`[${roomId}] ⏳ Almost there — ${300 - currentStreak}s until alert fires`);
+            }
+
+            if (emptyForXmins && !wasteDetected) {
+                console.log(`[${roomId}] ℹ️ 2 min empty BUT ac=${roomRow.ac} lights=${roomRow.lights} — no waste, no alert`);
+            }
+
+            if (emptyForXmins && wasteDetected && alertCooldown[roomId]) {
+                console.log(`[${roomId}] 🔕 Alert condition met but cooldown active — already sent`);
+            }
+
+            if (emptyForXmins && wasteDetected && !alertCooldown[roomId]) {
+                alertCooldown[roomId] = true;
+
+                const wasted = [];
+                if (roomRow.ac) wasted.push("AC");
+                if (roomRow.lights) wasted.push("Lights");
+
+                console.warn(`[${roomId}] 🚨 ALERT FIRING — ${wasted.join(' & ')} on, 0 occupancy for ${timeSinceStr}`);
+
+                fetch('http://localhost:1767/api/send_facilities_alert', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({
+                        room_number: roomId,
+                        alert_type: `${wasted.join(' & ')} left on in empty room`,
+                        time_since: timeSinceStr, // dynamic, reflects actual streak
+                        description: `${wasted.join(' and ')} has been running with zero occupancy for ${timeSinceStr}.`
+                    })
+                })
+                .then(r => r.json())
+                .then(data => {
+                    console.log(`[${roomId}] ✅ Alert sent:`, data);
+                    // Full reset after email sent — starts checking fresh
+                    zeroOccupancyTracker[roomId] = 0;
+                    alertCooldown[roomId] = false;
+                    console.log(`[${roomId}] 🔄 Reset — monitoring fresh 5-minute window`);
+                })
+                .catch(err => {
+                    console.error(`[${roomId}] ❌ Alert failed:`, err);
+                    // Also reset on failure so it retries next window
+                    zeroOccupancyTracker[roomId] = 0;
+                    alertCooldown[roomId] = false;
+                });
+            }
+        });
+    }
+   
     const row = room ? iot[room][seconds] : null;
 
     const allmarkers = [];

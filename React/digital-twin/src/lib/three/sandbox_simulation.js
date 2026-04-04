@@ -16,6 +16,12 @@ export class SandboxSimulation {
             "C-007": { occupancy: 0, temp: 25.0, ac: false, lights: false },
             "C-006": { occupancy: 0, temp: 25.0, ac: false, lights: false }
         }
+
+        // --- NEW TRACKERS FOR ALERTS ---
+        this.zeroOccupancyTracker = {}; // { roomId: secondsCount }
+        this.alertCooldown = {};        // { roomId: boolean }
+        this.lastSecond = -1;           
+        // -------------------------------
         
         this.raycaster = new THREE.Raycaster();
         this.screenCenter = new THREE.Vector2(0, 0); 
@@ -281,5 +287,71 @@ export class SandboxSimulation {
 
         if (uiElements.uiDate) uiElements.uiDate.innerText = getDate();
         if (uiElements.uiTime) uiElements.uiTime.innerText = getTime();
+
+        // ---- Facilities email notification -----
+        const seconds = Math.floor(Date.now() / 1000);
+
+        if (seconds !== this.lastSecond) {
+            this.lastSecond = seconds;
+
+            Object.keys(this.roomIoT).forEach(roomId => {
+                const roomRow = this.roomIoT[roomId];
+                
+                // Streak Logic: Increment if occupancy is 0, reset if > 0
+                if (roomRow.occupancy === 0) {
+                    this.zeroOccupancyTracker[roomId] = (this.zeroOccupancyTracker[roomId] || 0) + 1;
+                } else {
+                    this.zeroOccupancyTracker[roomId] = 0;
+                    this.alertCooldown[roomId] = false; 
+                }
+
+                const currentStreak = this.zeroOccupancyTracker[roomId] || 0;
+                const wasteDetected = roomRow.ac || roomRow.lights;
+                
+                // DEFINE THRESHOLD (120 seconds = 2 minutes)
+                const thresholdMet = currentStreak >= 120;
+
+                // Dynamic time string for the email
+                const streakMinutes = Math.floor(currentStreak / 60);
+                const streakSeconds = currentStreak % 60;
+                const timeSinceStr = streakMinutes > 0 
+                    ? `${streakMinutes} min ${streakSeconds} sec`
+                    : `${streakSeconds} sec`;
+
+                //  CHECK ALERT CONDITIONS
+                if (thresholdMet && wasteDetected && !this.alertCooldown[roomId]) {
+                    this.alertCooldown[roomId] = true;
+
+                    const wasted = [];
+                    if (roomRow.ac) wasted.push("AC");
+                    if (roomRow.lights) wasted.push("Lights");
+
+                    console.warn(`[Sandbox Alert] ${roomId} firing: 0 occupancy for ${timeSinceStr}`);
+
+                    fetch('http://localhost:1767/api/send_facilities_alert', {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify({
+                            room_number: roomId,
+                            alert_type: `${wasted.join(' & ')} left on in empty room`,
+                            time_since: timeSinceStr,
+                            description: `${wasted.join(' and ')} has been running with zero occupancy for ${timeSinceStr} in Sandbox mode.`
+                        })
+                    })
+                    .then(r => r.json())
+                    .then(data => {
+                        console.log(`[${roomId}] ✅ Alert sent:`, data);
+                        // Optional: Reset immediately or wait for occupancy to change
+                        this.zeroOccupancyTracker[roomId] = 0;
+                        this.alertCooldown[roomId] = false;
+                    })
+                    .catch(err => {
+                        console.error(`[${roomId}] ❌ Alert failed:`, err);
+                        this.zeroOccupancyTracker[roomId] = 0;
+                        this.alertCooldown[roomId] = false;
+                    });
+                }
+            });
+        }
     }
 }
