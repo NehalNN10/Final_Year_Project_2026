@@ -36,12 +36,17 @@ This repository contains the code and documentation for our final year project, 
 
 ## 🛠️ Tech Stack
 
-- **Frontend**: Three.js, JavaScript
-- **Computer Vision**: OpenCV, Python
+- **Frontend**: Three.js, Next.js
+- **Computer Vision**: OpenCV, YOLO, ByteTrack
 
 ### Running 3D Model
 
 - Go to Terminal
-- Run these commands:
-- - cd main
-- - py app.py
+- Run these commands to initiate the Flask backend:
+- - `cd main`
+- - `python app.py`
+- Run these commands to initiate the Next.js frontend:
+- - `cd React/digital-twin`
+- - `npm i` to install dependencies
+- - `npm run dev`
+- - Go to `http://localhost:3000` on your preferred browser
