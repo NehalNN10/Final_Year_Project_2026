@@ -2,6 +2,7 @@ import torch
 import cv2
 import numpy as np
 from ultralytics import YOLO
+import os
 
 # =========================
 # 1. INITIALIZE MPS (APPLE SILICON GPU)
@@ -16,7 +17,7 @@ else:
 # 2. CONFIGURATION
 # =========================
 # Swap to your actual Hikvision password
-VIDEO_PATH = "rtsp://admin:Habib_Test@192.168.1.64:554/Streaming/Channels/101"
+VIDEO_PATH = os.get_env("RTSP_URL")
 MODEL_PATH = "yolo11x.pt"
 
 # =========================
