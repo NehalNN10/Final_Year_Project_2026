@@ -242,9 +242,9 @@ export function renderFrame(index) {
                 const t = row.temperature;
                 uiElements.uiTemp.innerText = t + "°C";
                 
-                if (t <= 19) uiElements.uiTemp.style.backgroundColor = "#0088ff";
+                if (t <= 20) uiElements.uiTemp.style.backgroundColor = "#0088ff";
                 else if (t <= 22) uiElements.uiTemp.style.backgroundColor = "#00ffff";
-                else if (t <= 27) uiElements.uiTemp.style.backgroundColor = "#00ff88";
+                else if (t <= 28) uiElements.uiTemp.style.backgroundColor = "#00ff88";
                 else if (t <= 30) uiElements.uiTemp.style.backgroundColor = "#ff8800";
                 else uiElements.uiTemp.style.backgroundColor = "#f00";
             }

@@ -9,6 +9,7 @@ import Link from 'next/link';
 import StatRow from "@/components/StatRow";
 import FormRow from "@/components/FormRow";
 import StaffList from "@/components/StaffList";
+import IoTAlert from "@/components/IoTAlert";
 
 export default function SandboxModel() {
   const containerRef = useRef<HTMLDivElement>(null);
@@ -19,20 +20,10 @@ export default function SandboxModel() {
   const [isScrolledDown, setIsScrolledDown] = useState(false);
 
   const [roomsData, setRoomsData] = useState<any[]>([]);
-  const [currentRole, setCurrentRole] = useState("Facilities Officer");
-  const [name, setName] = useState("");
   const [isEmergencyModalOpen, setEmergencyModalOpen] = useState(false);
-
-  const [facilityStaff, setFacilityStaff] = useState<any[]>([]);
-
-  const [securityStaffList, setSecurityStaffList] = useState<any[]>([]);
-  const [securityStaffRooms, setSecurityStaffRooms] = useState<any>({});
   
   const [emergencyForm, setEmergencyForm] = useState({ roomNumber: "", alertType: "AC", timeSince: "", description: "" });
   const [currentRoomStats, setCurrentRoomStats] = useState<any>({});
-  const [currentTimeSpan, setCurrentTimeSpan] = useState("Loading Time...");
-
-  const LOOP_DURATION = 900;
 
   useEffect(() => {
     const handleScroll = () => {
@@ -69,7 +60,19 @@ export default function SandboxModel() {
     
     import("../../lib/three/sandbox.js").then((module) => {
       console.log("Booting up OOP Sandbox Engine...");
-      sandboxApp = new module.SandboxEngine(containerRef.current!);
+      
+      sandboxApp = new module.SandboxEngine(
+        containerRef.current!, 
+        
+        (liveData: any[]) => {
+          setCurrentRoomStats(liveData);
+        },
+        
+        (roomsList: any[]) => {
+          setRoomsData(roomsList);
+        }
+      );
+      
       window.sandboxAPI = sandboxApp.simulation;
       sandboxApp.init();
     });
@@ -103,60 +106,6 @@ export default function SandboxModel() {
   const handleToggleLights = () => window.sandboxAPI?.toggleLights();
   const handleToggleAC = () => window.sandboxAPI?.toggleAC();
 
-  // --- Initial Data Fetch ---
-  useEffect(() => {
-    fetch("/api/facility_home_data")
-      .then((res) => res.json())
-      .then((data) => {
-        setRoomsData(data.rooms || []);
-        setFacilityStaff(data.staff_list || []);
-        
-        if (data.current_role) setCurrentRole(data.current_role);
-        if (data.name) setName(data.name);
-      })
-      .catch(err => console.error("Error fetching data:", err));
-  }, []);
-
-  useEffect(() => {
-      fetch("/api/security_home_data")
-        .then((res) => res.json())
-        .then((data) => {
-          setSecurityStaffList(data.staff_list || []);
-          setSecurityStaffRooms(data.staff_rooms || {});
-          setRoomsData(data.rooms || []);
-          if (data.current_role) setCurrentRole(data.current_role);
-          if (data.name) setName(data.name);
-        })
-        .catch(err => console.error("Error fetching data:", err));
-    }, []);
-
-  // --- Real-Time Simulation Loop ---
-  useEffect(() => {
-    if (roomsData.length === 0) return;
-    
-    const interval = setInterval(() => {
-      const now = new Date();
-      const currentFrame = Math.floor(now.getTime() / 1000) % LOOP_DURATION;
-      
-      const cycleStartTime = new Date(now.getTime() - (currentFrame * 1000));
-      setCurrentTimeSpan(new Date(cycleStartTime.getTime() + (currentFrame * 1000)).toLocaleTimeString());
-
-      const newStats: any = {};
-      roomsData.forEach(room => {
-        if (room.timeseries?.length > 0) {
-          newStats[room.room_id] = room.timeseries.find((e: any) => e.time === currentFrame) 
-            || [...room.timeseries].reverse().find((e: any) => e.time <= currentFrame) 
-            || room.timeseries[0];
-        } else {
-          newStats[room.room_id] = { occupancy: "--", temperature: "--", ac: null, lights: null };
-        }
-      });
-      setCurrentRoomStats(newStats);
-    }, 1000);
-    
-    return () => clearInterval(interval);
-  }, [roomsData]);
-
   // --- Handlers ---
   const handleEmergencySubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -180,46 +129,20 @@ export default function SandboxModel() {
     }
   };
 
-  const handleSendAllAlerts = async () => {
-    // Failsafe to prevent accidental clicks
-    if (!window.confirm("🚨 Are you sure you want to trigger a campus-wide emergency alert for ALL rooms")) return;
-
-    try {
-      // Create an array of fetch promises for every room
-      const alertPromises = roomsData.map(room => {
-        // Grab the live occupancy at this exact second
-        const liveStats = currentRoomStats[room.room_id] || {};
-        const currentOccupancy = liveStats.occupancy !== "--" ? liveStats.occupancy : 0;
-
-        return fetch('/api/send_emergency_alert', { 
-          method: 'POST', 
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ 
-            room_number: room.room_id, 
-            occupancy_count: currentOccupancy
-          })
-        });
-      });
-
-      // Fire them all off at the same time
-      await Promise.all(alertPromises);
-      alert('✅ Mass emergency alerts successfully sent to all rooms!');
-
-    } catch (error) {
-      console.error("Error sending mass alerts:", error);
-      alert('❌ Error sending alerts. Check the console.'); 
-    }
-  };
-
   // Helper function for your temperature color logic
   const getTempColor = (t: any) => {
     if (t === "--" || t === undefined) return "#ffffff";
-    if (t <= 19) return "#0088ff";
+    if (t <= 20) return "#0088ff";
     if (t <= 22) return "#00ffff";
-    if (t <= 27) return "#00ff88";
+    if (t <= 28) return "#00ff88";
     if (t <= 30) return "#ff8800";
     return "#ff0000";
   };
+
+  const acAlerts = roomsData.filter(room => currentRoomStats[room.room_id]?.uiAlerts?.ac);
+  const lightsAlerts = roomsData.filter(room => currentRoomStats[room.room_id]?.uiAlerts?.lights);
+  const tempAlerts = roomsData.filter(room => currentRoomStats[room.room_id]?.uiAlerts?.temp);
+  const occuAlerts = roomsData.filter(room => currentRoomStats[room.room_id]?.uiAlerts?.occu);
 
   if (department === "Loading...") {
     return <div className="loading-screen text-white text-center mt-20">Loading Sandbox...</div>;
@@ -355,60 +278,90 @@ export default function SandboxModel() {
       </div>
 
       <div id="dashboard-section" className="side-nav row mt-0! text-black">
-        <span>Security Dashboard</span>
-        {currentRole === 'Security Admin' && (
-          <button className="btn btn-red btn-auto m-0! py-1!" onClick={handleSendAllAlerts}>
-            <h2 className="font-bold text-white text-xl">Create Emergency</h2>
-          </button>
-        )}
+        <span>Dashboard</span>
       </div>
 
       {/* Added relative here so our absolute button attaches to it */}
       <div className="main-home scroll relative"> 
-
-        <div className="row px-5">
-          <div className="">
-            <h2 className="font-bold text-white">Welcome, {name}!</h2>
-            <p className="text-gray-400">Security data and metrics will be displayed here.</p>
-          </div>
-          <div className="flex flex-row gap-2">
-            <button className="btn btn-red btn-auto m-0! py-1!" onClick={() => setEmergencyModalOpen(true)}>
-              <h2 className="m-0! font-bold text-white text-xl">Send Alert</h2>
-            </button>
-            <button className="btn btn-red btn-auto m-0! py-1!" onClick={handleSendAllAlerts}>
-              <h2 className="font-bold text-white text-xl">Create Emergency</h2>
-            </button>
-          </div>
-        </div>
         
         {/* Top Alerts Row */}
         <div className="row boxes">
+          
+          {/* AC ALERTS */}
           <div className="tracker-ui scroll outer box basis-70">
             <h3 className="font-bold">AC Alerts</h3>
-            <div className="tracker-ui mt-4 p-4 text-gray-400 text-center">No active alerts.</div>
-          </div>
-          <div className="tracker-ui scroll outer box basis-70">
-            <h3 className="font-bold">Lights Alerts</h3>
-            <div className="tracker-ui mt-4 p-4 text-gray-400 text-center">No active alerts.</div>
-          </div>
-          <div className="tracker-ui scroll outer box basis-70">
-            <h3 className="font-bold">Temperature Alerts</h3>
-            <div className="tracker-ui mt-4 p-4 text-gray-400 text-center">No active alerts.</div>
-          </div>
-          <div className="tracker-ui scroll outer box basis-70">
-            <h3 className="font-bold">Occupancy Alerts</h3>
-            {/* Dynamic Alerts will map here later */}
-            <div className="tracker-ui mt-4 p-4 text-gray-400 text-center">
-              No active alerts.
+            <div className="mt-4">
+              {acAlerts.length > 0 ? (
+                acAlerts.map(room => (
+                  <IoTAlert 
+                    roomData={room}  
+                    time={currentRoomStats[room.room_id].uiAlerts.ac} 
+                  />
+                ))
+              ) : (
+                <div className="p-4 text-center">No active alerts.</div>
+              )}
             </div>
           </div>
+
+          {/* LIGHTS ALERTS */}
+          <div className="tracker-ui scroll outer box basis-70">
+            <h3 className="font-bold">Lights Alerts</h3>
+            <div className="mt-4">
+              {lightsAlerts.length > 0 ? (
+                lightsAlerts.map(room => (
+                  <IoTAlert 
+                    roomData={room} 
+                    time={currentRoomStats[room.room_id].uiAlerts.lights} 
+                  />
+                ))
+              ) : (
+                <div className="p-4 text-center">No active alerts.</div>
+              )}
+            </div>
+          </div>
+
+          {/* TEMPERATURE ALERTS */}
+          <div className="tracker-ui scroll outer box basis-70">
+            <h3 className="font-bold">Temperature Alerts</h3>
+            <div className="mt-4">
+              {tempAlerts.length > 0 ? (
+                tempAlerts.map(room => (
+                  <IoTAlert 
+                    roomData={room} 
+                    time={currentRoomStats[room.room_id].uiAlerts.temp}
+                  />
+                ))
+              ) : (
+                <div className="p-4 text-center">No active alerts.</div>
+              )}
+            </div>
+          </div>
+
+          {/* OCCUPANCY ALERTS */}
+          <div className="tracker-ui scroll outer box basis-70">
+            <h3 className="font-bold">Occupancy Alerts</h3>
+            <div className="mt-4">
+              {occuAlerts.length > 0 ? (
+                occuAlerts.map(room => (
+                  <IoTAlert 
+                    roomData={room} 
+                    time={currentRoomStats[room.room_id].uiAlerts.occu}
+                  />
+                ))
+              ) : (
+                <div className="p-4 text-center">No active alerts.</div>
+              )}
+            </div>
+          </div>
+
         </div>
 
         {/* Real-Time Data Table */}
         <div className="tracker-ui outer box basis-220 overflow-hidden flex flex-col mx-5!">
           <h3 className="row mt-0! font-bold shrink-0">
             <span className="flex-2">Rooms Real-Time Data</span>
-            <StatRow icon={Clock} label={currentTimeSpan} size="32"/>
+            <StatRow icon={Clock} label="Loading..." id="time" size="32"/>
           </h3>
           <div className="w-full overflow-x-auto mt-4 pb-2">
             <table className="table w-full border-separate border-spacing-0 whitespace-nowrap">
@@ -442,7 +395,7 @@ export default function SandboxModel() {
               </thead>
               <tbody>
                 {roomsData.map(room => {
-                  const stats = currentRoomStats[room.room_id] || { occupancy: "--", temperature: "--", ac: null, lights: null };
+                  const stats = currentRoomStats[room.room_id] || { occupancy: "--", temp: "--", ac: null, lights: null };
                   const hasData = stats.occupancy !== "--";
 
                   const count = stats.occupancy;
@@ -454,9 +407,10 @@ export default function SandboxModel() {
                   const isLightsOn = stats.lights;
                   const lightsColor = stats.lights !== null ? (isLightsOn ? "#00ff88" : "#ff4444") : "#ffffff";
 
-                  const tempText = hasData ? `${stats.temperature} °C` : "--";
-                  const tempTextSmall = hasData ? `${Math.round(stats.temperature)}°` : "--";
-                  const tempColor = getTempColor(stats.temperature);
+                  const currentTemp = stats.temp; 
+                  const tempText = hasData ? `${currentTemp.toFixed(1)} °C` : "--";
+                  const tempTextSmall = hasData ? `${Math.round(currentTemp)}°` : "--";
+                  const tempColor = getTempColor(currentTemp);
 
                   return (
                     <tr key={room.id}>
@@ -506,17 +460,6 @@ export default function SandboxModel() {
               </tbody>
             </table>
           </div>
-        </div>
-        <div className="row boxes">
-          <StaffList 
-            staffList={securityStaffList}
-            staffRooms={securityStaffRooms}
-            department="Security"
-          />
-          <StaffList 
-            staffList={facilityStaff}
-            department="Facilities"
-          />
         </div>
       </div>
 

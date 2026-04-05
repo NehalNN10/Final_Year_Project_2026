@@ -1,10 +1,11 @@
 import * as THREE from "three";
 import { createMarker } from "./world.js";
-import { FPS, LOOP_DURATION, iot, getRoom, roomInfo, getDate, getTime } from "./variables.js";
+import { FPS, LOOP_DURATION, iot, getRoom, roomInfo, getDate, getTime, sendFacilitiesAlert } from "./variables.js";
 
 export class SandboxSimulation {
-    constructor(engine) {
+    constructor(engine, onDataUpdate = null) {
         this.engine = engine; 
+        this.onDataUpdate = onDataUpdate; 
 
         this.spawnedPeople = [];
 
@@ -17,11 +18,10 @@ export class SandboxSimulation {
             "C-006": { occupancy: 0, temp: 25.0, ac: false, lights: false }
         }
 
-        // --- NEW TRACKERS FOR ALERTS ---
-        this.zeroOccupancyTracker = {}; // { roomId: secondsCount }
-        this.alertCooldown = {};        // { roomId: boolean }
-        this.lastSecond = -1;           
-        // -------------------------------
+        this.trackers = { acWasted: {}, lightsWasted: {}, tempWarm: {}, tempCold: {} };
+        this.roomLastAlertTime = {}; 
+        this.lastSecond = -1;          
+        this.lastIoTString = ""; 
         
         this.raycaster = new THREE.Raycaster();
         this.screenCenter = new THREE.Vector2(0, 0); 
@@ -180,6 +180,7 @@ export class SandboxSimulation {
             uiLights: document.getElementById('ui-iot-lights'),
             uiDate: document.getElementById('ui-iot-date'),
             uiTime: document.getElementById('ui-iot-time'),
+            uiTime2: document.getElementById('time'),
             uiName: document.getElementById('ui-room-name'),
             uiID: document.getElementById('ui-room-id'),
             uiFloor: document.getElementById('ui-room-floor')
@@ -243,9 +244,9 @@ export class SandboxSimulation {
                     const t = row.temp;
                     uiElements.uiTemp.innerText = t.toFixed(1) + "°C";
                     
-                    if (t <= 19) uiElements.uiTemp.style.backgroundColor = "#0088ff";
+                    if (t <= 20) uiElements.uiTemp.style.backgroundColor = "#0088ff";
                     else if (t <= 22) uiElements.uiTemp.style.backgroundColor = "#00ffff";
-                    else if (t <= 27) uiElements.uiTemp.style.backgroundColor = "#00ff88";
+                    else if (t <= 28) uiElements.uiTemp.style.backgroundColor = "#00ff88";
                     else if (t <= 30) uiElements.uiTemp.style.backgroundColor = "#ff8800";
                     else uiElements.uiTemp.style.backgroundColor = "#f00";
                 }
@@ -287,6 +288,7 @@ export class SandboxSimulation {
 
         if (uiElements.uiDate) uiElements.uiDate.innerText = getDate();
         if (uiElements.uiTime) uiElements.uiTime.innerText = getTime();
+        if (uiElements.uiTime2) uiElements.uiTime2.innerText = getTime();
 
         // ---- Facilities email notification -----
         const seconds = Math.floor(Date.now() / 1000);
@@ -295,63 +297,87 @@ export class SandboxSimulation {
             this.lastSecond = seconds;
 
             Object.keys(this.roomIoT).forEach(roomId => {
-                const roomRow = this.roomIoT[roomId];
+                const row = this.roomIoT[roomId];
+                const threshold = 120;
                 
-                // Streak Logic: Increment if occupancy is 0, reset if > 0
-                if (roomRow.occupancy === 0) {
-                    this.zeroOccupancyTracker[roomId] = (this.zeroOccupancyTracker[roomId] || 0) + 1;
-                } else {
-                    this.zeroOccupancyTracker[roomId] = 0;
-                    this.alertCooldown[roomId] = false; 
-                }
+                if (row.occupancy === 0 && row.ac) this.trackers.acWasted[roomId] = (this.trackers.acWasted[roomId] || 0) + 1;
+                else this.trackers.acWasted[roomId] = 0;
 
-                const currentStreak = this.zeroOccupancyTracker[roomId] || 0;
-                const wasteDetected = roomRow.ac || roomRow.lights;
+                if (row.occupancy === 0 && row.lights) this.trackers.lightsWasted[roomId] = (this.trackers.lightsWasted[roomId] || 0) + 1;
+                else this.trackers.lightsWasted[roomId] = 0;
+
+                if (row.temp > 28) this.trackers.tempWarm[roomId] = (this.trackers.tempWarm[roomId] || 0) + 1;
+                else this.trackers.tempWarm[roomId] = 0;
+
+                if (row.temp < 22) this.trackers.tempCold[roomId] = (this.trackers.tempCold[roomId] || 0) + 1;
+                else this.trackers.tempCold[roomId] = 0;
+
+                // ✨ NEW: Attach UI alerts directly to the data payload so React can see them!
+                row.uiAlerts = { ac: null, lights: null, temp: null, occu: null };
                 
-                // DEFINE THRESHOLD (120 seconds = 2 minutes)
-                const thresholdMet = currentStreak >= 120;
+                const formatTime = (totalSec) => {
+                    const m = Math.floor(totalSec / 60);
+                    const s = totalSec % 60;
+                    return m > 0 ? `${m} min ${s} sec` : `${s} sec`;
+                };
 
-                // Dynamic time string for the email
-                const streakMinutes = Math.floor(currentStreak / 60);
-                const streakSeconds = currentStreak % 60;
-                const timeSinceStr = streakMinutes > 0 
-                    ? `${streakMinutes} min ${streakSeconds} sec`
-                    : `${streakSeconds} sec`;
+                // If a tracker crossed the threshold, attach the formatted time string!
+                if (this.trackers.acWasted[roomId] >= threshold) row.uiAlerts.ac = formatTime(this.trackers.acWasted[roomId]);
+                if (this.trackers.lightsWasted[roomId] >= threshold) row.uiAlerts.lights = formatTime(this.trackers.lightsWasted[roomId]);
+                
+                if (this.trackers.tempWarm[roomId] >= threshold) row.uiAlerts.temp = `Too Warm (${row.temp.toFixed(1)}°C) for ${formatTime(this.trackers.tempWarm[roomId])}`;
+                else if (this.trackers.tempCold[roomId] >= threshold) row.uiAlerts.temp = `Too Cold (${row.temp.toFixed(1)}°C) for ${formatTime(this.trackers.tempCold[roomId])}`;
+                
+                // Instant Occupancy Alert (no threshold needed)
+                if (roomInf && row.occupancy > roomInf.max_occupancy) row.uiAlerts.occu = `Over capacity: ${row.occupancy}/${roomInf.max_occupancy}`;
+                
+                const lastAlert = this.roomLastAlertTime[roomId] || 0;
+                if (seconds - lastAlert >= 120) {
+                    const activeAlerts = [];
+                    const descriptions = [];
 
-                //  CHECK ALERT CONDITIONS
-                if (thresholdMet && wasteDetected && !this.alertCooldown[roomId]) {
-                    this.alertCooldown[roomId] = true;
+                    const formatTime = (totalSec) => {
+                        const m = Math.floor(totalSec / 60);
+                        const s = totalSec % 60;
+                        return m > 0 ? `${m} min ${s} sec` : `${s} sec`;
+                    };
 
-                    const wasted = [];
-                    if (roomRow.ac) wasted.push("AC");
-                    if (roomRow.lights) wasted.push("Lights");
+                    if (this.trackers.acWasted[roomId] >= threshold) {
+                        activeAlerts.push("AC Being Wasted");
+                        descriptions.push(`AC being wasted with zero occupancy for ${formatTime(this.trackers.acWasted[roomId])}.`);
+                    }
+                    if (this.trackers.lightsWasted[roomId] >= threshold) {
+                        activeAlerts.push("Lights Being Wasted");
+                        descriptions.push(`Lights being wasted with zero occupancy for ${formatTime(this.trackers.lightsWasted[roomId])}.`);
+                    }
+                    if (this.trackers.tempWarm[roomId] >= threshold) {
+                        activeAlerts.push("Temperature Too Warm");
+                        descriptions.push(`Temperature over 28°C (${row.temp.toFixed(1)}°C) for ${formatTime(this.trackers.tempWarm[roomId])}.`);
+                    }
+                    if (this.trackers.tempCold[roomId] >= threshold) {
+                        activeAlerts.push("Temperature Too Cold");
+                        descriptions.push(`Temperature under 20°C (${row.temp.toFixed(1)}°C) for ${formatTime(this.trackers.tempCold[roomId])}.`);
+                    }
 
-                    console.warn(`[Sandbox Alert] ${roomId} firing: 0 occupancy for ${timeSinceStr}`);
+                    if (activeAlerts.length > 0) {
+                        const combinedTitle = activeAlerts.join(" & ");
+                        const combinedDesc = descriptions.join("\n \n");
 
-                    fetch('http://localhost:1767/api/send_facilities_alert', {
-                        method: 'POST',
-                        headers: { 'Content-Type': 'application/json' },
-                        body: JSON.stringify({
-                            room_number: roomId,
-                            alert_type: `${wasted.join(' & ')} left on in empty room`,
-                            time_since: timeSinceStr,
-                            description: `${wasted.join(' and ')} has been running with zero occupancy for ${timeSinceStr} in Sandbox mode.`
-                        })
-                    })
-                    .then(r => r.json())
-                    .then(data => {
-                        console.log(`[${roomId}] ✅ Alert sent:`, data);
-                        // Optional: Reset immediately or wait for occupancy to change
-                        this.zeroOccupancyTracker[roomId] = 0;
-                        this.alertCooldown[roomId] = false;
-                    })
-                    .catch(err => {
-                        console.error(`[${roomId}] ❌ Alert failed:`, err);
-                        this.zeroOccupancyTracker[roomId] = 0;
-                        this.alertCooldown[roomId] = false;
-                    });
+                        sendFacilitiesAlert(roomId, combinedTitle, getTime(), combinedDesc);
+
+                        this.roomLastAlertTime[roomId] = seconds;
+                    }
                 }
             });
+        }
+
+        const currentIoTString = JSON.stringify(this.roomIoT);
+        
+        if (currentIoTString !== this.lastIoTString) {
+            if (this.onDataUpdate) {
+                this.onDataUpdate(JSON.parse(currentIoTString));
+            }
+            this.lastIoTString = currentIoTString;
         }
     }
 }

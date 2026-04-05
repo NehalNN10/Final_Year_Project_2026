@@ -90,9 +90,9 @@ export default function FacilityHome() {
   // Helper function for your temperature color logic
   const getTempColor = (t: any) => {
     if (t === "--" || t === undefined) return "#ffffff";
-    if (t <= 19) return "#0088ff";
+    if (t <= 20) return "#0088ff";
     if (t <= 22) return "#00ffff";
-    if (t <= 27) return "#00ff88";
+    if (t <= 28) return "#00ff88";
     if (t <= 30) return "#ff8800";
     return "#ff0000";
   };
