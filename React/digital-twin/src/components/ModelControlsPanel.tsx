@@ -59,6 +59,19 @@ export default function ModelControlsPanel({ isReplay = false }: ModelControlsPa
                 <ListRestart size={20} /> <span className="ml-2">Model Replay</span>
               </button>
           )}
+          {!isReplay && (
+              <button 
+              className="btn btn-green mx-0! mb-0! mt-2!" 
+              id="replay-btn" 
+              onClick={() => {
+                  import("../lib/three/simulation.js").then(mod => {
+                  window.location.href = `/model_replay?frame=22499`;
+                  });
+              }}
+              >
+                <ListRestart size={20} /> <span className="ml-2">Full Model Replay</span>
+              </button>
+          )}
         </div>
       </div>
     </div>

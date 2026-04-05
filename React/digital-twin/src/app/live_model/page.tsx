@@ -52,10 +52,10 @@ export default function LiveModel() {
 
     <div className="main flex w-full" style={{ height: 'calc(100vh - 4.5rem)' }}>
             
-      <div className={`float ${isSidebarOpen ? "w-[max(17rem,25vw)]" : "w-0"}`}>
+      <div className={`float ${isSidebarOpen ? "float-width" : "w-0"}`}>
         <div className="w-full h-full overflow-hidden relative">
           
-          <div className="h-full overflow-y-auto overflow-x-hidden p-5 pr-0! w-[max(17rem, 25vw)]">
+          <div className="h-full overflow-y-auto overflow-x-hidden p-5 pr-0! float-width">
             <div className="flex justify-center mb-4!">
               <div 
                 id="data-status" 

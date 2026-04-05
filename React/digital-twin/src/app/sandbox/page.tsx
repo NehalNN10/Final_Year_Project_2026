@@ -171,10 +171,10 @@ export default function SandboxModel() {
 
       <div className="main flex h-[calc(100vh-4.5rem)] relative overflow-hidden">
 
-        <div className={`float ${isSidebarOpen ? "w-[max(17rem,25vw)]" : "w-0"}`}>
+        <div className={`float ${isSidebarOpen ? "float-width" : "w-0"}`}>
           <div className="w-full h-full overflow-hidden relative">
             
-            <div className="h-full overflow-y-auto overflow-x-hidden p-5 pr-0! w-[max(17rem, 25vw)]">
+            <div className="h-full overflow-y-auto overflow-x-hidden p-5 pr-0! float-width">
               <RoomStatsPanel department={department} />
 
               <div className="tracker-ui outer p-4!">
