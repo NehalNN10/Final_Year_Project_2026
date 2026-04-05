@@ -1,17 +1,18 @@
-import { initRoomInfo, FPS, LOOP_DURATION } from './variables.js';
+import { initRoomInfo, roomInfo, FPS, LOOP_DURATION } from './variables.js';
 import { initScene, scene, camera, renderer, controls } from './scene.js';
 import { loadAssets, buildWorld } from './world.js';
 import { SandboxSimulation } from "./sandbox_simulation.js";
 
 export class SandboxEngine {
-    constructor(container) {
+    constructor(container, onDataUpdate = null, onRoomsLoaded = null) {
         this.container = container;
         this.animationFrameId = null;
         this.lastTime = 0;
         this.lastRenderedFrame = -1;
         
-        this.simulation = new SandboxSimulation(this);
+        this.onRoomsLoaded = onRoomsLoaded;
 
+        this.simulation = new SandboxSimulation(this, onDataUpdate);
         this.animate = this.animate.bind(this);
     }
 
@@ -30,6 +31,16 @@ export class SandboxEngine {
         }
 
         await initRoomInfo();
+
+        if (this.onRoomsLoaded && roomInfo) {
+            const roomsArray = Object.keys(roomInfo).map(key => ({
+                id: key, 
+                room_id: roomInfo[key].room_id,
+                name: roomInfo[key].name,
+                max_occupancy: roomInfo[key].max_occupancy
+            }));
+            this.onRoomsLoaded(roomsArray);
+        }
 
         try {
             await loadAssets();

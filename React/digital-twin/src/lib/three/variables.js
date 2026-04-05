@@ -94,3 +94,21 @@ export function getDate() {
     const options = { weekday: 'short', month: 'short', day: 'numeric', year: 'numeric' };
     return now.toLocaleDateString('en-US', options);
 }
+
+export function sendFacilitiesAlert(roomId, alertType, timeStr, description) {
+    console.warn(`[Sandbox Alert] ${roomId} firing: ${alertType} at ${timeStr}`);
+
+    fetch('http://localhost:1767/api/send_facilities_alert', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+            room_number: roomId,
+            alert_type: alertType,
+            time_since: timeStr,
+            description: description + " (Sandbox Mode)"
+        })
+    })
+    .then(r => r.json())
+    .then(data => console.log(`[${roomId}] ✅ Alert sent:`, data))
+    .catch(err => console.error(`[${roomId}] ❌ Alert failed:`, err));
+}
