@@ -1,41 +1,50 @@
 import pandas as pd
 
 # File paths
-csv1_path = "3js_practice/projects_lab_2d/trim_files/cam1_trimmed_count.csv"
-csv2_path = "3js_practice/projects_lab_2d/trim_files/cam2_trimmed_count.csv"
-output_path ="3js_practice/projects_lab_2d/trim_files/combined_trimmed_count.csv"
+csv1_path = "csv_files/temp_files_30mins/cam1_people_count_log_1hr.csv"
+csv2_path = "csv_files/temp_files_30mins/cam2_people_count_log_door1.csv"
+csv3_path = "csv_files/temp_files_30mins/cam2_people_count_log_door2.csv"
+output_path = "csv_files/temp_files_30mins/combined_count.csv"
 
-# Initial global count
-global_count = 19
+# Initial global count 19
+global_count = 18
 
 # Read CSV files
 df1 = pd.read_csv(csv1_path)
 df2 = pd.read_csv(csv2_path)
+df3 = pd.read_csv(csv3_path)
 
-# Merge on frame and sum counts
-merged = pd.merge(df1, df2, on="Frame", how="outer", suffixes=('_1', '_2')).fillna(0)
+# Rename count columns before merging (cleaner)
+df1 = df1.rename(columns={"Count": "Count_1"})
+df2 = df2.rename(columns={"Count": "Count_2"})
+df3 = df3.rename(columns={"Count": "Count_3"})
 
-# Sum change in count from both CSVs
-merged["total_change"] = merged["Count_1"] + merged["Count_2"]
+# Merge step-by-step
+merged = pd.merge(df1, df2, on="Frame", how="outer")
+merged = pd.merge(merged, df3, on="Frame", how="outer")
 
-# Sort by frame (important)
+# Fill missing values
+merged = merged.fillna(0)
+
+# Sum change in count from all CSVs
+merged["total_change"] = merged["Count_1"] + merged["Count_2"] + merged["Count_3"]
+
+# Sort by frame
 merged = merged.sort_values("Frame")
 
-# Create list to store results
-final_counts = []
-
 # Compute running global count
+final_counts = []
 for change in merged["total_change"]:
     global_count += change
     final_counts.append(global_count)
 
-# Prepare final dataframe
+# Final dataframe
 output_df = pd.DataFrame({
     "Frame": merged["Frame"],
     "Count": final_counts
 })
 
-# Save to CSV
+# Save CSV
 output_df.to_csv(output_path, index=False)
 
 print("Final CSV saved as:", output_path)

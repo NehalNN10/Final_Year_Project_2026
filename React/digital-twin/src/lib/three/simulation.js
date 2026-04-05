@@ -13,7 +13,7 @@ export const playback = {
     showHeatmap: false
 };
 
-export const tracker = `http://localhost:1767/temp_files_15min/combined_frames_15min.csv`;
+export const tracker = `http://localhost:1767/temp_files_15min/combined_tracks_30min.csv`;
 export const globalCount = 18;
 
 export const raycaster = new THREE.Raycaster();
