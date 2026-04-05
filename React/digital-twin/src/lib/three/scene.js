@@ -68,111 +68,13 @@ export function initScene(container) {
 
 }
 
-// export function setupHeatmap() {
-
-//     const floor = worldObjects.floor;
-
-//     const box = new THREE.Box3().setFromObject(floor);
-
-//     const size = new THREE.Vector3();
-//     box.getSize(size);
-
-//     const center = new THREE.Vector3();
-//     box.getCenter(center);
-
-//     const floorWidth = size.x;
-//     const floorDepth = size.z;
-
-//     const aspectRatio = floorWidth / floorDepth;
-
-//     const heatmapBaseSize = 1024;
-//     const heatmapWidth = heatmapBaseSize;
-//     const heatmapHeight = Math.round(heatmapBaseSize / aspectRatio);
-
-//     heatmapSize = heatmapBaseSize;
-
-//     heatmapCanvas = document.createElement("canvas");
-//     heatmapCanvas.width = heatmapWidth;
-//     heatmapCanvas.height = heatmapHeight;
-
-//     heatmapCtx = heatmapCanvas.getContext("2d");
-
-//     heatmapTexture = new THREE.CanvasTexture(heatmapCanvas);
-//     heatmapTexture.minFilter = THREE.LinearFilter;
-//     heatmapTexture.magFilter = THREE.LinearFilter;
-
-//     heatmapPlane = new THREE.Mesh(
-//         new THREE.PlaneGeometry(floorWidth, floorDepth),
-//         new THREE.MeshBasicMaterial({
-//             map: heatmapTexture,
-//             transparent: true,
-//             opacity: 0.6,
-//             depthWrite: false
-//         })
-//     );
-
-//     heatmapPlane.rotation.x = -Math.PI / 2;
-//     heatmapPlane.position.set(center.x, 0.1, center.z);
-
-//     scene.add(heatmapPlane);
-
-//     console.log("Heatmap Bounds:", {
-//         width: floorWidth,
-//         depth: floorDepth
-//     });
-// }
-// export function setupHeatmap() {
-   
-//     // ----------------- Heatmap Setup -----------------
-//     // Floor dimensions: 20 wide × 10 deep
-//     const floorWidth = 20;
-//     const floorDepth = 20;
-//     const aspectRatio = floorWidth / floorDepth; // 2:1 ratio
-
-//     // Canvas size: maintain high resolution but rectangular
-//     const heatmapBaseSize = 1024;
-//     const heatmapWidth = heatmapBaseSize;
-//     const heatmapHeight = Math.round(heatmapBaseSize / aspectRatio); // 512 for 2:1
-
-//     heatmapSize = heatmapBaseSize; // Keep for compatibility
-//     heatmapCanvas = document.createElement("canvas");
-//     heatmapCanvas.width = heatmapWidth;
-//     heatmapCanvas.height = heatmapHeight;
-//     heatmapCtx = heatmapCanvas.getContext("2d");
-
-//     // Create a Three.js plane to display the heatmap
-//     heatmapTexture = new THREE.CanvasTexture(heatmapCanvas);
-//     heatmapTexture.minFilter = THREE.LinearFilter;
-//     heatmapTexture.magFilter = THREE.LinearFilter;
-//     heatmapTexture.wrapS = THREE.ClampToEdgeWrapping;
-//     heatmapTexture.wrapT = THREE.ClampToEdgeWrapping;
-
-//     heatmapPlane = new THREE.Mesh(
-//         new THREE.PlaneGeometry(floorWidth, floorDepth), // 20 × 10
-//         new THREE.MeshBasicMaterial({
-//             map: heatmapTexture,
-//             transparent: true,
-//             opacity: 0.6,
-//             depthWrite: false
-//         })
-//     );
-      
-//     heatmapPlane.material.opacity = showHeatmap ? 0.6 : 0;
-//     heatmapPlane.rotation.x = -Math.PI / 2;
-//     heatmapPlane.position.y = 0.1;
-//     scene.add(heatmapPlane);
-// }
-
 export function setupHeatmap(showHeatmap) {
     // ----------------- Heatmap Setup -----------------
-    // Manual floor dimensions from 3D model
-    const floorWidth = 18;   // X-axis
-    const floorDepth = 17.5; // Z-axis
+    const floorWidth = 18;   // X-axis (-9 to 9)
+    const floorDepth = 17.5; // Z-axis (-8.75 to 8.75)
     const aspectRatio = floorWidth / floorDepth; 
 
-    // Canvas size: maintain high resolution but rectangular
     const heatmapBaseSize = 128;
-
     heatmapWidth = heatmapBaseSize;
     heatmapHeight = Math.round(heatmapBaseSize / aspectRatio);
 
@@ -184,33 +86,66 @@ export function setupHeatmap(showHeatmap) {
     heatmapHeight = heatmapCanvas.height;
     heatmapCtx = heatmapCanvas.getContext("2d");
 
-    // Create a Three.js plane to display the heatmap
     heatmapTexture = new THREE.CanvasTexture(heatmapCanvas);
     heatmapTexture.minFilter = THREE.LinearFilter;
     heatmapTexture.magFilter = THREE.LinearFilter;
-    heatmapTexture.wrapS = THREE.ClampToEdgeWrapping;
-    heatmapTexture.wrapT = THREE.ClampToEdgeWrapping;
+    // REMOVED the repeat.x and offset.x hacks! The geometry fixes this natively.
 
-    heatmapTexture.repeat.x = -1;
-    heatmapTexture.offset.x = 1;
+    // 1. Draw the exact L-Shape
+    // Note: Because we pitch the plane down by 90 degrees later, 
+    // the 2D 'Y' coordinates here correspond to the 3D '-Z' coordinates!
+    // (e.g. Y = 8.75 maps to the top/back wall at Z = -8.75)
+    const floorShape = new THREE.Shape();
+    floorShape.moveTo(-9, 8.75);   // Top-Left (Z = -8.75)
+    floorShape.lineTo(9, 8.75);    // Top-Right (Z = -8.75)
+    floorShape.lineTo(9, -8.75);   // Bottom-Right (Z = 8.75)
+    
+    // --- THE CUTOUT (Based on wallxm, wallzn, and wallxn) ---
+    floorShape.lineTo(-5, -8.75);  // Bottom inner-corner (X = -5)
+    floorShape.lineTo(-5, 2.75);   // Cutout corner going 'up' (Z = -2.75)
+    floorShape.lineTo(-9, 2.75);   // Cutout corner going 'left' (X = -9)
+    // --------------------------------------------------------
+    
+    floorShape.lineTo(-9, 8.75);   // Close shape back to start
+
+    const customGeometry = new THREE.ShapeGeometry(floorShape);
+
+    const posAttribute = customGeometry.attributes.position;
+    const uvAttribute = customGeometry.attributes.uv;
+
+    for (let i = 0; i < posAttribute.count; i++) {
+        const x = posAttribute.getX(i);
+        const y = posAttribute.getY(i);
+
+        // Normalize X from [-9, 9] to [0.0, 1.0]
+        const u = (x + 9) / 18; 
+        
+        // Normalize Y (which is our Z axis) from [-8.75, 8.75] to [1.0, 0.0]
+        // We invert the V axis (1.0 - ...) because Canvas textures read bottom-to-top!
+        const v = 1.0 - ((y + 8.75) / 17.5); 
+
+        uvAttribute.setXY(i, u, v);
+    }
 
     heatmapPlane = new THREE.Mesh(
-        new THREE.PlaneGeometry(floorWidth, floorDepth, 16, 16), // Match actual floor
+        customGeometry, 
         new THREE.MeshBasicMaterial({
             map: heatmapTexture,
             transparent: true,
             opacity: 0.6,
-            depthWrite: false
+            depthWrite: false,
+            side: THREE.DoubleSide // Important so it renders properly when laid flat
         })
     );
 
-    // Position and rotate the plane to match floor
     heatmapPlane.material.opacity = showHeatmap ? 1 : 0;
+    
+    // 2. Lay it flat.
+    // REMOVED the rotation.z hack. The shape handles the mapping perfectly.
     heatmapPlane.rotation.x = -Math.PI / 2;
-    heatmapPlane.rotation.z = Math.PI/2; // Flip to match floor orientation
-    // Center it exactly on the floor
-    heatmapPlane.position.x = ( -9 + 9 ) / 2;       // centerX = 0
-    heatmapPlane.position.z = ( -8.75 + 8.75 ) / 2;    // centerZ ≈ 0
-    heatmapPlane.position.y = 2;                  // slightly above floor
+    
+    // Position is 0,0,0 because the vertices were drawn using exact world coordinates!
+    heatmapPlane.position.set(0, 0.1, 0);                  
+    
     scene.add(heatmapPlane);
 }
