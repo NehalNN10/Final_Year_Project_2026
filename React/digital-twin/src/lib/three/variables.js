@@ -1,5 +1,5 @@
 export const FPS = 25; 
-export const LOOP_DURATION = 900; 
+export const LOOP_DURATION = 1800; 
 
 // Start them as empty objects
 export const roomInfo = {};
@@ -21,17 +21,6 @@ export async function initVariables() {
     await initRoomData();
 }
 
-// export async function getRoomData(roomId) {
-//     try {
-//         const response = await fetch(`/api/room_data?room_id=${roomId}`);
-//         if (!response.ok) throw new Error(`HTTP error! Status: ${response.status}`);
-//         const data = await response.json();
-//         return data.room_data;
-//     } catch (error) {
-//         console.error("Failed to fetch room data:", error.message);
-//         return []; // Return empty array on fail so app doesn't crash
-//     }
-// }
 export async function getRoomData(roomId) {
     try {
         const response = await fetch(`/api/room_data?room_id=${roomId}`);
@@ -39,30 +28,20 @@ export async function getRoomData(roomId) {
         const data = await response.json();
         const rows = data.room_data;
 
-        // Convert array to seconds-keyed lookup
-        // Each row covers 900 seconds (15 mins), expand them out
-        const secondsMap = {};
-        const intervalSeconds = LOOP_DURATION; // 15 minutes per row
+        const secondsArray = rows.map((row) => ({
+            occupancy: row.occupancy,
+            temperature: row.temperature, 
+            ac: row.ac,
+            lights: row.lights
+        }));
 
-        rows.forEach((row, i) => {
-            const start = i * intervalSeconds;
-            const end = start + intervalSeconds;
-            for (let s = start; s < end; s++) {
-                secondsMap[s] = {
-                    occupancy: row.occupancy,
-                    temperature: row.temperature,
-                    ac: row.ac,
-                    lights: row.lights
-                };
-            }
-        });
-
-        return secondsMap;
+        return secondsArray;
     } catch (error) {
         console.error("Failed to fetch room data:", error.message);
-        return {};
+        return []; 
     }
 }
+
 export async function getRoomInfo(roomId) {
     try {
         const response = await fetch(`/api/room_info?room_id=${roomId}`);

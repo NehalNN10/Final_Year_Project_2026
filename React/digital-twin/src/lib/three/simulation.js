@@ -13,7 +13,7 @@ export const playback = {
     showHeatmap: false
 };
 
-export const tracker = `http://localhost:1767/temp_files_15min/combined_tracks_30min.csv`;
+export const tracker = `http://localhost:1767/active_files/combined_tracks_30min.csv`;
 export const globalCount = 18;
 
 export const raycaster = new THREE.Raycaster();
@@ -25,9 +25,10 @@ export const floorPlane = new THREE.Plane(new THREE.Vector3(0, 1, 0), 0);
 // Create a variable to hold the result
 export const intersectionPoint = new THREE.Vector3();
 
-const zeroOccupancyTracker = {}; // { roomId: secondsCount }
-const alertCooldown = {};        // { roomId: boolean }
-let lastSecond = -1;             // prevents counting same second multiple times
+export const trackers = { acWasted: {}, lightsWasted: {}, tempWarm: {}, tempCold: {} };
+export const roomLastAlertTime = {}; 
+export let lastSecond = -1;
+
 function getDate(dateElement) {
     if (!dateElement) return; // Safety check
     
@@ -52,8 +53,6 @@ let globalIoTData = [];
 let trackMarkers = new Map();
 //new
 let globalCountData = new Map();
-
-
 
 export function renderFrame(index) {
 
@@ -84,130 +83,24 @@ export function renderFrame(index) {
 
     const room = hit ? getRoom(intersectionPoint.x, intersectionPoint.z) : null;
     const roomInf = room ? roomInfo[room] : null;
-    const seconds = Math.floor(index / FPS);
+    const seconds = Math.floor(playback.frame / FPS);
+    let row = null;
     
-
-    // Only run once per second, not every frame
-    if (seconds !== lastSecond) {
-        lastSecond = seconds;
-
-        Object.keys(iot).forEach(roomId => {
-            const roomRow = iot[roomId][seconds];
-            if (!roomRow) {
-                console.log(`[${roomId}] ⚠️ No IoT row found for second ${seconds}`);
-                return;
-            }
-
-            console.log(`[${roomId}] second=${seconds} | occupancy=${roomRow.occupancy} | ac=${roomRow.ac} | lights=${roomRow.lights} | zeroStreak=${zeroOccupancyTracker[roomId] || 0}s`);
-
-            if (roomRow.occupancy === 0) {
-                zeroOccupancyTracker[roomId] = (zeroOccupancyTracker[roomId] || 0) + 1;
-                console.log(`[${roomId}] 🟡 Zero occupancy — streak now ${zeroOccupancyTracker[roomId]}s / 300s needed`);
-            } else {
-                if (zeroOccupancyTracker[roomId] > 0) {
-                    console.log(`[${roomId}] 🟢 Occupancy restored (was ${zeroOccupancyTracker[roomId]}s) — resetting streak`);
-                }
-                zeroOccupancyTracker[roomId] = 0;
-                alertCooldown[roomId] = false; // reset so next empty period can trigger again
-            }
-
-            const currentStreak = zeroOccupancyTracker[roomId] || 0;
-            const emptyForXmins = currentStreak >= 120; //2mins
-            const wasteDetected = roomRow.ac || roomRow.lights;
-
-            // Dynamic time string based on actual streak
-            const streakMinutes = Math.floor(currentStreak / 60);
-            const streakSeconds = currentStreak % 60;
-            const timeSinceStr = streakMinutes > 0 
-                ? `${streakMinutes} min ${streakSeconds} sec`
-                : `${streakSeconds} sec`;
-
-            if (currentStreak >= 270 && !emptyForXmins) {
-                console.log(`[${roomId}] ⏳ Almost there — ${300 - currentStreak}s until alert fires`);
-            }
-
-            if (emptyForXmins && !wasteDetected) {
-                console.log(`[${roomId}] ℹ️ 2 min empty BUT ac=${roomRow.ac} lights=${roomRow.lights} — no waste, no alert`);
-            }
-
-            if (emptyForXmins && wasteDetected && alertCooldown[roomId]) {
-                console.log(`[${roomId}] 🔕 Alert condition met but cooldown active — already sent`);
-            }
-
-            if (emptyForXmins && wasteDetected && !alertCooldown[roomId]) {
-                alertCooldown[roomId] = true;
-
-                const wasted = [];
-                if (roomRow.ac) wasted.push("AC");
-                if (roomRow.lights) wasted.push("Lights");
-
-                console.warn(`[${roomId}] 🚨 ALERT FIRING — ${wasted.join(' & ')} on, 0 occupancy for ${timeSinceStr}`);
-
-                fetch('http://localhost:1767/api/send_facilities_alert', {
-                    method: 'POST',
-                    headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({
-                        room_number: roomId,
-                        alert_type: `${wasted.join(' & ')} left on in empty room`,
-                        time_since: timeSinceStr, // dynamic, reflects actual streak
-                        description: `${wasted.join(' and ')} has been running with zero occupancy for ${timeSinceStr}.`
-                    })
-                })
-                .then(r => r.json())
-                .then(data => {
-                    console.log(`[${roomId}] ✅ Alert sent:`, data);
-                    // Full reset after email sent — starts checking fresh
-                    zeroOccupancyTracker[roomId] = 0;
-                    alertCooldown[roomId] = false;
-                    console.log(`[${roomId}] 🔄 Reset — monitoring fresh 5-minute window`);
-                })
-                .catch(err => {
-                    console.error(`[${roomId}] ❌ Alert failed:`, err);
-                    // Also reset on failure so it retries next window
-                    zeroOccupancyTracker[roomId] = 0;
-                    alertCooldown[roomId] = false;
-                });
-            }
-        });
+    if (room && iot && iot[room] && iot[room].length > 0) {
+        const safeIndex = seconds % iot[room].length; 
+        row = iot[room][safeIndex];
     }
-   
-    const row = room ? iot[room][seconds] : null;
 
-    const allmarkers = [];
-
-    if (index < globalTrackFrames.length) {
-        const realFrameNumber = globalTrackFrames[index];
-        const detections = globalTrackData.get(realFrameNumber) || [];
-        if (department != "Facilities") {
-            
-            detections.forEach(d => {
-                if (!playback.showHeatmap) {
-                    const marker = trackMarkers.get(d.id);
-
-                    if (marker) {
-                        marker.position.x = d.z; 
-                        marker.position.z = d.x;
-
-                        marker.visible = true;
-                    }
-                }
-                else allmarkers.push(d);
-            });
-            
-
-            if (typeof window.heatmapThrottle === 'undefined') window.heatmapThrottle = 0;
-                    
-            if (playback.showHeatmap) {
-                window.heatmapThrottle++;
-                // Only run the heavy math every 10 frames instead of every single frame
-                if (window.heatmapThrottle >= 5) {
-                    updateHeatmap(allmarkers);
-                    window.heatmapThrottle = 0;
-                }
-            }
-        }
+    // ✨ ADD THIS DIAGNOSTIC BLOCK ✨
+    // This will print to your console once every 2 seconds
+    if (Math.floor(playback.frame) % 50 === 0) { 
+        console.log("--- 3D ENGINE DIAGNOSTIC ---");
+        console.log("1. Raycaster sees room: ", room || "NONE (Look at the floor!)");
+        console.log("2. Array length for room: ", iot[room] ? iot[room].length : 0);
+        console.log("3. Current Second: ", seconds);
+        console.log("4. Extracted Row Data: ", row);
+        console.log("5. Logged in Dept: ", department);
     }
-    
 
     if (roomInf) {
         // Safe Check: Only update if React hasn't deleted the element yet!
@@ -232,8 +125,6 @@ export function renderFrame(index) {
         }
     }
         
-
-
     if (row) {
         if (department !== "Security") {
 
@@ -316,6 +207,115 @@ export function renderFrame(index) {
         
         uiElements.uiTime.innerText = frameTime.toLocaleTimeString(); 
         
+    }
+
+    const currentSeconds = Math.floor(Date.now() / 1000);
+    if (currentSeconds !== lastSecond) {
+        lastSecond = currentSeconds;
+
+        Object.keys(iot).forEach(roomId => {
+            // Safety check to ensure data actually exists
+            if (!iot[roomId] || iot[roomId].length === 0) return;
+            
+            // Safely loop the index for the background tracker!
+            const safeIndex = seconds % iot[roomId].length;
+            const row = iot[roomId][safeIndex];
+            
+            if (!row) return; // Final safety net
+            
+            const threshold = 120;
+            
+            // Parse strings safely
+            const occuCount = row.occu !== undefined ? parseInt(row.occu) : parseInt(row.occupancy);
+            const isAcOn = (row.ac === true || row.ac === "On" || row.ac === "ON");
+            const isLightsOn = (row.lights === true || row.lights === "On" || row.lights === "ON");
+            const currentTemp = parseFloat(row.temp);
+            
+            // Track conditions globally (NO 'this.' keyword used!)
+            if (occuCount === 0 && isAcOn) trackers.acWasted[roomId] = (trackers.acWasted[roomId] || 0) + 1;
+            else trackers.acWasted[roomId] = 0;
+
+            if (occuCount === 0 && isLightsOn) trackers.lightsWasted[roomId] = (trackers.lightsWasted[roomId] || 0) + 1;
+            else trackers.lightsWasted[roomId] = 0;
+
+            if (currentTemp > 28) trackers.tempWarm[roomId] = (trackers.tempWarm[roomId] || 0) + 1;
+            else trackers.tempWarm[roomId] = 0;
+
+            if (currentTemp < 22) trackers.tempCold[roomId] = (trackers.tempCold[roomId] || 0) + 1;
+            else trackers.tempCold[roomId] = 0;
+
+            const lastAlert = roomLastAlertTime[roomId] || 0;
+            if (currentSeconds - lastAlert >= 120) {
+                const activeAlerts = [];
+                const descriptions = [];
+
+                const formatTime = (totalSec) => {
+                    const m = Math.floor(totalSec / 60);
+                    const s = totalSec % 60;
+                    return m > 0 ? `${m} min ${s} sec` : `${s} sec`;
+                };
+
+                if (trackers.acWasted[roomId] >= threshold) {
+                    activeAlerts.push("AC Being Wasted");
+                    descriptions.push(`AC being wasted with zero occupancy for ${formatTime(trackers.acWasted[roomId])}.`);
+                }
+                if (trackers.lightsWasted[roomId] >= threshold) {
+                    activeAlerts.push("Lights Being Wasted");
+                    descriptions.push(`Lights being wasted with zero occupancy for ${formatTime(trackers.lightsWasted[roomId])}.`);
+                }
+                if (trackers.tempWarm[roomId] >= threshold) {
+                    activeAlerts.push("Temperature Too Warm");
+                    descriptions.push(`Temperature over 28°C (${currentTemp.toFixed(1)}°C) for ${formatTime(trackers.tempWarm[roomId])}.`);
+                }
+                if (trackers.tempCold[roomId] >= threshold) {
+                    activeAlerts.push("Temperature Too Cold");
+                    descriptions.push(`Temperature under 20°C (${currentTemp.toFixed(1)}°C) for ${formatTime(trackers.tempCold[roomId])}.`);
+                }
+
+                if (activeAlerts.length > 0) {
+                    const combinedTitle = activeAlerts.join(" & ");
+                    const combinedDesc = descriptions.join("\n \n");
+
+                    sendFacilitiesAlert(roomId, combinedTitle, getTime(), combinedDesc);
+                    roomLastAlertTime[roomId] = currentSeconds;
+                }
+            }
+        });
+    }
+
+    const allmarkers = [];
+
+    if (index < globalTrackFrames.length) {
+        const realFrameNumber = globalTrackFrames[index];
+        const detections = globalTrackData.get(realFrameNumber) || [];
+        if (department != "Facilities") {
+            
+            detections.forEach(d => {
+                if (!playback.showHeatmap) {
+                    const marker = trackMarkers.get(d.id);
+
+                    if (marker) {
+                        marker.position.x = d.z; 
+                        marker.position.z = d.x;
+
+                        marker.visible = true;
+                    }
+                }
+                else allmarkers.push(d);
+            });
+            
+
+            if (typeof window.heatmapThrottle === 'undefined') window.heatmapThrottle = 0;
+                    
+            if (playback.showHeatmap) {
+                window.heatmapThrottle++;
+                // Only run the heavy math every 10 frames instead of every single frame
+                if (window.heatmapThrottle >= 5) {
+                    updateHeatmap(allmarkers);
+                    window.heatmapThrottle = 0;
+                }
+            }
+        }
     }
 }
 

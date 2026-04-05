@@ -120,7 +120,6 @@ export async function initThreeEngine(container) {
     }
 
     // --- 2. DATA LOAD & UI SYNC ---
-    // --- 2. DATA LOAD & UI SYNC ---
     loadSimulationData(() => {
         const scrubber = document.getElementById('frame-scrubber');
         

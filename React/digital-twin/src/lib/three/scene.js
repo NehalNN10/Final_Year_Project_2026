@@ -70,8 +70,8 @@ export function initScene(container) {
 
 export function setupHeatmap(showHeatmap) {
     // ----------------- Heatmap Setup -----------------
-    const floorWidth = 18;   // X-axis (-9 to 9)
-    const floorDepth = 17.5; // Z-axis (-8.75 to 8.75)
+    const floorWidth = 17.5;   // X-axis (-9 to 9)
+    const floorDepth = 18; // Z-axis (-8.75 to 8.75)
     const aspectRatio = floorWidth / floorDepth; 
 
     const heatmapBaseSize = 128;
@@ -89,24 +89,27 @@ export function setupHeatmap(showHeatmap) {
     heatmapTexture = new THREE.CanvasTexture(heatmapCanvas);
     heatmapTexture.minFilter = THREE.LinearFilter;
     heatmapTexture.magFilter = THREE.LinearFilter;
-    // REMOVED the repeat.x and offset.x hacks! The geometry fixes this natively.
+    // heatmapTexture.wrapS = THREE.ClampToEdgeWrapping;
+    // heatmapTexture.wrapT = THREE.ClampToEdgeWrapping;
+    // heatmapTexture.repeat.x = -1;
+    // heatmapTexture.offset.x = 1;
 
     // 1. Draw the exact L-Shape
     // Note: Because we pitch the plane down by 90 degrees later, 
     // the 2D 'Y' coordinates here correspond to the 3D '-Z' coordinates!
     // (e.g. Y = 8.75 maps to the top/back wall at Z = -8.75)
     const floorShape = new THREE.Shape();
-    floorShape.moveTo(-9, 8.75);   // Top-Left (Z = -8.75)
-    floorShape.lineTo(9, 8.75);    // Top-Right (Z = -8.75)
-    floorShape.lineTo(9, -8.75);   // Bottom-Right (Z = 8.75)
+    floorShape.moveTo(-8.75, -9);  // Start at mirrored origin
     
-    // --- THE CUTOUT (Based on wallxm, wallzn, and wallxn) ---
-    floorShape.lineTo(-5, -8.75);  // Bottom inner-corner (X = -5)
-    floorShape.lineTo(-5, 2.75);   // Cutout corner going 'up' (Z = -2.75)
-    floorShape.lineTo(-9, 2.75);   // Cutout corner going 'left' (X = -9)
+    // --- THE CUTOUT (Mirrored X, Reversed Order) ---
+    floorShape.lineTo(-2.75, -9);  // Cutout corner going 'right'
+    floorShape.lineTo(-2.75, -5);  // Cutout corner going 'up'
+    floorShape.lineTo(8.75, -5);   // Bottom inner-corner (X = 8.75)
     // --------------------------------------------------------
     
-    floorShape.lineTo(-9, 8.75);   // Close shape back to start
+    floorShape.lineTo(8.75, 9);    // Top-Left (mirrored)
+    floorShape.lineTo(-8.75, 9);   // Top-Right (mirrored)
+    floorShape.lineTo(-8.75, -9);  // Close shape back to start
 
     const customGeometry = new THREE.ShapeGeometry(floorShape);
 
@@ -128,13 +131,13 @@ export function setupHeatmap(showHeatmap) {
     }
 
     heatmapPlane = new THREE.Mesh(
-        customGeometry, 
+        // new THREE.PlaneGeometry(floorWidth, floorDepth, 16, 16),
+        customGeometry,
         new THREE.MeshBasicMaterial({
             map: heatmapTexture,
             transparent: true,
             opacity: 0.6,
             depthWrite: false,
-            side: THREE.DoubleSide // Important so it renders properly when laid flat
         })
     );
 
@@ -143,7 +146,7 @@ export function setupHeatmap(showHeatmap) {
     // 2. Lay it flat.
     // REMOVED the rotation.z hack. The shape handles the mapping perfectly.
     heatmapPlane.rotation.x = -Math.PI / 2;
-    
+    heatmapPlane.rotation.z = -Math.PI/2;
     // Position is 0,0,0 because the vertices were drawn using exact world coordinates!
     heatmapPlane.position.set(0, 0.1, 0);                  
     

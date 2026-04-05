@@ -89,6 +89,13 @@ with app.app_context():
     #     max_occupancy=35
     # ).save()
 
+    Rooms(
+        room_id='E-220',
+        room_name='Tariq Rafi Hall',
+        room_floor='First Floor',
+        max_occupancy=250
+    ).save()
+
     # SecurityEmails(
     #     room=Rooms.objects(room_id='C-109').first(),
     #     user=User.objects(user_id='mk07899').first()
@@ -109,10 +116,10 @@ with app.app_context():
     #     user=User.objects(user_id='mk07899').first()
     # ).save()
 
-    data_proj = pd.read_csv("static/temp_files/csv_power_lab_iot_15min.csv")
-    occu_proj = pd.read_csv('static/temp_files//dilab_counts_fixed.csv')
+    data_proj = pd.read_csv("../csv_files/active_files/csv_power_lab_iot_30min.csv")
+    occu_proj = pd.read_csv('../csv_files/active_files//dilab_counts_fixed.csv')
 
-    occu_subset = occu_proj.iloc[0:22500:25].reset_index(drop=True)
+    occu_subset = occu_proj.iloc[0:44999:25].reset_index(drop=True)
     data_proj['occu'] = occu_subset['Count']
     target_room = Rooms.objects(room_id='C-006').first()
 
@@ -127,10 +134,10 @@ with app.app_context():
         ).save()
     
     print("Seeding Database...")
-    data_proj = pd.read_csv("static/temp_files/combined_proj_data_15min.csv")
-    occu_proj = pd.read_csv('static/temp_files/combined_count_30min.csv')
+    data_proj = pd.read_csv("../csv_files/active_files/combined_proj_data_30min.csv")
+    occu_proj = pd.read_csv('../csv_files/active_files/combined_count_30min.csv')
 
-    occu_subset = occu_proj.iloc[0:22500:25].reset_index(drop=True)
+    occu_subset = occu_proj.iloc[0:44999:25].reset_index(drop=True)
     data_proj['occu'] = occu_subset['Count']
     target_room = Rooms.objects(room_id='C-007').first()
 
@@ -145,8 +152,22 @@ with app.app_context():
         ).save()
 
     print("Seeding Database...")
-    data_proj = pd.read_csv("static/temp_files/arif_iot_15min.csv")
+    data_proj = pd.read_csv("../csv_files/active_files/arif_iot_30min.csv")
     target_room = Rooms.objects(room_id='C-109').first()
+
+    for index, row in data_proj.iterrows():
+        RoomData(
+            room = target_room,
+            time = row['timestamp'],
+            occupancy = row['occu'],
+            temperature = row['temp'],
+            ac = row['ac'] == 'On',
+            lights = row['lights'] == 'On'
+        ).save()
+
+    print("Seeding Database...")
+    data_proj = pd.read_csv("../csv_files/active_files/hall_iot_30min.csv")
+    target_room = Rooms.objects(room_id='E-220').first()
 
     for index, row in data_proj.iterrows():
         RoomData(

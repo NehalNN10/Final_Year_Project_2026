@@ -5,7 +5,7 @@ import { Clock, User, Users } from "lucide-react";
 import StatRow from "@/components/StatRow";
 import Navbar from "../../components/Navbar";
 import StaffList from "../../components/StaffList";
-import FormRow from "../../components/FormRow";
+import { LOOP_DURATION } from "@/lib/three/variables";
 
 export default function SecurityHome() {
   // --- States ---
@@ -17,8 +17,6 @@ export default function SecurityHome() {
   
   const [currentRoomStats, setCurrentRoomStats] = useState<any>({});
   const [currentTimeSpan, setCurrentTimeSpan] = useState("...");
-  
-  const LOOP_DURATION = 900;
 
   // --- Initial Data Fetch ---
   useEffect(() => {

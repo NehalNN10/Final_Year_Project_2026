@@ -43,9 +43,9 @@ socketio = SocketIO(app, cors_allowed_origins="*", async_mode='threading')
 
 from flask import send_from_directory
 
-@app.route('/temp_files_15min/<path:filename>')
-def serve_temp_files_15min(filename):
-    return send_from_directory(os.path.join(CSV_DIR, 'temp_files_15min'), filename)
+@app.route('/active_files/<path:filename>')
+def serve_active_files(filename):
+    return send_from_directory(os.path.join(CSV_DIR, 'active_files'), filename)
 
 # ---------------------------------------------------------
 # BACKGROUND TASKS & SOCKETS
