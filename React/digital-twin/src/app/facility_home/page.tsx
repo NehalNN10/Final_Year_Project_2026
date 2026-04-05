@@ -6,7 +6,7 @@ import Navbar from "../../components/Navbar";
 import StaffList from "../../components/StaffList";
 import FormRow from "../../components/FormRow";
 import StatRow from "@/components/StatRow";
-
+import { LOOP_DURATION } from "@/lib/three/variables";
 
 export default function FacilityHome() {
   // --- States ---
@@ -20,8 +20,6 @@ export default function FacilityHome() {
   const [emergencyForm, setEmergencyForm] = useState({ roomNumber: "", alertType: "AC", timeSince: "", description: "" });
   const [currentRoomStats, setCurrentRoomStats] = useState<any>({});
   const [currentTimeSpan, setCurrentTimeSpan] = useState("Loading Time...");
-  
-  const LOOP_DURATION = 900;
 
   // --- Initial Data Fetch ---
   useEffect(() => {

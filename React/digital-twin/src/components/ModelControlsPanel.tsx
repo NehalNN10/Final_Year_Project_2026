@@ -65,7 +65,7 @@ export default function ModelControlsPanel({ isReplay = false }: ModelControlsPa
               id="replay-btn" 
               onClick={() => {
                   import("../lib/three/simulation.js").then(mod => {
-                  window.location.href = `/model_replay?frame=22499`;
+                  window.location.href = `/model_replay?frame=44999`;
                   });
               }}
               >
