@@ -355,6 +355,12 @@ tr {
     @apply absolute transition-all duration-300 ease-in-out h-full z-40 shrink-0
 }
 
+.float-width {
+    width: 25vw !important;
+    max-width: 30rem !important;
+    min-width: 17rem !important;
+}
+
 .font-size-1_4 {
     font-size: 1.4rem;
 }
