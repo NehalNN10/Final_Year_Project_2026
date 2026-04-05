@@ -336,8 +336,8 @@ export function updateHeatmap(markers) {
     const gridRows = 80;
     const smoothSigma = 4.0; // slightly wider spread looks more natural
 
-    const xMin = -9, xMax = 9;
-    const zMin = -9, zMax = 8.75;
+    const xMin = -8.75, xMax = 16.5;
+    const zMin = -9, zMax = 9;
 
     const coolingFactor = 0.98; 
     for (let i = 0; i < density.length; i++) {
@@ -421,6 +421,7 @@ export function updateHeatmap(markers) {
 
     for (let py = 0; py < heatmapHeight; py++) {
         for (let px = 0; px < heatmapWidth; px++) {
+            // Map the 512px canvas back to your 80x80 grid
             const gx = (px / heatmapWidth) * gridCols;
             const gy = (py / heatmapHeight) * gridRows;
 
@@ -435,6 +436,8 @@ export function updateHeatmap(markers) {
             const densityValue = (d00*(1-fx) + d10*fx)*(1-fy) + (d01*(1-fx) + d11*fx)*fy;
 
             const { r, g, b, a } = sampleColor(densityValue);
+            
+            // Map the pixel to the massive 1D imageData array
             const idx = (py * heatmapWidth + px) * 4;
             data[idx]   = r;
             data[idx+1] = g;
@@ -446,6 +449,7 @@ export function updateHeatmap(markers) {
     heatmapCtx.putImageData(imageData, 0, 0);
     heatmapTexture.needsUpdate = true;
 }
+
 export async function loadSimulationData(onLoadComplete) {
     globalTrackFrames = [];
     globalTrackData.clear();

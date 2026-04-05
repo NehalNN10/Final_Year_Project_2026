@@ -70,15 +70,17 @@ export function initScene(container) {
 
 export function setupHeatmap(showHeatmap) {
     // ----------------- Heatmap Setup -----------------
-    const floorWidth = 17.5;   // X-axis (-9 to 9)
+    const floorWidth = 25.25;   // X-axis (-9 to 9)
     const floorDepth = 18; // Z-axis (-8.75 to 8.75)
     const aspectRatio = floorWidth / floorDepth; 
-
     const heatmapBaseSize = 128;
     heatmapWidth = heatmapBaseSize;
     heatmapHeight = Math.round(heatmapBaseSize / aspectRatio);
-
     heatmapSize = heatmapBaseSize; 
+
+    // heatmapWidth = 256;
+    // heatmapHeight = 256;
+    // heatmapSize = 256;
     heatmapCanvas = document.createElement("canvas");
     heatmapCanvas.width = Math.floor(heatmapWidth);
     heatmapCanvas.height = Math.floor(heatmapHeight);
@@ -105,9 +107,13 @@ export function setupHeatmap(showHeatmap) {
     floorShape.lineTo(-2.75, -9);  // Cutout corner going 'right'
     floorShape.lineTo(-2.75, -5);  // Cutout corner going 'up'
     floorShape.lineTo(8.75, -5);   // Bottom inner-corner (X = 8.75)
+    floorShape.lineTo(8.75, -9);   
+    floorShape.lineTo(12.75, -9);   
+    floorShape.lineTo(12.75, -4.75);   
+    floorShape.lineTo(16.5, -4.75);   
+    floorShape.lineTo(16.5, 9);  
     // --------------------------------------------------------
     
-    floorShape.lineTo(8.75, 9);    // Top-Left (mirrored)
     floorShape.lineTo(-8.75, 9);   // Top-Right (mirrored)
     floorShape.lineTo(-8.75, -9);  // Close shape back to start
 
@@ -120,12 +126,8 @@ export function setupHeatmap(showHeatmap) {
         const x = posAttribute.getX(i);
         const y = posAttribute.getY(i);
 
-        // Normalize X from [-9, 9] to [0.0, 1.0]
-        const u = (x + 9) / 18; 
-        
-        // Normalize Y (which is our Z axis) from [-8.75, 8.75] to [1.0, 0.0]
-        // We invert the V axis (1.0 - ...) because Canvas textures read bottom-to-top!
-        const v = 1.0 - ((y + 8.75) / 17.5); 
+        const u = (x + 8.75) / 25.25; 
+        const v = 1.0 - ((y + 9) / 18); 
 
         uvAttribute.setXY(i, u, v);
     }
