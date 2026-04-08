@@ -11,8 +11,10 @@ export const playback = {
 
 const FILE_PATH = "../csv_files";
 
-// const tracker = `${FILE_PATH}/trim_files/combined_frames_trimmed.csv`;
-const tracker = `../test_files/interpolated_ang_1.csv`;
+// const tracker = `${FILE_PATH}/active_files/combined_tracks_30min.csv`;
+// const tracker = `../test_files/interpolated_ang_1.csv`;
+// const tracker = `../test_files/processed_tracks_ang_1.csv`;
+const tracker = `${FILE_PATH}/temp_files_30mins/combined_tracks.csv`;
 const iot = `${FILE_PATH}/temp_files_15min/cs_lab_iot_15min.csv`;
 const track_count = `${FILE_PATH}/temp_files_15min/combined_count_15min.csv`;
 
