@@ -29,12 +29,12 @@ export default function StaffModal({
 
   return (
     <div className="modal-overlay active" onClick={(e) => e.target === e.currentTarget && onClose()}>
-      <div className="tracker-ui modal text-white overflow-y-auto! max-h-[80vh]">
+      <div className="tracker-ui modal text-white overflow-y-auto! max-h-[90vh]">
         <div className={`modal-header p-4 text-3xl ${staffForm.id ? "text-[#fc3]" : "text-[#88f]"}`}>
           {staffForm.id ? "Edit Staff" : "Add Staff"}
         </div>
         
-        <div className="overflow-y-auto max-h-[60vh] pr-4">
+        <div className="overflow-y-auto max-h-[90vh] pr-4">
         <form onSubmit={onSubmit}>
           {/* --- REFACTORED FORM ROWS --- */}
           <FormRow label="Username/ID" value={staffForm.user_id} onChange={e => setStaffForm({...staffForm, user_id: e.target.value})}  />

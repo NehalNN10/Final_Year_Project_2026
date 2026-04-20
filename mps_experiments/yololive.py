@@ -17,7 +17,8 @@ else:
 # 2. CONFIGURATION
 # =========================
 # Swap to your actual Hikvision password
-VIDEO_PATH = os.get_env("RTSP_URL")
+# VIDEO_PATH = os.get_env("RTSP_URL")
+VIDEO_PATH = "rtsp://admin:Habib_Test@192.168.1.64:554/Streaming/Channels/101/"
 MODEL_PATH = "yolo11x.pt"
 
 # =========================

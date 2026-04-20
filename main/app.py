@@ -147,7 +147,10 @@ def api_logout():
 def api_session():
     dept = session.get('department') 
     name = session.get('name')
-    return jsonify({'department': dept}, {'name': name})
+    return jsonify({
+        'department': dept, 
+        'name': name
+    })
 
 
 # ---------------------------------------------------------

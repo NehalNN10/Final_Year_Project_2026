@@ -1,9 +1,9 @@
 "use client";
 
-import { useState } from "react"; // <-- 1. Import useState
+import { useState, useEffect } from "react";
 import { useRouter, usePathname } from "next/navigation";
 // <-- 2. Import MoreVertical (3 dots) and X for the toggle button
-import { Home, Box, Activity, LogOut, MoreVertical, X, Wrench } from "lucide-react";
+import { Home, Box, Activity, LogOut, MoreVertical, Wrench, Sun, Moon } from "lucide-react";
 import IntButton from "./IntButton";
 
 export default function Navbar({ department }: { department: string }) {
@@ -12,6 +12,30 @@ export default function Navbar({ department }: { department: string }) {
   
   // --- STATE ---
   const [isMenuOpen, setIsMenuOpen] = useState(false);
+  const [isDarkMode, setIsDarkMode] = useState(false);
+
+  // ✨ ADD THIS: Check for saved theme on initial load
+  useEffect(() => {
+    const savedTheme = localStorage.getItem('theme');
+    if (savedTheme === 'dark') {
+      document.body.classList.add('dark-mode');
+      setIsDarkMode(true);
+    }
+  }, []);
+
+  // ✨ ADD THIS: The function to handle the switch
+  const toggleTheme = () => {
+    const newIsDark = !isDarkMode;
+    setIsDarkMode(newIsDark);
+    
+    if (newIsDark) {
+      document.body.classList.add('dark-mode');
+      localStorage.setItem('theme', 'dark');
+    } else {
+      document.body.classList.remove('dark-mode');
+      localStorage.setItem('theme', 'light');
+    }
+  };
 
   const handleLogout = async () => {
     try {
@@ -54,6 +78,12 @@ export default function Navbar({ department }: { department: string }) {
         </div>
 
         <div className="nav-right gap-2">
+          <IntButton 
+            icon={isDarkMode ? Sun : Moon} 
+            label="Switch Theme" 
+            onClick={toggleTheme} 
+            classes={"btn-header btn-black"} 
+          />
           <IntButton icon={LogOut} label="Log Out" onClick={handleLogout} classes={"btn-header btn-red"} />
           <IntButton icon={MoreVertical} label="Menus" onClick={() => setIsMenuOpen(!isMenuOpen)} classes={"btn-header btn-green text-black! md:hidden!"} />
         </div>

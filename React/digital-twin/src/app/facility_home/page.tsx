@@ -97,7 +97,7 @@ export default function FacilityHome() {
 
   // --- UI Render ---
   return (
-    <div className="min-h-screen bg-[#131313] text-white">
+    <>
       <Navbar department="Facilities" />
 
       <div className="side-nav row mt-0! text-black">
@@ -110,11 +110,6 @@ export default function FacilityHome() {
             <h2 className="font-bold">Welcome, {name}!</h2>
             <p className="text-gray-400">Facilities data and metrics will be displayed here.</p>
           </div>
-          {currentRole === 'Facilities Admin' && (
-            <button className="btn btn-red btn-auto m-0! py-1!" onClick={() => setEmergencyModalOpen(true)}>
-            <h2 className="m-0! font-bold text-white text-xl">Send Alert</h2>
-          </button>
-          )}
         </div>
         
         {/* Top Alerts Row */}
@@ -281,6 +276,6 @@ export default function FacilityHome() {
           </div>
         </div>
       )}
-    </div>
+    </>
   );
 }

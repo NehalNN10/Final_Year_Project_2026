@@ -16,12 +16,21 @@ export default function DigitalTwinModel() {
 
   const ui = "../../lib/three/ui.js";
 
-  useEffect(() => {
+useEffect(() => {
     async function fetchSession() {
       try {
-        const response = await fetch('/api/session');
+        const response = await fetch('/api/session', {
+            method: 'GET',
+            headers: { 'Content-Type': 'application/json' },
+            credentials: 'include' 
+        });
+        
+        if (!response.ok) throw new Error("Failed to fetch session");
+        
         const data = await response.json();
-        setDepartment(data.department || "Guest");
+        
+        setDepartment(data.department);
+        
       } catch (error) {
         console.error("Session fetch failed:", error);
         setDepartment("Security"); 
@@ -66,13 +75,15 @@ export default function DigitalTwinModel() {
 
       <div className="main flex w-full" style={{ height: 'calc(100vh - 4.5rem)' }}>
 
-        <IntButton 
-          icon={Radar} 
-          size="30"
-          label={showHeatmap ? "Heatmap: ON" : "Heatmap: OFF"} 
-          onClick={handleToggleHeatmap} 
-          classes={`absolute top-5 right-5 btn btn-auto m-0! p-2! rounded-0 z-150 text-[1.25rem]! ${showHeatmap ? "btn-yellow" : "btn-black"}`} 
-        />
+        {department !== "Facilities" && (
+          <IntButton 
+            icon={Radar} 
+            size="30"
+            label={showHeatmap ? "Heatmap: ON" : "Heatmap: OFF"} 
+            onClick={handleToggleHeatmap} 
+            classes={`absolute top-5 right-5 btn btn-auto m-0! p-2! rounded-0 z-150 text-[1.25rem]! ${showHeatmap ? "btn-yellow" : "btn-black"}`} 
+          />
+        )}
         
         <div className={`float ${isSidebarOpen ? "float-width" : "w-0"}`}>
           <div className="w-full h-full overflow-hidden relative">
