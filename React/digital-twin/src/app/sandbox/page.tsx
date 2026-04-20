@@ -160,7 +160,7 @@ export default function SandboxModel() {
             document.getElementById('dashboard-section')?.scrollIntoView({ behavior: 'smooth' }); 
           }
         }}
-        className="fixed top-24 right-[-1] z-[999] group flex items-center bg-[#131313] border border-[#00ff88]/50 hover:border-[#00ff88] text-[#00ff88] p-2 rounded-l-lg transition-all duration-300 shadow-[0_0_15px_rgba(0,255,136,0.3)] cursor-pointer"
+        className="fixed top-24 right-[-1] z-[999] group flex items-center bg-[var(--primary-color)] border border-[var(--primary-color)]/50 hover:border-[var(--primary-color)] text-[var(--primary-text-color)] p-2 rounded-l-lg transition-all duration-300 shadow-[0_0_15px_var(--primary-color)] cursor-pointer"
       >
         {isScrolledDown ? <Box size={24} className="shrink-0" /> : <LayoutDashboard size={24} className="shrink-0" />}
         
@@ -190,7 +190,7 @@ export default function SandboxModel() {
                     {department !== "Facilities" && (
                     <>
                       <div className="row flex-wrap gap-5 mt-4!">
-                        <button onClick={handleSpawn} className="btn btn-green m-0! flex-1">
+                        <button onClick={handleSpawn} className="btn btn-primary m-0! flex-1">
                           <UserPlus size={20} /> <span className="ml-2">Spawn</span>
                         </button>
                         <button onClick={handleRemove} className="btn btn-red m-0! flex-1">
@@ -218,7 +218,7 @@ export default function SandboxModel() {
 
                     {department !== "Security" && (
                     <>
-                      <div className="flex flex-wrap items-center my-3 border-t border-t-[#888] mt-4! py-4! text-[#ccc]">
+                      <div className="flex flex-wrap items-center my-3 border-t border-t-[var(--sub-text-color)] mt-4! py-4! text-[var(--sub-text-color)]">
                         <div className="w-10 text-left pr-2">Temp</div>
                         <div className="flex-1 flex items-center justify-end h-5">
                           <input 
@@ -272,7 +272,7 @@ export default function SandboxModel() {
           </button>
         </div>
         
-        <div id="model-container" ref={containerRef} className="flex-1 w-full h-full relative overflow-hidden bg-black/50">
+        <div id="model-container" ref={containerRef} className="flex-1 w-full h-full relative overflow-hidden bg-[--bg-color]/50">
           <div className="crosshair"></div>
         </div>
       </div>
@@ -365,9 +365,9 @@ export default function SandboxModel() {
           </h3>
           <div className="w-full overflow-x-auto mt-4 pb-2">
             <table className="table w-full border-separate border-spacing-0 whitespace-nowrap">
-              <thead>
+              <thead className="bg-[var(--primary-color)] text-[var(--primary-text-color)]">
                 <tr>
-                  <th className="w-[1%] sticky left-0 z-20 bg-black shadow-[2px_0_5px_rgba(0,0,0,0.5)]">
+                  <th className="w-[1%] sticky left-0 z-20 bg-[--bg-color] shadow-[2px_0_5px_rgba(0,0,0,0.5)]">
                     ID
                   </th>
                   
@@ -393,7 +393,7 @@ export default function SandboxModel() {
                   </th>
                 </tr>
               </thead>
-              <tbody>
+              <tbody className="text-[var(--text-color)] bg-[var(--bg-color)]">
                 {roomsData.map(room => {
                   const stats = currentRoomStats[room.room_id] || { occupancy: "--", temp: "--", ac: null, lights: null };
                   const hasData = stats.occupancy !== "--";
@@ -415,7 +415,7 @@ export default function SandboxModel() {
                   return (
                     <tr key={room.id}>
                       {/* 5. Matches the w-[1%] from the header */}
-                      <td className="w-[1%] sticky left-0 z-10 bg-black font-bold shadow-[2px_0_5px_rgba(0,0,0,0.5)]">
+                      <td className="w-[1%] sticky left-0 z-10 bg-[--bg-color] font-bold shadow-[2px_0_5px_rgba(0,0,0,0.5)]">
                         {room.room_id}
                       </td>
                       <td className="hidden min-[43rem]:table-cell">{room.name}</td>
@@ -487,7 +487,7 @@ export default function SandboxModel() {
               <FormRow label="Description" value={emergencyForm.description} onChange={e => setEmergencyForm({...emergencyForm, description: e.target.value})} />
               
               <div className="row mt-4! justify-center!">
-                <button type="button" className="btn btn-green btn-auto" onClick={() => setEmergencyModalOpen(false)}>Cancel</button>
+                <button type="button" className="btn btn-primary btn-auto" onClick={() => setEmergencyModalOpen(false)}>Cancel</button>
                 <button type="submit" className="btn btn-red btn-auto">Send Alert</button>
               </div>
             </form>

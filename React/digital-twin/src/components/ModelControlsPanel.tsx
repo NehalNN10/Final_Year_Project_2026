@@ -40,14 +40,14 @@ export default function ModelControlsPanel({ isReplay = false }: ModelControlsPa
           </div>
 
           <button 
-            className="btn btn-green mx-0! mb-0! mt-2!" 
+            className="btn btn-primary mx-0! mb-0! mt-2!" 
             onClick={() => import(ui).then(mod => mod.resetCameraView())}
           >
             <Camera size={20} /> <span className="ml-2">Reset Camera</span>
           </button>
           {!isReplay && (
               <button 
-              className="btn btn-green mx-0! mb-0! mt-2!" 
+              className="btn btn-primary mx-0! mb-0! mt-2!" 
               id="replay-btn" 
               onClick={() => {
                   import("../lib/three/simulation.js").then(mod => {
@@ -61,7 +61,7 @@ export default function ModelControlsPanel({ isReplay = false }: ModelControlsPa
           )}
           {!isReplay && (
               <button 
-              className="btn btn-green mx-0! mb-0! mt-2!" 
+              className="btn btn-primary mx-0! mb-0! mt-2!" 
               id="replay-btn" 
               onClick={() => {
                   import("../lib/three/simulation.js").then(mod => {

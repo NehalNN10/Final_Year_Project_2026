@@ -64,7 +64,7 @@ export default function SimulationControlsPanel() {
 
       <div className={`content-expand ${isExpanded ? "expanded" : "collapsed"}`}>
         <div className="content" id="sim-content">
-          <div className="flex items-center my-3 text-[#ccc] flex-wrap">
+          <div className="flex items-center my-3 text-[var(--text-color)] flex-wrap">
             <div className="w-20 text-left shrink-0">Speed</div>
             <div className="flex-1 flex items-center justify-end h-5">
               <input 
@@ -89,7 +89,7 @@ export default function SimulationControlsPanel() {
           </div>
 
           {/* Scrubber Row (Matches dat.gui 40/60 split) */}
-          <div className="flex flex-wrap items-center my-3 text-[#ccc]">
+          <div className="flex flex-wrap items-center my-3 text-[var(--text-color)]">
             <div className="w-20 text-left pr-2">Scrubber</div>
             <div className="flex-1 flex items-center justify-end h-5">
               <input 
@@ -116,13 +116,13 @@ export default function SimulationControlsPanel() {
           {/* Media Buttons Row (Using your .btn-track class!) */}
           <div className="row flex justify-between gap-2 mt-4! flex-wrap">
 
-            <IntButton icon={Rewind} label={"-5s"} onClick={() => import(ui).then(mod => mod.rewindSim())} classes="btn btn-green flex-1 m-0!" />
+            <IntButton icon={Rewind} label={"-5s"} onClick={() => import(ui).then(mod => mod.rewindSim())} classes="btn btn-primary flex-1 m-0!" />
 
-            <IntButton icon={isPlaying ? Pause : Play} label={isPlaying ? "Pause" : "Play"} onClick={handleIsPlaying} classes="btn btn-green flex-1 m-0!" />
+            <IntButton icon={isPlaying ? Pause : Play} label={isPlaying ? "Pause" : "Play"} onClick={handleIsPlaying} classes="btn btn-primary flex-1 m-0!" />
             
-            <IntButton icon={FastForward} label={"+5s"} onClick={() => import(ui).then(mod => mod.fastForwardSim())} classes="btn btn-green flex-1 m-0!" />
+            <IntButton icon={FastForward} label={"+5s"} onClick={() => import(ui).then(mod => mod.fastForwardSim())} classes="btn btn-primary flex-1 m-0!" />
 
-            <IntButton icon={RotateCcw} label={"Reset Playback"} onClick={() => import(ui).then(mod => mod.resetSim())} classes="btn btn-green flex-1 m-0!" />
+            <IntButton icon={RotateCcw} label={"Reset Playback"} onClick={() => import(ui).then(mod => mod.resetSim())} classes="btn btn-primary flex-1 m-0!" />
           </div>
         </div>
       </div>

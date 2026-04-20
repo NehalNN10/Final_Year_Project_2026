@@ -79,13 +79,13 @@ export default function Navbar({ department }: { department: string }) {
 
         <div className="nav-right gap-2">
           <IntButton 
-            icon={isDarkMode ? Sun : Moon} 
+            icon={isDarkMode ? Moon : Sun} 
             label="Switch Theme" 
             onClick={toggleTheme} 
-            classes={"btn-header btn-black"} 
+            classes={"btn-header btn-primary"} 
           />
           <IntButton icon={LogOut} label="Log Out" onClick={handleLogout} classes={"btn-header btn-red"} />
-          <IntButton icon={MoreVertical} label="Menus" onClick={() => setIsMenuOpen(!isMenuOpen)} classes={"btn-header btn-green text-black! md:hidden!"} />
+          <IntButton icon={MoreVertical} label="Menus" onClick={() => setIsMenuOpen(!isMenuOpen)} classes={"btn-header btn-primary text-black! md:hidden!"} />
         </div>
       </nav>
 

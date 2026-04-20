@@ -4,7 +4,9 @@
 :root {
   --bg-color: #fafafa;
   --text-color: #000;
-  --primary-color: #0f8;
+  --sub-text-color:#444;
+  --primary-color: #60b;
+  --primary-text-color: #fff;
   --surface-color: rgba(255, 255, 255, 0.6);
   font-family: var(--font-league-spartan), sans-serif;
 }
@@ -13,7 +15,9 @@
 body.dark-mode {
   --bg-color: #121212;
   --text-color: #fff;
-  --primary-color: #0f8;
+  --sub-text-color: #aaa;
+  --primary-color: #a4f;
+  --primary-text-color: #000;
   --surface-color: rgba(0, 0, 0, 0.6) !important;
 }
 
@@ -43,8 +47,8 @@ input[type="text"], input[type="password"], input[type="number"], select, input[
     justify-content: center !important;
     align-items: center;
     border-radius: 5px;
-    border: 1px solid #888;
-    color: #fff !important;
+    border: 1px solid var(--sub-text-color);
+    color: var(--text-color) !important;
     transition: all 0.3s ease;
     padding: 10px;
     box-sizing: border-box;
@@ -76,9 +80,9 @@ h5 {
 }
 
 input[type="text"]:hover, input[type="password"]:hover, input[type="number"]:hover, select:hover, input[type="email"]:hover, input[type="text"]:focus, input[type="password"]:focus, input[type="number"]:focus, select:focus, option:focus, input[type="email"]:focus {
-    border-color: #00ff88 !important;
-    color: #00ff88 !important;
-    box-shadow: 0 0 20px rgba(0, 255, 136, 0.6) !important;
+    border-color: var(--primary-color) !important;
+    color: var(--primary-color) !important;
+    box-shadow: 0 0 20px var(--primary-color) !important;
     cursor: pointer;
 }
 
@@ -86,9 +90,9 @@ table {
     border-right: none;
     border-left: none;
     border-collapse: collapse; 
-    border-radius: 0px;
+    border-radius: 8px;
     border-style: hidden; 
-    box-shadow: 0 0 0 1px #888; 
+    box-shadow: 0 0 20px var(--sub-text-color) inset; 
 }
 
 th, td {
@@ -118,7 +122,7 @@ th, td {
 
 tr {
     border-radius: 8px;
-    border: 1px solid #888;
+    border: 1px solid var(--sub-text-color);
 }
 
 .alert-time {
@@ -126,10 +130,6 @@ tr {
     text-align: right;
     color: red; 
     font-weight: bold;
-}
-
-.baseStyle {
-    @apply min-h-screen bg-[#131313] text-white;
 }
 
 .box {
@@ -156,17 +156,16 @@ tr {
     justify-content: center !important;
     align-items: center;
     border-radius: 8px;
-    border: 1px solid #888;
-    color: #fff;
+    border: 1px solid var(--sub-text-color);
     margin: 20px;
     padding: 10px;
     transition: all 0.3s ease;
 }
 
 .btn:hover {
-    border-color: #00ff88;
-    color: #00ff88;
-    box-shadow: 0 0 20px rgba(0, 255, 136, 0.6);
+    border-color: var(--primary-color);
+    color: var(--primary-color);
+    box-shadow: 0 0 20px var(--primary-color);
     font-weight: bold;
     cursor: pointer;
 }
@@ -192,42 +191,56 @@ tr {
 .btn-black {
     background: var(--surface-color);
     backdrop-filter: blur(1rem) !important;
-    border: 1px solid #000;
-    color: white;
+    border: 1px solid var(--text-color) !important;
+    color: var(--text-color) !important;
 }
 
 .btn-black:hover {
-    box-shadow: 0 0 20px rgba(0, 255, 128, 0.6) !important;
-    border: 1px solid #00ff88 !important;
-    color: #00ff88 !important;
+    box-shadow: 0 0 20px var(--primary-color) !important;
+    border: 1px solid var(--primary-color) !important;
+    color: var(--primary-color) !important;
     cursor: pointer;
 }
 
 .btn-blue {
     background-color: #6666ff !important;
-    border: 1px solid #000;
-    color: white;
+    border: 1px solid var(--text-color) !important;
+    color: white !important;
 }
 
 .btn-blue:hover {
     background-color: #6666ff !important;
     box-shadow: 0 0 20px rgba(102, 102, 255, 0.6) !important;
-    border: 1px solid #ffffff !important;
+    border: 1px solid var(--text-color) !important;
     color: #ffffff !important;
     cursor: pointer;
 }
 
 .btn-green {
     background-color: #00ff88 !important;
-    border: 1px solid #000;
-    color: black;
+    border: 1px solid var(--text-color) !important;
+    color: #000 !important;
 }
 
-.btn-green:hover {
-    background-color: #00ff88 !important;
-    box-shadow: 0 0 20px rgba(0, 255, 102, 0.6) !important;
-    border: 1px solid #000 !important;
-    color: black !important;
+.btn-primary:hover {
+    background-color: #00ff88  !important;
+    box-shadow: 0 0 20px #00ff88  !important;
+    border: 1px solid var(--text-color) !important;
+    color: #00ff88  !important;
+    cursor: pointer;
+}
+
+.btn-primary {
+    background-color: var(--primary-color) !important;
+    border: 1px solid var(--text-color) !important;
+    color: var(--primary-text-color) !important;
+}
+
+.btn-primary:hover {
+    background-color: var(--primary-color) !important;
+    box-shadow: 0 0 20px var(--primary-color) !important;
+    border: 1px solid var(--text-color) !important;
+    color: var(--primary-text-color) !important;
     cursor: pointer;
 }
 
@@ -245,9 +258,9 @@ tr {
 }
 
 .btn-header:hover {
-    color: #00ff88;
+    color: var(--primary-color);
     font-weight: bold;
-    box-shadow: 0 0 0px rgba(0, 255, 136, 0.6) !important;
+    box-shadow: 0 0 0px var(--primary-color) !important;
     cursor: pointer;
 }
 
@@ -259,14 +272,14 @@ tr {
 
 .btn-red {
     background-color: #ff3333 !important;
-    border: 1px solid #000;
+    border: 1px solid var(--text-color);
     color: white;
 }
 
 .btn-red:hover {
     background-color: #ff3333 !important;
     box-shadow: 0 0 20px rgba(255, 51, 51, 0.6) !important;
-    border: 1px solid #ffffff !important;
+    border: 1px solid var(--text-color) !important;
     color: #fff !important;
     cursor: pointer;
 }
@@ -274,14 +287,14 @@ tr {
 
 .btn-yellow {
     background-color: #ffcc33 !important;
-    border: 1px solid #000;
+    border: 1px solid var(--text-color);
     color: #000 !important;
 }
 
 .btn-yellow:hover {
     background-color: #ffcc33 !important;
     box-shadow: 0 0 20px rgba(255, 204, 51, 0.6) !important;
-    border: 1px solid #000000 !important;
+    border: 1px solid var(--text-color) !important;
     color: #000 !important;
     cursor: pointer;
 }
@@ -308,7 +321,7 @@ tr {
 }
 
 .checklist-item:hover {
-    background-color: rgba(255, 255, 255, 0.1);
+    background-color: var(--bg-color);
 }
 
 /* Checklist Checkbox */
@@ -321,7 +334,7 @@ tr {
 
 /* Checklist Label */
 .checklist-label {
-    color: #fff;
+    color: var(--text-color);
     cursor: pointer;
     user-select: none; /* Prevents text highlighting when clicking repeatedly */
 }
@@ -361,7 +374,7 @@ tr {
 }
 
 .faded-font {
-    color: #888; 
+    color: var(--sub-text-color); 
 }
 
 .fill {
@@ -388,11 +401,11 @@ tr {
 }
 
 .formInput {
-    @apply w-2/3 text-black h-[45px] block; 
+    @apply w-2/3 text-black h-[11.25] block; 
 }
 
 .header {
-    @apply flex justify-between items-center cursor-pointer select-none border-b border-transparent hover:border-[#00ff88] transition-all pb-1;
+    @apply flex justify-between items-center cursor-pointer select-none border-b border-transparent hover:border-[var(--primary-color)] transition-all pb-1;
 }
 
 .login {
@@ -424,32 +437,7 @@ tr {
     padding: 1rem 2vw !important;
 }
 
-/* .main-nav {
-    position: sticky;
-    display: flex;
-    flex-direction: row;
-    align-items: center;
-    justify-content: space-between;
-    background-color: rgba(0, 0, 0, 0.95);
-    padding: 0.5rem 2rem;
-    border-bottom: 2px solid #00ff88;
-    top: 0;
-    width: 100%;
-    height: 5rem;
-    z-index: 150;
-    display: flex;
-    flex-direction: row;
-    color: white;
-
-    background-color: rgba(15, 15, 15, 0.4); 
-    
-    backdrop-filter: blur(12px);
-    -webkit-backdrop-filter: blur(12px);
-    transform: translateZ(0);
-}  */
-
 nav {
-    /* WE DELETED POSITION: STICKY, TOP, AND Z-INDEX FROM HERE */
     width: 100%;
     height: 4.5rem;
     display: flex;
@@ -459,7 +447,7 @@ nav {
     padding-right: 2rem;
     background: var(--surface-color);
     backdrop-filter: blur(20px) !important;    
-    border-bottom: 2px solid #00ff88;
+    border-bottom: 2px solid var(--primary-color);
 }
 
 .nav-left, .nav-right {
@@ -486,12 +474,12 @@ nav {
 }
 
 .modal { 
-    border: 2px solid #00ff88;
+    border: 2px solid var(--primary-color);
     border-radius: 10px;
     padding: 40px;
     @apply max-w-125;
     width: 90%;
-    box-shadow: 0 0 50px rgba(0, 255, 136, 0.3);
+    box-shadow: 0 0 50px var(--primary-color);
     background: var(--surface-color);
     animation: slideUp 0.3s ease-in-out;
 }
@@ -538,8 +526,8 @@ nav {
 }
 
 .outer {
-    box-shadow: 0 0 7px rgba(0, 255, 136, 0.6) !important;
-    border: 1px solid #00ff88 !important;
+    box-shadow: 0 0 7px var(--primary-text-color) !important;
+    border: 1px solid var(--primary-color) !important;
 }
 
 .row { 
@@ -555,25 +543,25 @@ nav {
 } */
 
 .scrubber {
-    @apply grow ml-1 h-full bg-[#333] border border-[#888] rounded accent-[#00ff88] cursor-pointer hover:border-[#008800] hover:shadow-[0_0_20px_rgba(0,255,136,0.6)] hover:bg-[0_0_20px_rgba(0,255,136,0.6)] transition-all;
+    @apply grow ml-1 h-full bg-[--sub-text-color] border border-[var(--sub-text-color)] rounded accent-[var(--primary-color)] cursor-pointer hover:border-[var(--primary-color)] hover:bg-[var(--primary-color)] transition-all;
 }
 
 .scrubber-text {
-    @apply ml-2 bg-[#222] border border-[#888] rounded text-[#00ff88] font-bold text-center w-17 py-1! px-0;
+    @apply ml-2 bg-[var(--sub-text-color)] border border-[var(--sub-text-color)] rounded text-[var(--primary-color)] font-bold text-center w-17 py-1! px-0;
 }
 
 .selected {
-    border: 2px solid rgba(0,255,127,1);
-    background-color: #00ff88;
+    border: 2px solid var(--primary-color);
+    background-color: var(--primary-color);
     border-radius: 8px;
-    color: #000;
+    color: var(--primary-text-color);
 }
 
 .selected:hover {
-    border: 2px solid rgba(0,255,127,1);
-    background-color: #00ff88;
+    border: 2px solid var(--primary-color);
+    background-color: var(--primary-color);
     border-radius: 8px;
-    color: #000;
+    color: var(--primary-text-color);
 }
 
 .side-nav {
@@ -582,13 +570,17 @@ nav {
     padding: 0.5rem 2rem;
     height: 4rem !important;
     font-size: 1.8rem;
-    background-color: #00ff88;
-    color: #000000;
-    border-bottom: 2px solid #00ff88;
+    background-color: var(--primary-color);
+    color: var(--primary-text-color);
+    border-bottom: 2px solid var(--primary-color);
 }
 
 .sidebar-toggle {
-    @apply absolute top-8 -right-8 z-50 bg-[#131313] text-[#00ff88] py-3 px-1 rounded-r-lg transition-colors shadow-[5px_0_10px_rgba(0,0,0,0.5)] flex items-center justify-center cursor-pointer;
+    @apply absolute top-8 -right-8 z-50 bg-[var(--primary-color)] text-[var(--primary-text-color)] py-3 px-1 rounded-r-lg transition-colors flex items-center justify-center cursor-pointer;
+}
+
+.sub-text {
+    color: var(--sub-text-color);
 }
 
 .table {
@@ -599,13 +591,13 @@ nav {
 .tracker-ui {
     background: var(--surface-color);
     backdrop-filter: blur(1rem) !important;
-    color: white;
+    color: var(--text-color);
     margin-top: 10px;
     border-radius: 8px;
     padding: 1.5rem;
     font-family: 'League Spartan';
     pointer-events: none;
-    border: 1px solid #888888;
+    border: 1px solid var(--sub-text-color);
     pointer-events: auto !important; /* CRITICAL: Allows clicking the header */
     transition: all 0.3s ease;
     overflow: hidden; /* Needed for the slide animation */
@@ -614,6 +606,7 @@ nav {
 #model-container {
     @apply relative flex-1 w-full h-full overflow-hidden min-h-0;
 }
+
 #float {
     position: absolute;
     padding: 20px;
@@ -633,7 +626,7 @@ nav {
     overflow-y: auto; 
     background: var(--surface-color); 
     padding: 10px; 
-    border: 1px solid #888; 
+    border: 1px solid var(--sub-text-color); 
     border-radius: 5px;
 }
 
@@ -652,16 +645,16 @@ nav {
     background: var(--surface-color); 
 }
 ::-webkit-scrollbar-thumb {
-    background: #00ff88; 
+    background: var(--primary-color); 
     border-radius: 3px;
 }
 ::-webkit-scrollbar-thumb:hover {
-    background: #00cc6a; /* Slightly darker green when hovered */
+    background: var(--primary-color); /* Slightly darker green when hovered */
 }
 
 html {
     scrollbar-width: thin; /* Makes the scrollbar 7px/thin */
-    scrollbar-color: #00ff88 #131313; /* Thumb color, then Track color */
+    scrollbar-color: var(--primary-color) var(--primary-text-color); /* Thumb color, then Track color */
 }
 
 @keyframes slideUp {

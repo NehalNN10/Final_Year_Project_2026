@@ -99,12 +99,12 @@ export default function StaffList({ staffList, staffRooms, department }: StaffLi
                   <IntButton icon={Trash} label="Delete User" onClick={() => deleteStaff(staff.id)} classes={"btn btn-red btn-list m-0!"} />
                 </div>
                 </div>
-                <div><span className="text-[#999]">{staff.user_id} - {staff.email} <br/> {staff.role}</span></div>
+                <div><span className="sub-text">{staff.user_id} - {staff.email} <br/> {staff.role}</span></div>
                 {staffRooms && (
                 <>
                   <div className="mt-2">
                   <span>Rooms Assigned: </span>
-                  <span className="text-[#999]">{staffRooms[staff.user_id]?.length > 0 ? staffRooms[staff.user_id].join(", ") : "N/A"}</span>
+                  <span className="sub-text">{staffRooms[staff.user_id]?.length > 0 ? staffRooms[staff.user_id].join(", ") : "N/A"}</span>
                   </div>
                 </>
                 )}
