@@ -86,6 +86,10 @@ input[type="text"]:hover, input[type="password"]:hover, input[type="number"]:hov
     cursor: pointer;
 }
 
+option {
+    background-color: var(--bg-color) !important;
+}
+
 table {
     border-right: none;
     border-left: none;
@@ -220,6 +224,14 @@ tr {
     background-color: #00ff88 !important;
     border: 1px solid var(--text-color) !important;
     color: #000 !important;
+}
+
+.btn-green:hover {
+    background-color: #00ff88 !important;
+    box-shadow: 0 0 20px rgba(0, 255, 136, 0.6) !important;
+    border: 1px solid var(--text-color) !important;
+    color: #000000 !important;
+    cursor: pointer;
 }
 
 .btn-primary:hover {
@@ -366,11 +378,11 @@ tr {
 }
 
 .expanded {
-    @apply grid-rows-[1fr] opacity-100 mt-2;
+    @apply grid-rows-[1fr] opacity-100 p-4! pt-0!;
 }
 
 .collapsed {
-    @apply grid-rows-[0fr] opacity-0 mt-0 pointer-events-none;
+    @apply grid-rows-[0fr] opacity-0 mt-0 pointer-events-none px-4!;
 }
 
 .faded-font {
@@ -401,11 +413,11 @@ tr {
 }
 
 .formInput {
-    @apply w-2/3 text-black h-[11.25] block; 
+    @apply w-2/3 text-black h-[50px] block; 
 }
 
 .header {
-    @apply flex justify-between items-center cursor-pointer select-none border-b border-transparent hover:border-[var(--primary-color)] transition-all pb-1;
+    @apply flex justify-between items-center cursor-pointer select-none border-b border-transparent hover:border-[--primary-color] transition-all pb-1;
 }
 
 .login {
@@ -438,6 +450,7 @@ tr {
 }
 
 nav {
+    /* WE DELETED POSITION: STICKY, TOP, AND Z-INDEX FROM HERE */
     width: 100%;
     height: 4.5rem;
     display: flex;
@@ -526,7 +539,7 @@ nav {
 }
 
 .outer {
-    box-shadow: 0 0 7px var(--primary-text-color) !important;
+    box-shadow: 0 0 7px var(--primary-color) !important;
     border: 1px solid var(--primary-color) !important;
 }
 
@@ -537,13 +550,8 @@ nav {
     margin-top: 15px;
 }
 
-/* .scroll {
-    transition: all 0.3s ease;
-    overflow: hidden;
-} */
-
 .scrubber {
-    @apply grow ml-1 h-full bg-[--sub-text-color] border border-[var(--sub-text-color)] rounded accent-[var(--primary-color)] cursor-pointer hover:border-[var(--primary-color)] hover:bg-[var(--primary-color)] transition-all;
+    @apply grow ml-1 h-full bg-[var(--text-color)] border border-[var(--text-color)] rounded accent-[var(--primary-color)] cursor-pointer hover:border-[var(--primary-color)] hover:bg-[var(--primary-color)] transition-all;
 }
 
 .scrubber-text {
@@ -606,7 +614,6 @@ nav {
 #model-container {
     @apply relative flex-1 w-full h-full overflow-hidden min-h-0;
 }
-
 #float {
     position: absolute;
     padding: 20px;
@@ -642,19 +649,24 @@ nav {
     height: 7px;
 }
 ::-webkit-scrollbar-track {
-    background: var(--surface-color); 
+    background: transparent !important; 
 }
 ::-webkit-scrollbar-thumb {
     background: var(--primary-color); 
     border-radius: 3px;
 }
 ::-webkit-scrollbar-thumb:hover {
-    background: var(--primary-color); /* Slightly darker green when hovered */
+    /* Mixes your primary color with 20% black */
+    background: color-mix(in srgb, var(--primary-color), black 20%); 
+}
+
+::-webkit-scrollbar-button {
+    display: none;
 }
 
 html {
     scrollbar-width: thin; /* Makes the scrollbar 7px/thin */
-    scrollbar-color: var(--primary-color) var(--primary-text-color); /* Thumb color, then Track color */
+    scrollbar-color: var(--primary-color) transparent !important; /* Thumb color, then Track color */
 }
 
 @keyframes slideUp {

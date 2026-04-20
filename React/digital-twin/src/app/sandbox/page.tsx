@@ -177,8 +177,8 @@ export default function SandboxModel() {
             <div className="h-full overflow-y-auto overflow-x-hidden p-5 pr-0! float-width">
               <RoomStatsPanel department={department} />
 
-              <div className="tracker-ui outer p-4!">
-                <div className="header cursor-pointer select-none" onClick={() => setIsExpanded(!isExpanded)}>
+              <div className="tracker-ui outer p-0!">
+                <div className="header p-4!" onClick={() => setIsExpanded(!isExpanded)}>
                   <h3 className="font-bold">Sandbox Controls</h3>
                   <div className="ml-2">
                     {isExpanded ? <ChevronUp size={24} /> : <ChevronDown size={24} />}
@@ -189,8 +189,8 @@ export default function SandboxModel() {
                   <div className="content">
                     {department !== "Facilities" && (
                     <>
-                      <div className="row flex-wrap gap-5 mt-4!">
-                        <button onClick={handleSpawn} className="btn btn-primary m-0! flex-1">
+                      <div className="row flex-wrap gap-5 mt-0!">
+                        <button onClick={handleSpawn} className="btn btn-green m-0! flex-1">
                           <UserPlus size={20} /> <span className="ml-2">Spawn</span>
                         </button>
                         <button onClick={handleRemove} className="btn btn-red m-0! flex-1">
@@ -218,7 +218,7 @@ export default function SandboxModel() {
 
                     {department !== "Security" && (
                     <>
-                      <div className="flex flex-wrap items-center my-3 border-t border-t-[var(--sub-text-color)] mt-4! py-4! text-[var(--sub-text-color)]">
+                      <div className="flex flex-wrap items-center my-3 border-t border-t-[var(--text-color)] mt-4! py-4! text-[var(--text-color)]">
                         <div className="w-10 text-left pr-2">Temp</div>
                         <div className="flex-1 flex items-center justify-end h-5">
                           <input 

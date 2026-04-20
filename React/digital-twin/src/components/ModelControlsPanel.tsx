@@ -15,8 +15,8 @@ export default function ModelControlsPanel({ isReplay = false }: ModelControlsPa
   const ui = "../lib/three/ui.js";
 
   return (
-    <div className="tracker-ui outer p-4!">
-      <div className="header" onClick={() => setIsExpanded(!isExpanded)}>
+    <div className="tracker-ui outer p-0!">
+      <div className="header p-4!" onClick={() => setIsExpanded(!isExpanded)}>
         <h3 className="font-bold">
           Model Controls
         </h3>
@@ -26,7 +26,7 @@ export default function ModelControlsPanel({ isReplay = false }: ModelControlsPa
       </div>
       <div className={`content-expand ${isExpanded ? "expanded" : "collapsed"}`}>
         <div className="content" id="ui-content">
-          <div className="row">
+          <div className="row mt-0!">
             <span>Zoom:</span>
             <span>Scroll Wheel/Pinch</span>
           </div>
