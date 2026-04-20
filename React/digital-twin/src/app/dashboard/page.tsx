@@ -156,7 +156,7 @@ export default function Dashboard() {
         <div className="row px-5">
           <div className="">
             <h2 className="font-bold">Welcome, {name}!</h2>
-            <p className="text-gray-400">Security data and metrics will be displayed here.</p>
+            <p className="text-[var(--sub-text-color)]">Security data and metrics will be displayed here.</p>
           </div>
           <div className="flex flex-row gap-2">
             <button className="btn btn-red btn-auto m-0! py-1!" onClick={handleSendAllAlerts}>
@@ -169,28 +169,25 @@ export default function Dashboard() {
         <div className="row boxes">
           <div className="tracker-ui scroll outer box basis-70">
             <h3 className="font-bold">AC Alerts</h3>
-            <div className="tracker-ui mt-4 p-4 text-gray-400 text-center">No active alerts.</div>
+            <div className="p-4 text-center">No active alerts.</div>
           </div>
           <div className="tracker-ui scroll outer box basis-70">
             <h3 className="font-bold">Lights Alerts</h3>
-            <div className="tracker-ui mt-4 p-4 text-gray-400 text-center">No active alerts.</div>
+            <div className="p-4 text-center">No active alerts.</div>
           </div>
           <div className="tracker-ui scroll outer box basis-70">
             <h3 className="font-bold">Temperature Alerts</h3>
-            <div className="tracker-ui mt-4 p-4 text-gray-400 text-center">No active alerts.</div>
+            <div className="p-4 text-center">No active alerts.</div>
           </div>
           <div className="tracker-ui scroll outer box basis-70">
             <h3 className="font-bold">Occupancy Alerts</h3>
-            {/* Dynamic Alerts will map here later */}
-            <div className="tracker-ui mt-4 p-4 text-gray-400 text-center">
-              No active alerts.
-            </div>
+            <div className="p-4 text-center">No active alerts.</div>
           </div>
         </div>
 
         {/* Real-Time Data Table */}
         <div className="row boxes">
-          <div className="tracker-ui outer box basis-220 overflow-hidden flex flex-col mx-5!">
+          <div className="tracker-ui outer box basis-220 overflow-hidden flex flex-col mx-0!">
             <h3 className="row mt-0! font-bold shrink-0">
               <span className="flex-2">Rooms Real-Time Data</span>
               <StatRow icon={Clock} label={currentTimeSpan} size="32"/>
@@ -292,7 +289,7 @@ export default function Dashboard() {
               </table>
             </div>
           </div>
-          <div className="box basis-100 overflow-hidden flex flex-col mx-5!">
+          <div className="box basis-200 overflow-hidden flex flex-row px-0! gap-5!">
             <StaffList 
               staffList={securityStaffList}
               staffRooms={securityStaffRooms}

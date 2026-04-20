@@ -12,23 +12,23 @@ export default function RoomStatsPanel({ department, isLive = false }: RoomStats
   const [isExpanded, setIsExpanded] = useState(true);
 
   return (
-    <div className="tracker-ui outer p-4!">
-      <div className="header" onClick={() => setIsExpanded(!isExpanded)}>
-        <h3 className="flex gap-2 items-center font-bold mt-0! justify-start! text-[var(--primary-color)]">
+    <div className="tracker-ui outer p-0!">
+      <div className="header p-4! bg-[var(--primary-color)] rounded-[8px]" onClick={() => setIsExpanded(!isExpanded)}>
+        <h3 className="flex gap-2 items-center font-bold mt-0! justify-start! text-[var(--primary-text-color)]">
           <StatRow icon={MapPin} label="--" id="ui-room-name" size="32"/>
         </h3>
-        <div className="text-[var(--primary-color)] ml-2">
+        <div className="text-[var(--primary-text-color)] ml-2">
           {isExpanded ? <ChevronUp size={24} /> : <ChevronDown size={24} />}
         </div>
       </div>
       <div className={`content-expand ${isExpanded ? "expanded" : "collapsed"}`}>
         <div className="content" id="ui-content">
-          <div className="row font-bold text-[var(--sub-text-color)]">
+          <div className="row font-bold text-[var(--text-color)]">
             <span id="ui-room-id">--</span>
             <span id="ui-room-floor">--</span>
           </div>
 
-          <div className="row text-[var(--sub-text-color)] flex-wrap gap-4">
+          <div className="row text-[var(--text-color)] flex-wrap gap-4">
             <StatRow icon={Calendar} label="--" id="ui-iot-date" />
             <StatRow icon={Clock} label="--" id="ui-iot-time" />
           </div>

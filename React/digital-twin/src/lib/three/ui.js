@@ -46,8 +46,8 @@ export function fastForwardSim() {
 }
 
 export function resetSim() {
-    playback.frame = 0; 
-    playback.speed = 1; 
+    scrubFrame(0); 
+    changeSpeed(1);
     renderFrame(0);
 }
 

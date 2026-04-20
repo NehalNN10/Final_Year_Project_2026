@@ -81,7 +81,7 @@ export default function ModelReplay() {
             <div className="h-full overflow-y-auto overflow-x-hidden p-5 pr-0! float-width">
               <RoomStatsPanel department={department} />
           
-              <SimulationControlsPanel />
+              {/* <SimulationControlsPanel /> */}
               
               <ModelControlsPanel isReplay={true} />
               
@@ -105,6 +105,7 @@ export default function ModelReplay() {
           <div className="crosshair"></div>
         </div>
 
+        <SimulationControlsPanel />
       </div>
     </>
   );

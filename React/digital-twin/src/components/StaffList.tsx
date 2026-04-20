@@ -84,30 +84,30 @@ export default function StaffList({ staffList, staffRooms, department }: StaffLi
 
   return (
     <>
-      <div className="tracker-ui scroll outer box basis-90">
+      <div className="tracker-ui scroll outer box basis-95">
         <h3 className="row mt-0! font-bold">
           <span>{department} Staff</span>
           <IntButton icon={Plus} label="Add User" onClick={openStaffModal} classes={"btn-header btn-blue btn-auto m-0!"} />
         </h3>
         <div className="flex flex-wrap items-stretch gap-2 mt-4">
             {staffList.map(staff => (
-            <div key={staff.id} className="tracker-ui mt-4 p-4! flex-1 basis-78">
-                <div className="row m-0! font-bold">
-                <h4 className="m-0 flex-3">{staff.name}</h4>
-                <div className="row m-0! gap-2 flex-1 justify-end!">
-                  <IntButton icon={Pencil} label="Edit User" onClick={() => openStaffModal(staff)} classes={"btn btn-yellow btn-list m-0!"} />
-                  <IntButton icon={Trash} label="Delete User" onClick={() => deleteStaff(staff.id)} classes={"btn btn-red btn-list m-0!"} />
+            <div key={staff.id} className="tracker-ui mt-4 p-4! flex-1 basis-90">
+              <div className="row m-0! mb-2! gap-2 font-bold">
+              <h4 className="m-0 flex-3">{staff.name}</h4>
+              <div className="row m-0! gap-2 flex-1 justify-end! h-full!">
+                <IntButton icon={Pencil} label="Edit User" onClick={() => openStaffModal(staff)} classes={"btn btn-yellow btn-list m-0!"} />
+                <IntButton icon={Trash} label="Delete User" onClick={() => deleteStaff(staff.id)} classes={"btn btn-red btn-list m-0!"} />
+              </div>
+              </div>
+              <div><span className="sub-text">{staff.user_id} - {staff.email} <br/> {staff.role}</span></div>
+              {staffRooms && (
+              <>
+                <div className="mt-2">
+                <span>Rooms Assigned: </span>
+                <span className="sub-text">{staffRooms[staff.user_id]?.length > 0 ? staffRooms[staff.user_id].join(", ") : "N/A"}</span>
                 </div>
-                </div>
-                <div><span className="sub-text">{staff.user_id} - {staff.email} <br/> {staff.role}</span></div>
-                {staffRooms && (
-                <>
-                  <div className="mt-2">
-                  <span>Rooms Assigned: </span>
-                  <span className="sub-text">{staffRooms[staff.user_id]?.length > 0 ? staffRooms[staff.user_id].join(", ") : "N/A"}</span>
-                  </div>
-                </>
-                )}
+              </>
+              )}
             </div>
             ))}
         </div>
