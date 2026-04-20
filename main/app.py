@@ -35,13 +35,11 @@ app.config['MONGODB_SETTINGS'] = {
 db.init_app(app)
 
 # Redis setup
-redis_client = redis.Redis(host='3.109.201.41', port=6379, decode_responses=True)
-live_tracking_data = {}
-redis_thread = None
+# redis_client = redis.Redis(host='3.109.201.41', port=6379, decode_responses=True)
+# live_tracking_data = {}
+# redis_thread = None
 
 socketio = SocketIO(app, cors_allowed_origins="*", async_mode='threading')
-
-from flask import send_from_directory
 
 @app.route('/active_files/<path:filename>')
 def serve_active_files(filename):
@@ -51,61 +49,61 @@ def serve_active_files(filename):
 # BACKGROUND TASKS & SOCKETS
 # ---------------------------------------------------------
 
-def redis_listener():
-    """Background thread that listens to Redis and broadcasts to connected clients"""
-    pubsub = redis_client.pubsub()
-    pubsub.subscribe('tracking_stream')
+# def redis_listener():
+#     """Background thread that listens to Redis and broadcasts to connected clients"""
+#     pubsub = redis_client.pubsub()
+#     pubsub.subscribe('tracking_stream')
     
-    print("🎧 Redis listener started...")
+#     print("🎧 Redis listener started...")
     
-    for message in pubsub.listen():
-        if message['type'] == 'message':
-            try:
-                data = json.loads(message['data'])
-                track_id = data.get('id')
-                occupancy = data.get('occupancy', 0)
-                frame_num = data.get('frame', 0)
+#     for message in pubsub.listen():
+#         if message['type'] == 'message':
+#             try:
+#                 data = json.loads(message['data'])
+#                 track_id = data.get('id')
+#                 occupancy = data.get('occupancy', 0)
+#                 frame_num = data.get('frame', 0)
                 
-                # Store latest position for this track
-                live_tracking_data[track_id] = {
-                    'id': track_id,
-                    'x': data.get('x', 0),
-                    'z': data.get('z', 0),
-                    'frame': frame_num,
-                    'timestamp': data.get('timestamp', 0),
-                    'occupancy': occupancy,
-                    'region': data.get('region', 'Unknown')
-                }
+#                 # Store latest position for this track
+#                 live_tracking_data[track_id] = {
+#                     'id': track_id,
+#                     'x': data.get('x', 0),
+#                     'z': data.get('z', 0),
+#                     'frame': frame_num,
+#                     'timestamp': data.get('timestamp', 0),
+#                     'occupancy': occupancy,
+#                     'region': data.get('region', 'Unknown')
+#                 }
                 
-                # Broadcast to all connected WebSocket clients
-                socketio.emit('live_tracking_update', live_tracking_data[track_id], skip_sid=None)
-                print(f"📡 Broadcasting track {track_id}: x={data.get('x')}, z={data.get('z')}, occupancy={occupancy}, region={data.get('region', 'Unknown')}")
-            except (json.JSONDecodeError, KeyError) as e:
-                print(f"❌ Error processing Redis message: {e}")
+#                 # Broadcast to all connected WebSocket clients
+#                 socketio.emit('live_tracking_update', live_tracking_data[track_id], skip_sid=None)
+#                 print(f"📡 Broadcasting track {track_id}: x={data.get('x')}, z={data.get('z')}, occupancy={occupancy}, region={data.get('region', 'Unknown')}")
+#             except (json.JSONDecodeError, KeyError) as e:
+#                 print(f"❌ Error processing Redis message: {e}")
 
-def start_redis_listener():
-    """Start Redis listener in background thread"""
-    global redis_thread
-    if redis_thread is None or not redis_thread.is_alive():
-        redis_thread = Thread(target=redis_listener, daemon=True)
-        redis_thread.start()
-        print("✅ Redis listener thread started")
+# def start_redis_listener():
+#     """Start Redis listener in background thread"""
+#     global redis_thread
+#     if redis_thread is None or not redis_thread.is_alive():
+#         redis_thread = Thread(target=redis_listener, daemon=True)
+#         redis_thread.start()
+#         print("✅ Redis listener thread started")
 
-@socketio.on('connect')
-def handle_connect():
-    """Handle new WebSocket connection"""
-    print(f"👤 Client connected: {request.sid}")
-    socketio.emit('initial_live_data', list(live_tracking_data.values()))
+# @socketio.on('connect')
+# def handle_connect():
+#     """Handle new WebSocket connection"""
+#     print(f"👤 Client connected: {request.sid}")
+#     socketio.emit('initial_live_data', list(live_tracking_data.values()))
 
-@socketio.on('disconnect')
-def handle_disconnect():
-    """Handle client disconnection"""
-    print(f"👤 Client disconnected: {request.sid}")
+# @socketio.on('disconnect')
+# def handle_disconnect():
+#     """Handle client disconnection"""
+#     print(f"👤 Client disconnected: {request.sid}")
 
-@socketio.on('request_tracking_data')
-def send_tracking_data():
-    """Send all current tracking data on request"""
-    socketio.emit('initial_live_data', list(live_tracking_data.values()))
+# @socketio.on('request_tracking_data')
+# def send_tracking_data():
+#     """Send all current tracking data on request"""
+#     socketio.emit('initial_live_data', list(live_tracking_data.values()))
 
 
 # ---------------------------------------------------------
@@ -494,31 +492,31 @@ def api_facility_home_data():
         return jsonify({'error': str(e)}), 500
 
 
-# #will uncomment this once the esp32 is ready.....
-# @app.route('/data', methods=['POST'])
-# def receive_esp32_data():
-#     data = request.get_json(silent=True)
-#
-#     if not data:
-#         return jsonify({'success': False, 'error': 'Invalid or missing JSON'}), 400
-#
-#     temperature = data.get('temperature')
-#     lidar_light = data.get('lidar_light')
-#
-#     print('ESP32 data received:', data)
-#
-#     return jsonify({
-#         'success': True,
-#         'received': {
-#             'temperature': temperature,
-#             'lidar_light': lidar_light
-#         }
-#     }), 200
+# ESP32 data route
+@app.route('/sensor-data', methods=['POST'])
+def receive_data():
+    # Grab the JSON data sent by the ESP32
+    data = request.get_json()
+    
+    if not data:
+        return jsonify({"error": "No JSON payload received"}), 400
+
+    # debug printing
+    print("\n--- New IoT Data Received ---")
+    print(f"Device ID:    {data.get('device_id')}")
+    print(f"Temperature:  {data.get('temperature')} °C")
+    print(f"Humidity:     {data.get('humidity')} %")
+    print(f"LDR Value:    {data.get('ldr')}")
+    print(f"Switch State: {data.get('switch_state')}")
+    print("-----------------------------\n")
+
+    # Send a success response back to the ESP32
+    return jsonify({"status": "success", "message": "Data received and logged"}), 200
 
 
 if __name__ == '__main__':
     print("🚀 Booting up server and starting background tasks...")
-    start_redis_listener()
+    # start_redis_listener()
 
     socketio.run(app, 
                 host='0.0.0.0',  
