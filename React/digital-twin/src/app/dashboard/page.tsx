@@ -145,7 +145,7 @@ export default function Dashboard() {
 
   // --- UI Render ---
   return (
-    <div className="min-h-screen bg-[#131313] text-white">
+    <>
       <Navbar department="Admin" />
 
       <div className="side-nav row mt-0! text-black">
@@ -192,118 +192,120 @@ export default function Dashboard() {
         </div>
 
         {/* Real-Time Data Table */}
-        <div className="tracker-ui outer box basis-220 overflow-hidden flex flex-col mx-5!">
-          <h3 className="row mt-0! font-bold shrink-0">
-            <span className="flex-2">Rooms Real-Time Data</span>
-            <StatRow icon={Clock} label={currentTimeSpan} size="32"/>
-          </h3>
-          <div className="w-full overflow-x-auto mt-4 pb-2">
-            <table className="table w-full border-separate border-spacing-0 whitespace-nowrap">
-              <thead>
-                <tr>
-                  <th className="w-[1%] sticky left-0 z-20 bg-black shadow-[2px_0_5px_rgba(0,0,0,0.5)]">
-                    ID
-                  </th>
-                  
-                  <th className="hidden min-[43rem]:table-cell w-full text-left">
-                    Room Name
-                  </th>
-                  
-                  <th className="text-center!">
-                    <span className="iot">Occupancy</span>
-                    <Users size={24} className="th-small-iot" />
-                  </th>
-                  <th className="text-center!">
-                    <span className="iot">Temperature</span>
-                    <Thermometer size={24} className="th-small-iot" />
-                  </th>
-                  <th className="text-center!">
-                    <span className="iot">AC</span>
-                    <AirVent size={24} className="th-small-iot" />
-                  </th>
-                  <th className="text-center!">
-                    <span className="iot">Lights</span>
-                    <Lightbulb size={24} className="th-small-iot" />
-                  </th>
-                </tr>
-              </thead>
-              <tbody>
-                {roomsData.map(room => {
-                  const stats = currentRoomStats[room.room_id] || { occupancy: "--", temperature: "--", ac: null, lights: null };
-                  const hasData = stats.occupancy !== "--";
-
-                  const count = stats.occupancy;
-                  const bgColor = count > room.max_occupancy ? "#ff4444" : (count !== "--" && count !== 0) ? "#00ff88" : "#ffffff";
-                  
-                  const isAcOn = stats.ac;
-                  const acColor = stats.ac !== null ? (isAcOn ? "#00ff88" : "#ff4444") : "#ffffff";
-                  
-                  const isLightsOn = stats.lights;
-                  const lightsColor = stats.lights !== null ? (isLightsOn ? "#00ff88" : "#ff4444") : "#ffffff";
-
-                  const tempText = hasData ? `${stats.temperature} °C` : "--";
-                  const tempTextSmall = hasData ? `${Math.round(stats.temperature)}°` : "--";
-                  const tempColor = getTempColor(stats.temperature);
-
-                  return (
-                    <tr key={room.id}>
-                      {/* 5. Matches the w-[1%] from the header */}
-                      <td className="w-[1%] sticky left-0 z-10 bg-black font-bold shadow-[2px_0_5px_rgba(0,0,0,0.5)]">
-                        {room.room_id}
-                      </td>
-                      <td className="hidden min-[43rem]:table-cell">{room.name}</td>
-                      <td className="text-center!">
-                        <span className="fill small-iot" style={{ backgroundColor: bgColor }}>
-                          {count ?? "??"}
-                        </span>
-                      </td>
-                      <td className="text-center!">
-                        <span className="fill small-iot" style={{ backgroundColor: tempColor }}>
-                          {hasData ? (
-                            <>
-                              <span className="small">{tempTextSmall}</span>
-                              <span className="iot">{tempText}</span>
-                            </>
-                          ) : "--"}
-                        </span>
-                      </td>
-                      <td className="text-center!">
-                        <span className="fill small-iot" style={{ backgroundColor: acColor }}>
-                          {stats.ac !== null ? (
-                            <>
-                              <span className="small">{isAcOn ? <Wind size={24} className="animate-pulse"/> : <X size={24}/>}</span>
-                              <span className="iot">{isAcOn ? "• ON" : "- OFF"}</span>
-                            </>
-                          ) : "--"}
-                        </span>
-                      </td>
-                      <td className="text-center!">
-                        <span className="fill small-iot" style={{ backgroundColor: lightsColor }}>
-                          {stats.lights !== null ? (
-                            <>
-                              <span className="small">{isLightsOn ? <Lightbulb size={24}/> : <LightbulbOff size={24}/>}</span>
-                              <span className="iot">{isLightsOn ? "• ON" : "- OFF"}</span>
-                            </>
-                          ) : "--"}
-                        </span>
-                      </td>
-                    </tr>
-                  );
-                })}
-              </tbody>
-            </table>
-          </div>
-        </div>
         <div className="row boxes">
-          <StaffList 
-            staffList={securityStaffList}
-            staffRooms={securityStaffRooms}
-            department="Security"
-          />
-          <StaffList 
-            staffList={facilityStaff}
-            department="Facilities"
-          />
+          <div className="tracker-ui outer box basis-220 overflow-hidden flex flex-col mx-5!">
+            <h3 className="row mt-0! font-bold shrink-0">
+              <span className="flex-2">Rooms Real-Time Data</span>
+              <StatRow icon={Clock} label={currentTimeSpan} size="32"/>
+            </h3>
+            <div className="w-full overflow-x-auto mt-4 pb-2">
+              <table className="table w-full border-separate border-spacing-0 whitespace-nowrap">
+                <thead>
+                  <tr>
+                    <th className="w-[1%] sticky left-0 z-20 bg-black shadow-[2px_0_5px_rgba(0,0,0,0.5)]">
+                      ID
+                    </th>
+                    
+                    <th className="hidden min-[43rem]:table-cell w-full text-left">
+                      Room Name
+                    </th>
+                    
+                    <th className="text-center!">
+                      <span className="iot">Occupancy</span>
+                      <Users size={24} className="th-small-iot" />
+                    </th>
+                    <th className="text-center!">
+                      <span className="iot">Temperature</span>
+                      <Thermometer size={24} className="th-small-iot" />
+                    </th>
+                    <th className="text-center!">
+                      <span className="iot">AC</span>
+                      <AirVent size={24} className="th-small-iot" />
+                    </th>
+                    <th className="text-center!">
+                      <span className="iot">Lights</span>
+                      <Lightbulb size={24} className="th-small-iot" />
+                    </th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {roomsData.map(room => {
+                    const stats = currentRoomStats[room.room_id] || { occupancy: "--", temperature: "--", ac: null, lights: null };
+                    const hasData = stats.occupancy !== "--";
+
+                    const count = stats.occupancy;
+                    const bgColor = count > room.max_occupancy ? "#ff4444" : (count !== "--" && count !== 0) ? "#00ff88" : "#ffffff";
+                    
+                    const isAcOn = stats.ac;
+                    const acColor = stats.ac !== null ? (isAcOn ? "#00ff88" : "#ff4444") : "#ffffff";
+                    
+                    const isLightsOn = stats.lights;
+                    const lightsColor = stats.lights !== null ? (isLightsOn ? "#00ff88" : "#ff4444") : "#ffffff";
+
+                    const tempText = hasData ? `${stats.temperature} °C` : "--";
+                    const tempTextSmall = hasData ? `${Math.round(stats.temperature)}°` : "--";
+                    const tempColor = getTempColor(stats.temperature);
+
+                    return (
+                      <tr key={room.id}>
+                        {/* 5. Matches the w-[1%] from the header */}
+                        <td className="w-[1%] sticky left-0 z-10 bg-black font-bold shadow-[2px_0_5px_rgba(0,0,0,0.5)]">
+                          {room.room_id}
+                        </td>
+                        <td className="hidden min-[43rem]:table-cell">{room.name}</td>
+                        <td className="text-center!">
+                          <span className="fill small-iot" style={{ backgroundColor: bgColor }}>
+                            {count ?? "??"}
+                          </span>
+                        </td>
+                        <td className="text-center!">
+                          <span className="fill small-iot" style={{ backgroundColor: tempColor }}>
+                            {hasData ? (
+                              <>
+                                <span className="small">{tempTextSmall}</span>
+                                <span className="iot">{tempText}</span>
+                              </>
+                            ) : "--"}
+                          </span>
+                        </td>
+                        <td className="text-center!">
+                          <span className="fill small-iot" style={{ backgroundColor: acColor }}>
+                            {stats.ac !== null ? (
+                              <>
+                                <span className="small">{isAcOn ? <Wind size={24} className="animate-pulse"/> : <X size={24}/>}</span>
+                                <span className="iot">{isAcOn ? "• ON" : "- OFF"}</span>
+                              </>
+                            ) : "--"}
+                          </span>
+                        </td>
+                        <td className="text-center!">
+                          <span className="fill small-iot" style={{ backgroundColor: lightsColor }}>
+                            {stats.lights !== null ? (
+                              <>
+                                <span className="small">{isLightsOn ? <Lightbulb size={24}/> : <LightbulbOff size={24}/>}</span>
+                                <span className="iot">{isLightsOn ? "• ON" : "- OFF"}</span>
+                              </>
+                            ) : "--"}
+                          </span>
+                        </td>
+                      </tr>
+                    );
+                  })}
+                </tbody>
+              </table>
+            </div>
+          </div>
+          <div className="box basis-100 overflow-hidden flex flex-col mx-5!">
+            <StaffList 
+              staffList={securityStaffList}
+              staffRooms={securityStaffRooms}
+              department="Security"
+            />
+            <StaffList 
+              staffList={facilityStaff}
+              department="Facilities"
+            />
+          </div>
         </div>
       </div>
 
@@ -338,6 +340,6 @@ export default function Dashboard() {
           </div>
         </div>
       )}
-    </div>
+    </>
   );
 }

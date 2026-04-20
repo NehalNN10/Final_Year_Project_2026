@@ -1,16 +1,34 @@
 @import "tailwindcss";
 
-/* Your existing Next.js font setup and old CSS goes below this */
+/* 1. Default Light Theme Variables */
 :root {
+  --bg-color: #fafafa;
+  --text-color: #000;
+  --primary-color: #0f8;
+  --surface-color: rgba(255, 255, 255, 0.6);
   font-family: var(--font-league-spartan), sans-serif;
 }
 
-body { 
-    margin: 0; 
-    font-family: 'League Spartan', sans-serif !important; 
-    background-color: #131313;
-    overflow-y: auto;
+/* 2. Dark Theme Overrides */
+body.dark-mode {
+  --bg-color: #121212;
+  --text-color: #fff;
+  --primary-color: #0f8;
+  --surface-color: rgba(0, 0, 0, 0.6) !important;
+}
 
+/* 3. Apply the variables to your elements */
+body {
+  background-color: var(--bg-color);
+  color: var(--text-color) !important;
+  transition: background-color 0.3s, color 0.3s; /* Smooth transition */
+  margin: 0; 
+  font-family: 'League Spartan', sans-serif !important; 
+  overflow-y: auto;
+}
+
+.card {
+  background-color: var(--surface-color);
 }
 
 button {
@@ -20,7 +38,7 @@ button {
 
 input[type="text"], input[type="password"], input[type="number"], select, input[type="email"] {
     font-family: 'League Spartan', sans-serif !important;
-    background: rgba(0, 0, 0, 0.8);
+    background: var(--surface-color);
     display: flex !important;
     justify-content: center !important;
     align-items: center;
@@ -172,7 +190,7 @@ tr {
 }
 
 .btn-black {
-    background: rgba(0, 0, 0, 0.8);
+    background: var(--surface-color);
     backdrop-filter: blur(1rem) !important;
     border: 1px solid #000;
     color: white;
@@ -218,7 +236,7 @@ tr {
     text-decoration: none;
     font-size: 1.3rem;
     padding: 10px 15px;
-    color: white;
+    color: var(--text-color);
     border-radius: 8px;
     background: transparent;
     transition: all 0.3s ease;
@@ -439,8 +457,7 @@ nav {
     justify-content: space-between;
     padding-left: 2rem; 
     padding-right: 2rem;
-    color: white;
-    background: rgba(0, 0, 0, 0.67);
+    background: var(--surface-color);
     backdrop-filter: blur(20px) !important;    
     border-bottom: 2px solid #00ff88;
 }
@@ -475,7 +492,7 @@ nav {
     @apply max-w-125;
     width: 90%;
     box-shadow: 0 0 50px rgba(0, 255, 136, 0.3);
-    background: #000000;
+    background: var(--surface-color);
     animation: slideUp 0.3s ease-in-out;
 }
 
@@ -491,7 +508,7 @@ nav {
     left: 0;
     width: 100%;
     height: 100%;
-    background-color: rgba(0, 0, 0, 0.7);
+    background-color: var(--surface-color);
     z-index: 999;
     animation: 0.3s ease-in-out;
 }
@@ -565,7 +582,7 @@ nav {
     padding: 0.5rem 2rem;
     height: 4rem !important;
     font-size: 1.8rem;
-    background-color: #ffffff;
+    background-color: #00ff88;
     color: #000000;
     border-bottom: 2px solid #00ff88;
 }
@@ -580,7 +597,7 @@ nav {
 }
 
 .tracker-ui {
-    background: rgba(0, 0, 0, 0.8);
+    background: var(--surface-color);
     backdrop-filter: blur(1rem) !important;
     color: white;
     margin-top: 10px;
@@ -614,7 +631,7 @@ nav {
 #roomChecklist {
     @apply max-h-37.5;
     overflow-y: auto; 
-    background: rgba(0,0,0,0.5); 
+    background: var(--surface-color); 
     padding: 10px; 
     border: 1px solid #888; 
     border-radius: 5px;
@@ -632,7 +649,7 @@ nav {
     height: 7px;
 }
 ::-webkit-scrollbar-track {
-    background: rgba(0,0,0,0.1); 
+    background: var(--surface-color); 
 }
 ::-webkit-scrollbar-thumb {
     background: #00ff88; 
