@@ -92,11 +92,11 @@ export default function SecurityHome() {
 
   // --- UI Render ---
   return (
-    <div className="min-h-screen bg-[#131313] text-white">
+    <>
       <Navbar department="Security" />
 
       {/* Side Nav */}
-      <div className="side-nav row mt-0! text-black">
+      <div className="side-nav row mt-0!">
         <span>Security Dashboard</span>
       </div>
 
@@ -105,11 +105,11 @@ export default function SecurityHome() {
         <div className="row px-5">
           <div className="">
             <h2 className="font-bold">Welcome, {name}!</h2>
-            <p className="text-gray-400">Security data and metrics will be displayed here.</p>
+            <p className="text-[var(--sub-text-color)]">Security data and metrics will be displayed here.</p>
           </div>
           {currentRole === 'Security Admin' && (
             <button className="btn btn-red btn-auto m-0! py-1!" onClick={handleSendAllAlerts}>
-              <h2 className="font-bold text-white text-xl">Create Emergency</h2>
+              <h2 className="font-bold">Create Emergency</h2>
             </button>
           )}
         </div>
@@ -119,7 +119,7 @@ export default function SecurityHome() {
           <div className="tracker-ui scroll outer box basis-70">
             <h3 className="font-bold">Occupancy Alerts</h3>
             {/* Dynamic Alerts will map here later */}
-            <div className="tracker-ui mt-4 p-4 text-gray-400 text-center">
+            <div className="tracker-ui mt-4 p-4 text-[var(--sub-text-color)] text-center">
               No active alerts.
             </div>
           </div>
@@ -131,9 +131,9 @@ export default function SecurityHome() {
             </h3>
             <div className="w-full overflow-x-auto mt-4 pb-2">
               <table className="table w-full border-separate border-spacing-0 whitespace-nowrap">
-                <thead>
+                <thead className="bg-[var(--primary-color)] text-[var(--primary-text-color)]">
                   <tr>
-                    <th className="w-[1%] sticky left-0 z-20 bg-black shadow-[2px_0_5px_rgba(0,0,0,0.5)]">
+                    <th className="w-[1%] sticky left-0 z-20 bg-[--bg-color] shadow-[2px_0_5px_rgba(0,0,0,0.5)]">
                       ID
                     </th>
                     
@@ -147,7 +147,7 @@ export default function SecurityHome() {
                     </th>
                   </tr>
                 </thead>
-                <tbody>
+                <tbody className="text-[var(--text-color)] bg-[var(--bg-color)]">
                   {roomsData.map(room => {
                     const stats = currentRoomStats[room.room_id] || { occupancy: "--", temperature: "--", ac: null, lights: null };
 
@@ -157,7 +157,7 @@ export default function SecurityHome() {
                     return (
                       <tr key={room.id}>
                         {/* 5. Matches the w-[1%] from the header */}
-                        <td className="w-[1%] sticky left-0 z-10 bg-black font-bold shadow-[2px_0_5px_rgba(0,0,0,0.5)]">
+                        <td className="w-[1%] sticky left-0 z-10 bg-[--bg-color] font-bold shadow-[2px_0_5px_rgba(0,0,0,0.5)]">
                           {room.room_id}
                         </td>
                         <td className="hidden min-[26rem]:table-cell">{room.name}</td>
@@ -184,6 +184,6 @@ export default function SecurityHome() {
           )}
         </div>
       </div>
-    </div>
+    </>
   );
 }

@@ -108,7 +108,7 @@ export default function FacilityHome() {
         <div className="row px-5">
           <div className="">
             <h2 className="font-bold">Welcome, {name}!</h2>
-            <p className="text-gray-400">Facilities data and metrics will be displayed here.</p>
+            <p className="sub-text">Facilities data and metrics will be displayed here.</p>
           </div>
         </div>
         
@@ -116,15 +116,15 @@ export default function FacilityHome() {
         <div className="row boxes">
           <div className="tracker-ui scroll outer box basis-70">
             <h3 className="font-bold">AC Alerts</h3>
-            <div className="tracker-ui mt-4 p-4 text-gray-400 text-center">No active alerts.</div>
+            <div className="tracker-ui mt-4 p-4 sub-text text-center">No active alerts.</div>
           </div>
           <div className="tracker-ui scroll outer box basis-70">
             <h3 className="font-bold">Lights Alerts</h3>
-            <div className="tracker-ui mt-4 p-4 text-gray-400 text-center">No active alerts.</div>
+            <div className="tracker-ui mt-4 p-4 sub-text text-center">No active alerts.</div>
           </div>
           <div className="tracker-ui scroll outer box basis-70">
             <h3 className="font-bold">Temperature Alerts</h3>
-            <div className="tracker-ui mt-4 p-4 text-gray-400 text-center">No active alerts.</div>
+            <div className="tracker-ui mt-4 p-4 sub-text text-center">No active alerts.</div>
           </div>
 
           {/* Real-Time Data Table */}
@@ -136,9 +136,9 @@ export default function FacilityHome() {
             <div className="w-full overflow-x-auto mt-4 pb-2">
 {/* 1. Removed min-w-175 and table-fixed. Added whitespace-nowrap to stop text wrapping! */}
               <table className="table w-full border-separate border-spacing-0 whitespace-nowrap">
-                <thead>
+                <thead className="bg-[var(--primary-color)] text-[var(--primary-text-color)]">
                   <tr>
-                    <th className="w-[1%] sticky left-0 z-20 bg-black shadow-[2px_0_5px_rgba(0,0,0,0.5)]">
+                    <th className="w-[1%] sticky left-0 z-20 shadow-[2px_0_5px_rgba(0,0,0,0.5)]">
                       ID
                     </th>
                     
@@ -183,9 +183,9 @@ export default function FacilityHome() {
                     const tempColor = getTempColor(stats.temperature);
 
                     return (
-                      <tr key={room.id}>
+                      <tr key={room.id} className=" bg-[var(--bg-color)]">
                         {/* 5. Matches the w-[1%] from the header */}
-                        <td className="w-[1%] sticky left-0 z-10 bg-black font-bold shadow-[2px_0_5px_rgba(0,0,0,0.5)]">
+                        <td className="w-[1%] sticky left-0 z-10 bg-[var(--bg-color)] font-bold shadow-[2px_0_5px_rgba(0,0,0,0.5)]">
                           {room.room_id}
                         </td>
                         <td className="hidden min-[43rem]:table-cell">{room.name}</td>
@@ -269,7 +269,7 @@ export default function FacilityHome() {
               <FormRow label="Description" value={emergencyForm.description} onChange={e => setEmergencyForm({...emergencyForm, description: e.target.value})} />
               
               <div className="row mt-4! justify-center!">
-                <button type="button" className="btn btn-green btn-auto" onClick={() => setEmergencyModalOpen(false)}>Cancel</button>
+                <button type="button" className="btn btn-primary btn-auto" onClick={() => setEmergencyModalOpen(false)}>Cancel</button>
                 <button type="submit" className="btn btn-red btn-auto">Send Alert</button>
               </div>
             </form>

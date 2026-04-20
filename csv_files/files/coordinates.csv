@@ -1,4 +1,4 @@
-Name,Type,Min X,Max X,Min Z,Max Z,Center X,Center Z,Width (X),Depth (Z)
+Name,Type,Min X,Max X,Min Z,Max Z,Center X,Center Z,Width (X),Depth (Zcoordi
 Floor 1,Floor,-5.00,9.00,-2.75,8.75,2.00,3.00,14.00,11.50
 Floor 2,Floor,-9.00,9.00,-8.75,-2.75,0.00,-5.75,18.00,6.00
 wallx1,Wall,9.00,9.35,-8.75,-2.25,9.175,-5.50,0.35,6.50

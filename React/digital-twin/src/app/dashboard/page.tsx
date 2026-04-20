@@ -159,9 +159,6 @@ export default function Dashboard() {
             <p className="text-gray-400">Security data and metrics will be displayed here.</p>
           </div>
           <div className="flex flex-row gap-2">
-            <button className="btn btn-red btn-auto m-0! py-1!" onClick={() => setEmergencyModalOpen(true)}>
-              <h2 className="m-0! font-bold text-white text-xl">Send Alert</h2>
-            </button>
             <button className="btn btn-red btn-auto m-0! py-1!" onClick={handleSendAllAlerts}>
               <h2 className="font-bold text-white text-xl">Create Emergency</h2>
             </button>
@@ -200,9 +197,9 @@ export default function Dashboard() {
             </h3>
             <div className="w-full overflow-x-auto mt-4 pb-2">
               <table className="table w-full border-separate border-spacing-0 whitespace-nowrap">
-                <thead>
+                <thead className="bg-[var(--primary-color)] text-[var(--primary-text-color)]">
                   <tr>
-                    <th className="w-[1%] sticky left-0 z-20 bg-black shadow-[2px_0_5px_rgba(0,0,0,0.5)]">
+                    <th className="w-[1%] sticky left-0 z-20 shadow-[2px_0_5px_rgba(0,0,0,0.5)]">
                       ID
                     </th>
                     
@@ -228,7 +225,7 @@ export default function Dashboard() {
                     </th>
                   </tr>
                 </thead>
-                <tbody>
+                <tbody className="text-[var(--text-color)] bg-[var(--bg-color)]">
                   {roomsData.map(room => {
                     const stats = currentRoomStats[room.room_id] || { occupancy: "--", temperature: "--", ac: null, lights: null };
                     const hasData = stats.occupancy !== "--";
@@ -249,7 +246,7 @@ export default function Dashboard() {
                     return (
                       <tr key={room.id}>
                         {/* 5. Matches the w-[1%] from the header */}
-                        <td className="w-[1%] sticky left-0 z-10 bg-black font-bold shadow-[2px_0_5px_rgba(0,0,0,0.5)]">
+                        <td className="w-[1%] sticky left-0 z-10 bg-[--bg-color] font-bold shadow-[2px_0_5px_rgba(0,0,0,0.5)]">
                           {room.room_id}
                         </td>
                         <td className="hidden min-[43rem]:table-cell">{room.name}</td>
@@ -312,7 +309,7 @@ export default function Dashboard() {
       {/* EMERGENCY MODAL */}
       {isEmergencyModalOpen && (
         <div className="modal-overlay active" onClick={(e) => e.target === e.currentTarget && setEmergencyModalOpen(false)}>
-          <div className="tracker-ui modal text-white">
+          <div className="tracker-ui modal">
             <div className="modal-header p-4 text-3xl text-[#f33]">🚨 FACILITIES ALERT 🚨</div>
             <p className="text-xl mb-4">Please provide details about the situation:</p>
             
@@ -333,7 +330,7 @@ export default function Dashboard() {
               <FormRow label="Description" value={emergencyForm.description} onChange={e => setEmergencyForm({...emergencyForm, description: e.target.value})} />
               
               <div className="row mt-4! justify-center!">
-                <button type="button" className="btn btn-green btn-auto" onClick={() => setEmergencyModalOpen(false)}>Cancel</button>
+                <button type="button" className="btn btn-primary btn-auto" onClick={() => setEmergencyModalOpen(false)}>Cancel</button>
                 <button type="submit" className="btn btn-red btn-auto">Send Alert</button>
               </div>
             </form>

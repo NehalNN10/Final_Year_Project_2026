@@ -65,7 +65,7 @@ export default function Login() {
         <FormRow label="Password" type="password" value={password} onChange={(e) => setPassword(e.target.value)} />
         
         <div className="row" style={{ marginTop: '20px' }}>
-          <button className="btn btn-green text-2xl" type="submit">
+          <button className="btn btn-primary text-2xl" type="submit">
             Login
           </button>
         </div>

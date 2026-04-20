@@ -222,9 +222,9 @@ export class SandboxSimulation {
 
         // Color the buttons dynamically every frame based on the room's data
         if (roomInf && row && department !== "Security") {
-            if (btnAC) btnAC.className = row.ac ? "btn btn-green m-0! flex-1!" : "btn btn-red m-0! flex-1!";
-            if (btnLights) btnLights.className = row.lights ? "btn btn-green m-0! flex-1!" : "btn btn-red m-0! flex-1!";
-            if (btnOccu) btnOccu.className = row.occupancy === 0 ? "btn btn-green m-0! flex-1!" : "btn btn-red m-0! flex-1!";
+            if (btnAC) btnAC.className = row.ac ? "btn btn-primary m-0! flex-1!" : "btn btn-red m-0! flex-1!";
+            if (btnLights) btnLights.className = row.lights ? "btn btn-primary m-0! flex-1!" : "btn btn-red m-0! flex-1!";
+            if (btnOccu) btnOccu.className = row.occupancy === 0 ? "btn btn-primary m-0! flex-1!" : "btn btn-red m-0! flex-1!";
         } else {
             // Grey out the buttons if looking at a hallway!
             if (btnAC) btnAC.className = "btn bg-gray-700 m-0! flex-1! pointer-events-none";
