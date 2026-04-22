@@ -41,6 +41,15 @@ db.init_app(app)
 
 socketio = SocketIO(app, cors_allowed_origins="*", async_mode='threading')
 
+# global iot data object
+latest_iot_data = {
+    "device_id": None,
+    "temperature": None,
+    "humidity": None,
+    "lights_state": None,
+    "ac_state": None
+}
+
 @app.route('/active_files/<path:filename>')
 def serve_active_files(filename):
     return send_from_directory(os.path.join(CSV_DIR, 'active_files'), filename)
@@ -496,23 +505,29 @@ def api_facility_home_data():
 @app.route('/sensor-data', methods=['POST'])
 def receive_data():
     # Grab the JSON data sent by the ESP32
-    data = request.get_json()
+    global latest_iot_data
+    data = request.get_json(force=True)
     
     if not data:
         return jsonify({"error": "No JSON payload received"}), 400
+    
+    latest_iot_data = data
 
     # debug printing
     print("\n--- New IoT Data Received ---")
     print(f"Device ID:    {data.get('device_id')}")
     print(f"Temperature:  {data.get('temperature')} °C")
     print(f"Humidity:     {data.get('humidity')} %")
-    print(f"LDR Value:    {data.get('ldr')}")
-    print(f"Switch State: {data.get('switch_state')}")
+    print(f"Lights:    {data.get('lights_state')}")
+    print(f"AC: {data.get('ac_state')}")
     print("-----------------------------\n")
 
     # Send a success response back to the ESP32
     return jsonify({"status": "success", "message": "Data received and logged"}), 200
 
+@app.route('/api/live_sensor_data', methods=['GET'])
+def get_live_sensor_data():
+    return jsonify(latest_iot_data), 200
 
 if __name__ == '__main__':
     print("🚀 Booting up server and starting background tasks...")
