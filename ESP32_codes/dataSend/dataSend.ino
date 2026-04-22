@@ -4,23 +4,25 @@
 #include <ArduinoJson.h> // Make sure you installed this library!
 
 // --- HARDWARE PINS ---
-#define LDRPIN 4
+#define LIGHTSWITCHPIN 4
 #define DHTPIN 21
-#define SWITCHPIN 19
+#define ACSWITCHPIN 19
 #define DHTTYPE DHT22
 
 // --- WIFI & SERVER SETTINGS ---
-const char* ssid = "Not your wifi";
-const char* password = "tjnc7740";
+// const char* ssid = "Not your wifi";
+const char* ssid = "HU-AltStdev";
+const char* password = "0r!!A!!487St";
 // Put your Mac's IP address here, keeping the http:// and :5000/sensor-data
-const char* serverName = "http://10.240.174.51:1767/sensor-data"; 
+const char* serverName = "http://10.20.7.112:1767/sensor-data"; 
 
 DHT dht(DHTPIN, DHTTYPE);
 
 void setup() {
   Serial.begin(115200);
   dht.begin();
-  pinMode(SWITCHPIN, INPUT_PULLUP);
+  pinMode(ACSWITCHPIN, INPUT_PULLUP);
+  pinMode(LIGHTSWITCHPIN, INPUT_PULLUP);
 
   // 1. Connect to WiFi
   Serial.print("Connecting to WiFi");
@@ -36,8 +38,8 @@ void setup() {
 
 void loop() {
   // 1. Read Sensors
-  int ldrVal = analogRead(LDRPIN);
-  int switchState = digitalRead(SWITCHPIN);
+  int lightSwitchState = digitalRead(LIGHTSWITCHPIN);
+  int acSwitchState = digitalRead(ACSWITCHPIN);
   float tempC = dht.readTemperature();
   float humidity = dht.readHumidity();
 
@@ -54,12 +56,13 @@ void loop() {
   doc["device_id"] = "lab_station_1";
   doc["temperature"] = tempC;
   doc["humidity"] = humidity;
-  doc["ldr"] = ldrVal;
-  doc["switch_state"] = (switchState == LOW) ? "ON" : "OFF";
+  doc["lights_state"] = (lightSwitchState == LOW) ? "ON" : "OFF";
+  doc["ac_state"] = (acSwitchState == LOW) ? "ON" : "OFF";
 
   // Serialize the JSON object into a normal string
   String jsonPayload;
   serializeJson(doc, jsonPayload);
+  Serial.println(jsonPayload);
 
   // 3. Send the HTTP POST Request (Only if WiFi is connected)
   if (WiFi.status() == WL_CONNECTED) {
@@ -67,7 +70,7 @@ void loop() {
     
     Serial.println("Sending data to Flask...");
     http.begin(serverName); // Specify destination
-    http.addHeader("Content-Type", "application/json"); // Tell Flask to expect JSON
+    http.addHeader("addHeaderContent-Type", "application/json"); // Tell Flask to expect JSON
 
     // Send the actual POST request
     int httpResponseCode = http.POST(jsonPayload);
@@ -77,8 +80,8 @@ void loop() {
       Serial.print("HTTP Response code: ");
       Serial.println(httpResponseCode);
       // Optional: Print the server's reply (e.g., {"status": "success"})
-      // String response = http.getString(); 
-      // Serial.println(response);
+      String response = http.getString(); 
+      Serial.println(response);
     } else {
       Serial.print("Error code: ");
       Serial.println(httpResponseCode);
