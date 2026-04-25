@@ -2,7 +2,7 @@ import * as THREE from 'three';
 import { io } from 'socket.io-client';
 import { initVariables } from './variables.js';
 import { initScene, scene, camera, renderer, controls } from './scene.js';
-import { loadAssets, buildWorld, createMarker } from './world.js';
+import { loadAssets, buildLiveWorld, createMarker } from './world.js';
 import { renderLiveFrame } from './live_simulation.js';
 
 let animationFrameId;
@@ -184,7 +184,7 @@ export async function initLiveEngine(container) {
 
     try {
         await loadAssets();
-        buildWorld(); 
+        buildLiveWorld(); 
         animate();
     } catch (err) {
         console.error("Critical Error loading assets:", err);

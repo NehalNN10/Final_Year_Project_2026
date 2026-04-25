@@ -191,7 +191,29 @@ export function updateMarker(markerGroup, x, z, id) {
     // --- REMOVED SECTION C (Text Update) COMPLETELY ---
 }
 
-export function buildWorld() {
+export function buildLiveWorld() {
+    // We assign to the exported 'worldObjects' so ui.js can see them
+    Object.assign(worldObjects, {
+        // floor1: createFloor(14, 11.5, 3, 2, materials.floor),
+    // floor2: createFloor(18, 6, -5.75, 0, materials.floor),
+    // floor: createObject(0, 0, Math.PI, models.floor),
+
+    floor1 : createFloor(7.5, 4.25, 0, 3.75, materials.floor2),
+
+    workbench_v1: createObject2(2.375, 0.9, 4.25/2 -0.9/2, 7.5 - 0.4 - 2.375/2, materials.bench),
+    workbench_v2: createObject2(2.375, 0.9, 4.25/2 -0.9/2, 7.5 - 0.8 - 2.375*3/2, materials.bench),
+
+    b_bench: createObject2(1.3, 0.6, -4.25/2 +0.6/2, 2.4+ 1.3/2, materials.bench),
+    w_bench: createObject2(1.3, 0.8, -4.25/2 +0.8/2, 2.4+ 1.3*3/2 + 1.02, materials.buggy),
+    s_bench: createObject2(0.8, 0.6, -4.25/2 +0.6/2, 2.4+ 1.3*2 + 1.02 + 0.8/2 + 0.25, materials.buggy),
+
+    wall_1: createWall(wallThickness, 4.25 + wallThickness,  -wallThickness/2, -wallThickness/2, materials.wall),
+    wall_2: createWall(wallThickness, 4.25 + wallThickness, 7.5+wallThickness/2, -wallThickness/2, materials.wall),
+    wall_3: createWall(7.5, wallThickness, 7.5/2, -4.25/2 - wallThickness/2, materials.wall),
+    });
+}
+
+export function buildStaticWorld() {
     // We assign to the exported 'worldObjects' so ui.js can see them
     Object.assign(worldObjects, {
         // floor1: createFloor(14, 11.5, 3, 2, materials.floor),

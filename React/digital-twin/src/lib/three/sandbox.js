@@ -1,6 +1,6 @@
 import { initRoomInfo, roomInfo, FPS, LOOP_DURATION } from './variables.js';
 import { initScene, scene, camera, renderer, controls } from './scene.js';
-import { loadAssets, buildWorld } from './world.js';
+import { loadAssets, buildStaticWorld } from './world.js';
 import { SandboxSimulation } from "./sandbox_simulation.js";
 
 export class SandboxEngine {
@@ -45,7 +45,7 @@ export class SandboxEngine {
         try {
             await loadAssets();
             console.log("Sandbox Assets ready. Building world...");
-            buildWorld(); 
+            buildStaticWorld(); 
             this.animate();
         } catch (err) {
             console.error("Critical Error loading Sandbox assets:", err);

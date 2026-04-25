@@ -1,6 +1,6 @@
 import { initVariables } from './variables.js';
 import { initScene, scene, camera, renderer, controls, setupHeatmap } from './scene.js';
-import { loadAssets, buildWorld} from './world.js';
+import { loadAssets, buildStaticWorld} from './world.js';
 import { loadSimulationData, renderFrame, playback } from './simulation.js';
 import { FPS, LOOP_DURATION } from './variables.js';
 
@@ -138,7 +138,7 @@ export async function initThreeEngine(container) {
     try {
         await loadAssets();
         console.log("Assets ready. Building world...");
-        buildWorld(); 
+        buildStaticWorld(); 
         setupHeatmap(playback.showHeatmap);
         animate();
     } catch (err) {

@@ -1,6 +1,6 @@
 import * as THREE from 'three';
 import { OrbitControls } from 'jsm/controls/OrbitControls.js';
-import { loadAssets, buildWorld } from "./assets/world.js";
+import { loadAssets, buildStaticWorld } from "./assets/world.js";
 import { renderFrame, livePlayback, createLiveMarker, updateLiveMarker, getTime } from "./assets/live_simulation.js";
 import { scene, camera, renderer, controls } from "./assets/scene.js";
 
@@ -165,7 +165,7 @@ socket.on('disconnect', () => {
 // 1. Load 3D Assets -> Then Build World -> Then Start Animate
 loadAssets().then(() => {
     console.log("Assets ready. Building world...");
-    buildWorld(); // Creates the tables/walls using the loaded assets
+    buildStaticWorld(); // Creates the tables/walls using the loaded assets
     animate();    // Start the loop
 }).catch(err => {
     console.error("Critical Error loading assets:", err);
