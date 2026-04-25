@@ -4,8 +4,8 @@
 :root {
   --bg-color: #fafafa;
   --text-color: #000;
-  --sub-text-color:#444;
-  --primary-color: #60b;
+  --sub-text-color:hsl(0, 0%, 27%);
+  --primary-color: #502567;
   --primary-text-color: #fff;
   --surface-color: rgba(255, 255, 255, 0.6);
   font-family: var(--font-league-spartan), sans-serif;
@@ -16,7 +16,7 @@ body.dark-mode {
   --bg-color: #121212;
   --text-color: #fff;
   --sub-text-color: #aaa;
-  --primary-color: #a4f;
+  --primary-color: #0f8;
   --primary-text-color: #000;
   --surface-color: rgba(0, 0, 0, 0.6) !important;
 }

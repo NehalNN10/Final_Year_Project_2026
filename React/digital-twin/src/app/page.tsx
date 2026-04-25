@@ -1,14 +1,17 @@
 "use client"; // Tells Next.js this component uses interactive client-side features (like state)
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
 import FormRow from "../components/FormRow";
+import IntButton from "@/components/IntButton";
+import { Moon, Sun } from "lucide-react";
 
 export default function Login() {
   // React State to hold our form inputs and errors
   const [userId, setUserId] = useState("");
   const [password, setPassword] = useState("");
   const [error, setError] = useState("");
+  const [isDarkMode, setIsDarkMode] = useState(false);
   const router = useRouter();
 
   // Handle the form submission
@@ -46,31 +49,74 @@ export default function Login() {
     }
   };
 
+  useEffect(() => {
+    const savedTheme = localStorage.getItem('theme');
+    if (savedTheme === 'dark') {
+      document.body.classList.add('dark-mode');
+      setIsDarkMode(true);
+    }
+  }, []);
+
+  // ✨ ADD THIS: The function to handle the switch
+  const toggleTheme = () => {
+    const newIsDark = !isDarkMode;
+    setIsDarkMode(newIsDark);
+    
+    if (newIsDark) {
+      document.body.classList.add('dark-mode');
+      localStorage.setItem('theme', 'dark');
+    } else {
+      document.body.classList.remove('dark-mode');
+      localStorage.setItem('theme', 'light');
+    }
+  };
+
+  const handleLogout = async () => {
+    try {
+      await fetch('/api/logout', { method: 'POST' });
+      document.cookie = "department=; expires=Thu, 01 Jan 1970 00:00:00 UTC; path=/;";
+      window.location.href = '/'; 
+    } catch (error) {
+      console.error("Failed to log out:", error);
+    }
+  };
+
   return (
-    <div className="tracker-ui outer login p-8">
-      <div className="pt-5 font-bold text-center">
-        <h1>Welcome To HU Digital Twin</h1>
+    <>
+      <div className="flex flex-row">
+        <div className="bg-[var(--primary-color)] text-[var(--primary-text-color)] rounded-r-[1rem] rounded-l-0 h-screen w-3/5">yo</div>
+        <div className="w-2/5 h-screen flex flex-col items-center justify-center relative">
+          <IntButton 
+            icon={isDarkMode ? Moon : Sun} 
+            label="Switch Theme" 
+            onClick={toggleTheme} 
+            classes={"btn-header btn-primary absolute top-8 right-8 z-200"} 
+          />
+          <div className="pt-5 font-bold text-center px-5">
+            <h1>Welcome To HU Digital Twin</h1>
+          </div>
+
+          {error && (
+            <div className="row px-10">
+              <div className="text-[#ff4444] font-bold">{error}</div>
+            </div>
+          )}
+
+          <form onSubmit={handleSubmit} className="w-full px-10">
+            
+            <FormRow label="Username/ID" value={userId} onChange={(e) => setUserId(e.target.value)} />
+            
+            <FormRow label="Password" type="password" value={password} onChange={(e) => setPassword(e.target.value)} />
+            
+            <div className="row" style={{ marginTop: '20px' }}>
+              <button className="btn btn-primary text-2xl" type="submit">
+                Login
+              </button>
+            </div>
+            
+          </form>
+        </div>
       </div>
-
-      {error && (
-        <div className="row">
-          <div className="text-[#ff4444] font-bold">{error}</div>
-        </div>
-      )}
-
-      <form onSubmit={handleSubmit}>
-        
-        <FormRow label="Username/ID" value={userId} onChange={(e) => setUserId(e.target.value)} />
-        
-        <FormRow label="Password" type="password" value={password} onChange={(e) => setPassword(e.target.value)} />
-        
-        <div className="row" style={{ marginTop: '20px' }}>
-          <button className="btn btn-primary text-2xl" type="submit">
-            Login
-          </button>
-        </div>
-        
-      </form>
-    </div>
+    </>
   );
 }
