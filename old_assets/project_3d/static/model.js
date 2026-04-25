@@ -1,5 +1,5 @@
 // Import the new functions from world.js
-import { loadAssets, buildWorld } from "./assets/world.js";
+import { loadAssets, buildStaticWorld } from "./assets/world.js";
 import { loadSimulationData, renderFrame, playback } from "./assets/simulation.js";
 import { FPS, LOOP_DURATION } from "./variables.js";
 import { setupGUI } from "./assets/ui.js";
@@ -67,7 +67,7 @@ loadSimulationData(() => {
 // 2. Load 3D Assets -> Then Build World -> Then Start Animate
 loadAssets().then(() => {
     console.log("Assets ready. Building world...");
-    buildWorld(); // Creates the tables/walls using the loaded assets
+    buildStaticWorld(); // Creates the tables/walls using the loaded assets
     animate();    // Start the loop
 }).catch(err => {
     console.error("Critical Error loading assets:", err);

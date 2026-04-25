@@ -191,7 +191,7 @@ export function updateMarker(markerGroup, x, z, id) {
     // --- REMOVED SECTION C (Text Update) COMPLETELY ---
 }
 
-export function buildWorld() {
+export function buildStaticWorld() {
     // We assign to the exported 'worldObjects' so ui.js can see them
     Object.assign(worldObjects, {
         // floor1: createFloor(14, 11.5, 3, 2, materials.floor),
