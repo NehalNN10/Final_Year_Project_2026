@@ -59,7 +59,7 @@ export default function ModelControlsPanel({ isReplay = false }: ModelControlsPa
                 <ListRestart size={20} /> <span className="ml-2">Model Replay</span>
               </button>
           )}
-          {!isReplay && (
+          {/* {!isReplay && (
               <button 
               className="btn btn-primary mx-0! mb-0! mt-2!" 
               id="replay-btn" 
@@ -71,7 +71,7 @@ export default function ModelControlsPanel({ isReplay = false }: ModelControlsPa
               >
                 <ListRestart size={20} /> <span className="ml-2">Full Model Replay</span>
               </button>
-          )}
+          )} */}
         </div>
       </div>
     </div>
