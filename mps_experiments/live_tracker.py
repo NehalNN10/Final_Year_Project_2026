@@ -105,8 +105,8 @@ while cap.isOpened():
             cv2.putText(orig, label, (x1, y1 - 10), cv2.FONT_HERSHEY_SIMPLEX, 0.6, (0, 255, 0), 2)
 
     # 🌟 Fire and Forget: Send data to AWS in the background!
-    if frame_payload:
-        threading.Thread(target=publish_async, args=(frame_payload,), daemon=True).start()
+    # if frame_payload:
+    threading.Thread(target=publish_async, args=(frame_payload,), daemon=True).start()
 
     cv2.imshow("Live YOLO Detections", orig)
 
