@@ -1,10 +1,13 @@
 import * as THREE from "three";
 import { OrbitControls } from "three/examples/jsm/controls/OrbitControls.js";
+import { EffectComposer } from 'three/examples/jsm/postprocessing/EffectComposer.js';
+import { RenderPass } from 'three/examples/jsm/postprocessing/RenderPass.js';
+import { OutlinePass } from 'three/examples/jsm/postprocessing/OutlinePass.js';
 import { worldObjects } from "./world.js";
 // Alias the import so it's clear what it's doing
 import { RGBELoader } from "three/examples/jsm/loaders/RGBELoader.js";
 
-export let scene, camera, renderer, controls;
+export let scene, camera, renderer, controls, composer, outlinePass, renderPass;
 export let heatmapCanvas, heatmapCtx, heatmapTexture, heatmapPlane, heatmapSize, heatmapWidth, heatmapHeight;
 export function initScene(container) {
     // Force a minimum size if container is briefly 0x0 during React hydration
@@ -12,6 +15,7 @@ export function initScene(container) {
     const h = container.clientHeight || window.innerHeight || 600;
 
     renderer = new THREE.WebGLRenderer({ antialias: true });
+    renderer.setPixelRatio(window.devicePixelRatio);
     renderer.setSize(w, h);
     renderer.shadowMap.enabled = true;
     
@@ -41,7 +45,7 @@ export function initScene(container) {
     // INJECT INTO REACT CONTAINER
     container.appendChild(renderer.domElement);
 
-    const sunLight = new THREE.DirectionalLight(0xffffff, 3);
+    const sunLight = new THREE.DirectionalLight(0xffcc33, 3);
     sunLight.position.set(10, 20, 10); 
     sunLight.castShadow = true;
 
@@ -64,7 +68,35 @@ export function initScene(container) {
 
     scene.add(camera);
 
+    const renderTarget = new THREE.WebGLRenderTarget(w, h, {
+        samples: 4, // 4x MSAA (Hardware Anti-Aliasing)
+        format: THREE.RGBAFormat,
+    });
 
+    // 1. Initialize the Composer
+    composer = new EffectComposer(renderer, renderTarget);
+    // Export composer for use in other modules
+
+    // // 2. Add the standard RenderPass (renders your scene normally)
+    renderPass = new RenderPass(scene, camera);
+    composer.addPass(renderPass);
+
+    // // 3. Add the OutlinePass
+    // outlinePass = new OutlinePass(
+    //     new THREE.Vector2(window.innerWidth, window.innerHeight),
+    //     scene,
+    //     camera
+    // );
+
+    // // Customize the outline appearance
+    // outlinePass.edgeStrength = 0.0; // How thick the outline is
+    // outlinePass.edgeGlow = 0.0;     // Set to 0 for a hard, cartoon-like black line
+    // outlinePass.edgeThickness = 0.0;
+    // outlinePass.pulsePeriod = 0;
+    // outlinePass.visibleEdgeColor.set('#ffffff'); // Black outline
+    // outlinePass.hiddenEdgeColor.set('#ffffff');  // Outline color when hidden behind other objects
+
+    // composer.addPass(outlinePass);
 
 }
 

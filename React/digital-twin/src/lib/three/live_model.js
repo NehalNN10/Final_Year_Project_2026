@@ -1,7 +1,7 @@
 import * as THREE from 'three';
 import { io } from 'socket.io-client';
 import { initVariables } from './variables.js';
-import { initScene, scene, camera, renderer, controls } from './scene.js';
+import { initScene, scene, camera, renderer, controls, composer } from './scene.js';
 import { loadAssets, buildLiveWorld, createMarker } from './world.js';
 import { renderLiveFrame } from './live_simulation.js';
 
@@ -119,7 +119,7 @@ function animate() {
     // ------------------------------------------------------------
     
     if (controls) controls.update();
-    if (renderer && scene && camera) renderer.render(scene, camera);
+    if (renderer && scene && camera) composer.render();
 }
 
 export async function initLiveEngine(container) {
@@ -130,6 +130,10 @@ export async function initLiveEngine(container) {
     trackMarkers.clear();
 
     initScene(container);
+
+    camera.position.set(0, 10, 5);
+    camera.lookAt(3.75, 0, 0);
+    controls.target.set(3.75, 0, 0);
     
     if (renderer) {
         renderer.domElement.style.width = '100%';

@@ -38,7 +38,7 @@ export default function LiveModel() {
     const fetchSensorData = async () => {
       try {
         // Change this URL to your actual Flask server IP/Port
-        const response = await fetch('http://10.20.3.245:1767/api/live_sensor_data');
+        const response = await fetch('http://localhost:1767/api/live_sensor_data');
         if (response.ok) {
           const data = await response.json();
           setSensorData(data);
@@ -117,7 +117,7 @@ export default function LiveModel() {
             {/* Room Stats */}
             <RoomStatsPanel department={department} isLive={true}/>
             
-            <ModelControlsPanel isReplay = {true}/>
+            <ModelControlsPanel isLive={true}/>
             
             {/* Hidden Variables for Three.js */}
             <div style={{ display: "none" }}>

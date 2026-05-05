@@ -1,5 +1,5 @@
 import { initVariables } from './variables.js';
-import { initScene, scene, camera, renderer, controls, setupHeatmap } from './scene.js';
+import { initScene, scene, camera, renderer, controls, setupHeatmap, composer } from './scene.js';
 import { loadAssets, buildStaticWorld} from './world.js';
 import { loadSimulationData, renderFrame, playback } from './simulation.js';
 import { FPS, LOOP_DURATION } from './variables.js';
@@ -80,7 +80,7 @@ function animate(t = 0) {
     }
     
     if (controls) controls.update();
-    if (renderer && scene && camera) renderer.render(scene, camera);
+    if (renderer && scene && camera) composer.render(scene, camera);
 }
 
 export async function initThreeEngine(container) {
