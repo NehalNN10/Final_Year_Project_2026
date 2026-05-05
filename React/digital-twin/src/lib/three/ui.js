@@ -15,6 +15,13 @@ export function resetCameraView() {
     controls.update();
 }
 
+export function resetCameraViewLive() {
+    camera.position.set(3.75, 5, 5);
+    camera.lookAt(3.75, 0, 0);
+    controls.target.set(3.75, 0, 0);
+    controls.update();
+}
+
 export function toggleHeatmap() {
     playback.showHeatmap = !playback.showHeatmap;
     heatmapPlane.material.opacity = playback.showHeatmap ? 1 : 0;

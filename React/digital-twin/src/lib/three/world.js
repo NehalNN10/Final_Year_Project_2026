@@ -15,7 +15,10 @@ export const worldObjects = {};
 export const models = {
     white_table: './models/table.glb',
     black_table: './models/black_table.glb',
+    small_table_black: './models/smalltable.glb',
+    small_table_white: './models/small_table_white.glb',
     workbench:   './models/workbench.glb',
+    electric_table: './models/electric_table.glb',
     workbench_table: './models/workbench_table.glb',
     pillar:      './models/pillar.glb',
     camera:      './models/camera.glb',
@@ -72,6 +75,7 @@ export function createObject(z, x, rot, objectUrl) {
 
     group.add(model);
     scene.add(group);
+    
     return group;
 }
 
@@ -200,14 +204,15 @@ export function buildLiveWorld() {
 
     floor1 : createFloor(7.5, 4.25, 0, 3.75, materials.floor2),
 
-    workbench_v1: createObject2(2.375, 0.9, 4.25/2 -0.9/2, 7.5 - 0.4 - 2.375/2, materials.bench),
-    workbench_v2: createObject2(2.375, 0.9, 4.25/2 -0.9/2, 7.5 - 0.8 - 2.375*3/2, materials.bench),
+    workbench_v1: createObject(4.25/2 -0.9/2, 7.5 - 0.4 - 2.375/2, 0, models.workbench_table),
+    workbench_v2: createObject(4.25/2 -0.9/2, 7.5 - 0.4 - 2.375*3/2, 0, models.workbench_table),
 
-    b_bench: createObject2(1.3, 0.6, -4.25/2 +0.6/2, 2.4+ 1.3/2, materials.bench),
-    w_bench: createObject2(1.3, 0.8, -4.25/2 +0.8/2, 2.4+ 1.3*3/2 + 1.02, materials.buggy),
-    s_bench: createObject2(0.8, 0.6, -4.25/2 +0.6/2, 2.4+ 1.3*2 + 1.02 + 0.8/2 + 0.25, materials.buggy),
+    b_bench: createObject(-4.25/2 + 0.08 +0.6/2, 2.4+ 1.3/2, Math.PI, models.small_table_black),
+    w_bench: createObject(-4.25/2 +0.8/2, 2.4+ 1.3*3/2 + 1.02, Math.PI, models.electric_table),
+    s_bench: createObject(-4.25/2 +0.6/2, 2.4+ 1.3*2 + 1.02 + 0.8/2 + 0.25, Math.PI, models.small_table_white),
 
     wall_1: createWall(wallThickness, 4.25 + wallThickness,  -wallThickness/2, -wallThickness/2, materials.wall),
+    
     wall_2: createWall(wallThickness, 4.25 + wallThickness, 7.5+wallThickness/2, -wallThickness/2, materials.wall),
     wall_3: createWall(7.5, wallThickness, 7.5/2, -4.25/2 - wallThickness/2, materials.wall),
     });

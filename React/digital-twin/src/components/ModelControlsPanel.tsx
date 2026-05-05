@@ -6,9 +6,10 @@ import IntButton from "./IntButton";
 
 interface ModelControlsPanelProps {
     isReplay?: boolean;
+    isLive?: boolean;
 }
 
-export default function ModelControlsPanel({ isReplay = false }: ModelControlsPanelProps) {
+export default function ModelControlsPanel({ isReplay = false, isLive = false }: ModelControlsPanelProps) {
   const [isExpanded, setIsExpanded] = useState(true);
   const [showHeatmap, setShowHeatmap] = useState(false);
 
@@ -38,13 +39,25 @@ export default function ModelControlsPanel({ isReplay = false }: ModelControlsPa
               <span>Rotate:</span>
               <span>Left Click & Pan</span>
           </div>
+          
+          {!isLive && (
+            <button 
+              className="btn btn-primary mx-0! mb-0! mt-2!" 
+              onClick={() => import(ui).then(mod => mod.resetCameraView())}
+            >
+                <Camera size={20} /> <span className="ml-2">Reset Camera</span>
+            </button>
+          )}
 
-          <button 
-            className="btn btn-primary mx-0! mb-0! mt-2!" 
-            onClick={() => import(ui).then(mod => mod.resetCameraView())}
-          >
-            <Camera size={20} /> <span className="ml-2">Reset Camera</span>
-          </button>
+          {isLive && (
+            <button 
+              className="btn btn-primary mx-0! mb-0! mt-2!" 
+              onClick={() => import(ui).then(mod => mod.resetCameraViewLive())}
+            >
+              <Camera size={20} /> <span className="ml-2">Yo Camera</span>
+            </button>
+          )}
+
           {!isReplay && (
               <button 
               className="btn btn-primary mx-0! mb-0! mt-2!" 
