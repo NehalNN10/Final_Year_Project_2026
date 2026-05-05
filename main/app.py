@@ -35,9 +35,9 @@ app.config['MONGODB_SETTINGS'] = {
 db.init_app(app)
 
 # Redis setup
-# redis_client = redis.Redis(host='3.109.201.41', port=6379, decode_responses=True)
+redis_client = redis.Redis(host='13.204.143.167', port=6379, decode_responses=True)
 # live_tracking_data = {}
-# redis_thread = None
+redis_thread = None
 
 socketio = SocketIO(app, cors_allowed_origins="*", async_mode='threading')
 
@@ -58,62 +58,48 @@ def serve_active_files(filename):
 # BACKGROUND TASKS & SOCKETS
 # ---------------------------------------------------------
 
-# def redis_listener():
-#     """Background thread that listens to Redis and broadcasts to connected clients"""
-#     pubsub = redis_client.pubsub()
-#     pubsub.subscribe('tracking_stream')
+def redis_listener():
+    """Background thread that listens to Redis and broadcasts to connected clients"""
+    pubsub = redis_client.pubsub()
     
-#     print("🎧 Redis listener started...")
+    # 🌟 Subscribe to BOTH channels!
+    pubsub.subscribe('live_detections', 'iot_stream')
     
-#     for message in pubsub.listen():
-#         if message['type'] == 'message':
-#             try:
-#                 data = json.loads(message['data'])
-#                 track_id = data.get('id')
-#                 occupancy = data.get('occupancy', 0)
-#                 frame_num = data.get('frame', 0)
+    print("🎧 Redis listener started... Waiting for YOLO and IoT data...")
+    
+    for message in pubsub.listen():
+        if message['type'] == 'message':
+            channel = message['channel']
+            raw_data = message['data']
+            
+            try:
+                parsed_data = json.loads(raw_data)
                 
-#                 # Store latest position for this track
-#                 live_tracking_data[track_id] = {
-#                     'id': track_id,
-#                     'x': data.get('x', 0),
-#                     'z': data.get('z', 0),
-#                     'frame': frame_num,
-#                     'timestamp': data.get('timestamp', 0),
-#                     'occupancy': occupancy,
-#                     'region': data.get('region', 'Unknown')
-#                 }
+                # Route the data to the correct frontend event
+                if channel == 'live_detections':
+                    socketio.emit('live_tracking_update', parsed_data)
                 
-#                 # Broadcast to all connected WebSocket clients
-#                 socketio.emit('live_tracking_update', live_tracking_data[track_id], skip_sid=None)
-#                 print(f"📡 Broadcasting track {track_id}: x={data.get('x')}, z={data.get('z')}, occupancy={occupancy}, region={data.get('region', 'Unknown')}")
-#             except (json.JSONDecodeError, KeyError) as e:
-#                 print(f"❌ Error processing Redis message: {e}")
+                elif channel == 'iot_stream':
+                    socketio.emit('iot_update', parsed_data)
+                    
+            except json.JSONDecodeError as e:
+                print(f"❌ Error decoding message from {channel}: {e}")
 
-# def start_redis_listener():
-#     """Start Redis listener in background thread"""
-#     global redis_thread
-#     if redis_thread is None or not redis_thread.is_alive():
-#         redis_thread = Thread(target=redis_listener, daemon=True)
-#         redis_thread.start()
-#         print("✅ Redis listener thread started")
+def start_redis_listener():
+    """Start Redis listener in background thread"""
+    global redis_thread
+    if redis_thread is None or not redis_thread.is_alive():
+        redis_thread = Thread(target=redis_listener, daemon=True)
+        redis_thread.start()
+        print("✅ Redis listener thread started")
 
-# @socketio.on('connect')
-# def handle_connect():
-#     """Handle new WebSocket connection"""
-#     print(f"👤 Client connected: {request.sid}")
-#     socketio.emit('initial_live_data', list(live_tracking_data.values()))
+@socketio.on('connect')
+def handle_connect():
+    print(f"👤 Frontend Client connected: {request.sid}")
 
-# @socketio.on('disconnect')
-# def handle_disconnect():
-#     """Handle client disconnection"""
-#     print(f"👤 Client disconnected: {request.sid}")
-
-# @socketio.on('request_tracking_data')
-# def send_tracking_data():
-#     """Send all current tracking data on request"""
-#     socketio.emit('initial_live_data', list(live_tracking_data.values()))
-
+@socketio.on('disconnect')
+def handle_disconnect():
+    print(f"👤 Frontend Client disconnected: {request.sid}")
 
 # ---------------------------------------------------------
 # AUTHENTICATION APIs
@@ -513,6 +499,13 @@ def receive_data():
     
     latest_iot_data = data
 
+    try:
+        # Publish this JSON to the 'iot_stream' channel on AWS
+        redis_client.publish('iot_stream', json.dumps(data))
+        print("☁️ Successfully published IoT data to AWS Redis!")
+    except redis.ConnectionError:
+        print("⚠️ Warning: Could not connect to AWS Redis to publish IoT data.")
+    
     # debug printing
     print("\n--- New IoT Data Received ---")
     print(f"Device ID:    {data.get('device_id')}")
@@ -531,7 +524,7 @@ def get_live_sensor_data():
 
 if __name__ == '__main__':
     print("🚀 Booting up server and starting background tasks...")
-    # start_redis_listener()
+    start_redis_listener()
 
     socketio.run(app, 
                 host='0.0.0.0',  
