@@ -3,43 +3,70 @@ export const LOOP_DURATION = 1800;
 
 // Start them as empty objects
 export const roomInfo = {};
-export const iot = {};
+export const iot = {};  // now stores Maps instead of arrays
+export const iotState = {
+    loadedStart: 0,
+    loadedEnd: 0,
+    isFetching: false
+};
 
-// We will call this function right before booting the 3D world!
-export async function initRoomInfo() {
-    roomInfo["C-007"] = await getRoomInfo("C-007");
-    roomInfo["C-006"] = await getRoomInfo("C-006");
-}
+export async function fetchIotChunk(startSecond, endSecond) {
+    if (iotState.isFetching) return;
+    iotState.isFetching = true;
 
-export async function initRoomData() {
-    iot["C-007"] = await getRoomData("C-007");
-    iot["C-006"] = await getRoomData("C-006");
-}
-
-export async function initVariables() {
-    await initRoomInfo();
-    await initRoomData();
-}
-
-export async function getRoomData(roomId) {
     try {
-        const response = await fetch(`/api/room_data?room_id=${roomId}`);
-        if (!response.ok) throw new Error(`HTTP error! Status: ${response.status}`);
-        const data = await response.json();
-        const rows = data.room_data;
+        const roomIds = ["C-007", "C-006"];
+        
+        await Promise.all(roomIds.map(async (roomId) => {
+            const response = await fetch(`/api/room_data?room_id=${roomId}&start=${startSecond}&end=${endSecond}`);
+            
+            if (!response.ok) {
+                console.warn(`[IoT Fetch] Server error ${response.status} for ${roomId}. Skipping chunk.`);
+                return; 
+            }
 
-        const secondsArray = rows.map((row) => ({
-            occupancy: row.occupancy,
-            temperature: row.temperature, 
-            ac: row.ac,
-            lights: row.lights
+            const data = await response.json();
+            
+            if (!iot[roomId] || !(iot[roomId] instanceof Map)) {
+                iot[roomId] = new Map();
+            }
+
+            if (data && Array.isArray(data.room_data)) {
+                data.room_data.forEach(row => {
+                    iot[roomId].set(row.second ?? row.time, {  
+                        occupancy: row.occupancy,
+                        temperature: row.temperature,
+                        ac: row.ac,
+                        lights: row.lights
+                    });
+                });
+            }
         }));
 
-        return secondsArray;
-    } catch (error) {
-        console.error("Failed to fetch room data:", error.message);
-        return []; 
+        iotState.loadedStart = startSecond;
+        iotState.loadedEnd = endSecond;
+
+    } catch (e) {
+        console.error("Failed to fetch IoT chunk:", e);
+    } finally {
+        iotState.isFetching = false;
     }
+}
+
+export function pruneOldIotFrames(beforeSecond) {
+    ["C-007", "C-006"].forEach(roomId => {
+        if (iot[roomId] instanceof Map) {
+            for (let [sec] of iot[roomId].entries()) {
+                if (sec < beforeSecond) iot[roomId].delete(sec);
+            }
+        }
+    });
+    iotState.loadedStart = beforeSecond;
+}
+
+export async function initVariables(startSecond = 0) {
+    await initRoomInfo();
+    await fetchIotChunk(startSecond, startSecond + 60);
 }
 
 export async function getRoomInfo(roomId) {
@@ -51,6 +78,30 @@ export async function getRoomInfo(roomId) {
         console.error("Failed to fetch room info:", error.message);
         return null;
     }
+}
+
+export async function resetIotBuffer(startSecond) {
+    // Clear out the old maps
+    if (iot["C-007"] instanceof Map) iot["C-007"].clear();
+    if (iot["C-006"] instanceof Map) iot["C-006"].clear();
+    
+    // Reset the tracking boundaries
+    iotState.loadedStart = startSecond;
+    iotState.loadedEnd = startSecond;
+    iotState.isFetching = false;
+    
+    // Fetch the new chunk
+    await fetchIotChunk(startSecond, startSecond + 60);
+}
+
+export async function initRoomInfo() {
+    roomInfo["C-007"] = await getRoomInfo("C-007");
+    roomInfo["C-006"] = await getRoomInfo("C-006");
+}
+
+export async function initRoomData() {
+    iot["C-007"] = await getRoomData("C-007");
+    iot["C-006"] = await getRoomData("C-006");
 }
 
 export function getRoom(x, z) {

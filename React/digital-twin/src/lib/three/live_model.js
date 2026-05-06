@@ -2,7 +2,7 @@ import * as THREE from 'three';
 import { io } from 'socket.io-client';
 import { initVariables } from './variables.js';
 import { initScene, scene, camera, renderer, controls, composer } from './scene.js';
-import { loadAssets, buildLiveWorld, createMarker } from './world.js';
+import { loadAssets, buildLiveWorld } from './world.js';
 import { renderLiveFrame } from './live_simulation.js';
 
 let animationFrameId;
@@ -131,7 +131,7 @@ export async function initLiveEngine(container) {
 
     initScene(container);
 
-    camera.position.set(0, 10, 5);
+    camera.position.set(3.75, 5, 5);
     camera.lookAt(3.75, 0, 0);
     controls.target.set(3.75, 0, 0);
     

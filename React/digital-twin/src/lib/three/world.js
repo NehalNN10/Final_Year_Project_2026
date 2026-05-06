@@ -23,7 +23,8 @@ export const models = {
     pillar:      './models/pillar.glb',
     camera:      './models/camera.glb',
     roblox:      './models/roblox.glb',
-    floor:       './models/floor.glb'
+    floor:       './models/floor.glb',
+    floor_live: './models/floor_live.glb'
 };
 
 // 2. Load Function: Loads everything once and saves to 'assets'
@@ -202,7 +203,7 @@ export function buildLiveWorld() {
     // floor2: createFloor(18, 6, -5.75, 0, materials.floor),
     // floor: createObject(0, 0, Math.PI, models.floor),
 
-    floor1 : createFloor(7.5, 4.25, 0, 3.75, materials.floor2),
+    floor : createFloor(0, 0, -Math.PI/2, models.floor_live),
 
     workbench_v1: createObject(4.25/2 -0.9/2, 7.5 - 0.4 - 2.375/2, 0, models.workbench_table),
     workbench_v2: createObject(4.25/2 -0.9/2, 7.5 - 0.4 - 2.375*3/2, 0, models.workbench_table),

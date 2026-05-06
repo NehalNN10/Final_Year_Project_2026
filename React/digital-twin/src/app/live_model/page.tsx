@@ -137,7 +137,7 @@ export default function LiveModel() {
               liveOccupancy={liveDetections.length} 
             />
             
-            <ModelControlsPanel isReplay={true}/>
+            <ModelControlsPanel isLive={true}/>
             
             {/* Hidden Variables for Three.js */}
             <div style={{ display: "none" }}>

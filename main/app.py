@@ -1,6 +1,7 @@
 import os
 import json
 import redis
+import pandas as pd
 from threading import Thread
 from dotenv import load_dotenv
 
@@ -53,6 +54,23 @@ latest_iot_data = {
 @app.route('/active_files/<path:filename>')
 def serve_active_files(filename):
     return send_from_directory(os.path.join(CSV_DIR, 'active_files'), filename)
+
+df_tracks = pd.read_csv('../csv_files/active_files/combined_tracks_30min.csv')
+
+@app.route('/api/tracks')
+def get_tracks_chunk():
+    start_frame = int(request.args.get('start', 0))
+    end_frame = int(request.args.get('end', 1500))
+    
+    # Filter the dataframe
+    chunk = df_tracks[(df_tracks['frame'] >= start_frame) & (df_tracks['frame'] <= end_frame)]
+
+    chunk = chunk.dropna(subset=['three_x', 'three_z'])
+
+    chunk = chunk.where(pd.notnull(chunk), None)
+    
+    # Return just that slice as JSON
+    return jsonify(chunk.to_dict(orient='records'))
 
 # ---------------------------------------------------------
 # BACKGROUND TASKS & SOCKETS
@@ -324,23 +342,20 @@ def get_security_info():
 
 @app.route('/api/room_data', methods=['GET'])
 def get_room_data():
-    """Returns all RoomData entries for a given room"""
     room_id = request.args.get('room_id')
+    start_second = int(request.args.get('start', 0))
+    end_second = int(request.args.get('end', 60))
+    
     try:
         room = Rooms.objects(room_id=room_id).first()
         if not room:
             return jsonify({'error': 'Room not found'}), 404
         
-        data_entries = RoomData.objects(room=room)
-        data_list = []
-        for d in data_entries:
-            data_list.append({
-                'time': d.time,
-                'occupancy': d.occupancy,
-                'temperature': d.temperature,
-                'ac': d.ac,
-                'lights': d.lights
-            })
+        all_entries = list(RoomData.objects(room=room))
+        sliced = all_entries[start_second:end_second]
+        
+        data_list = [{'second': start_second + i, 'occupancy': d.occupancy, 'temperature': d.temperature, 'ac': d.ac, 'lights': d.lights}
+                     for i, d in enumerate(sliced)]
         
         return jsonify({'room_data': data_list})
     except Exception as e:
