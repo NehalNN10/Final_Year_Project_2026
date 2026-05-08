@@ -573,11 +573,11 @@ nav {
 }
 
 .side-nav {
-    @apply mt-0! text-black flex items-center font-bold justify-between;
+    @apply mt-0! flex items-center font-bold justify-between;
 
     padding: 0.5rem 2rem;
-    height: 4rem !important;
-    font-size: 1.8rem;
+    height: 3rem !important;
+    font-size: 1.6rem;
     background-color: var(--primary-color);
     color: var(--primary-text-color);
     border-bottom: 2px solid var(--primary-color);
