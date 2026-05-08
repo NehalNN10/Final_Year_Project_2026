@@ -16,7 +16,7 @@ export function resetCameraView() {
 }
 
 export function resetCameraViewLive() {
-    camera.position.set(3.75, 5, 5);
+    camera.position.set(3.75, 6, 6);
     camera.lookAt(3.75, 0, 0);
     controls.target.set(3.75, 0, 0);
     controls.update();

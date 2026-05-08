@@ -7,13 +7,15 @@ interface StatRowProps {
   label: string;
   id?: string;
   id2?: string;
+  value?: string | number;
+  classes?: string;
   size?: string;
 }
 
-export default function StatRow ({ icon: Icon, label, id = "", id2 = "", size="20"}: StatRowProps) {
+export default function StatRow ({ icon: Icon, label, id = "", id2 = "", value="", classes="", size="20"}: StatRowProps) {
   return (
   <>
-    <span className="flex gap-2 items-center font-bold">
+    <span className={`flex gap-2 items-center font-bold`}>
       <Icon size={size} />
       <span id={id}> {label} </span>
     </span>
@@ -22,6 +24,14 @@ export default function StatRow ({ icon: Icon, label, id = "", id2 = "", size="2
     <>
       <span className="fill" id={id2}>
         --
+      </span>
+    </>
+    )}
+
+    {value !== "" && (
+    <>
+      <span className={`fill ${classes}`} id={id2}>
+        {value}
       </span>
     </>
     )}

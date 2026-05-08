@@ -23,7 +23,8 @@ export const models = {
     pillar:      './models/pillar.glb',
     camera:      './models/camera.glb',
     roblox:      './models/roblox.glb',
-    floor:       './models/floor.glb'
+    floor:       './models/floor.glb',
+    floor_live:  './models/floor_live.glb'
 };
 
 // 2. Load Function: Loads everything once and saves to 'assets'
@@ -117,39 +118,6 @@ export function createObjectMarker(z, x, rot, objectUrl) {
     
 }
 
-// const loader = new GLTFLoader();
-
-// loader.load(
-//     './files/model.glb', // 1. Path to your file
-//     function (gltf) {
-//         const model = gltf.scene;
-
-//         // 2. Transform the model
-//         model.position.set(0, 0.5, 0); // X, Y, Z
-//         model.scale.set(1, 1, 1);      // Scale it if it's too big/small
-//         model.rotation.y = Math.PI / 2; // Rotate if needed
-
-//         // 3. Optional: Force the model to be bright (if lighting is still tricky)
-//         model.traverse((child) => {
-//             if (child.isMesh) {
-//                 // Determine if you want shadows
-//                 child.castShadow = true;
-//                 child.receiveShadow = true;
-//             }
-//         });
-
-//         scene.add(model);
-//         console.log("Model loaded successfully!");
-//     },
-//     function (xhr) {
-//         // Optional: Loading progress
-//         console.log((xhr.loaded / xhr.total * 100) + '% loaded');
-//     },
-//     function (error) {
-//         console.error('An error happened loading the model:', error);
-//     }
-// );
-
 export function createMarker(z, x, color, radius = 0.1, label = '') {
     // This creates the "Template" marker for the pool
     const meshGroup = createObjectMarker(z, x, Math.PI, models.roblox);
@@ -198,11 +166,8 @@ export function updateMarker(markerGroup, x, z, id) {
 export function buildLiveWorld() {
     // We assign to the exported 'worldObjects' so ui.js can see them
     Object.assign(worldObjects, {
-        // floor1: createFloor(14, 11.5, 3, 2, materials.floor),
-    // floor2: createFloor(18, 6, -5.75, 0, materials.floor),
-    // floor: createObject(0, 0, Math.PI, models.floor),
 
-    floor1 : createFloor(7.5, 4.25, 0, 3.75, materials.floor2),
+    floor : createObject(0, 0, -Math.PI/2, models.floor_live),
 
     workbench_v1: createObject(4.25/2 -0.9/2, 7.5 - 0.4 - 2.375/2, 0, models.workbench_table),
     workbench_v2: createObject(4.25/2 -0.9/2, 7.5 - 0.4 - 2.375*3/2, 0, models.workbench_table),
