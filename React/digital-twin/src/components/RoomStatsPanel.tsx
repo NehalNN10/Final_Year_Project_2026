@@ -11,19 +11,34 @@ import {
   AirVent, 
   Lightbulb, 
   ChevronDown, 
-  ChevronUp 
+  ChevronUp, 
+  Droplets
 } from "lucide-react";
 
 interface RoomStatsPanelProps {
   department: string;
   isLive?: boolean;
   liveOccupancy?: number | null;
+  sensorData?: {
+    device_id: null,
+    temperature: null,
+    humidity: null,
+    lights_state: null,
+    ac_state: null
+  };
 }
 
 export default function RoomStatsPanel({ 
   department, 
   isLive = false, 
-  liveOccupancy = null 
+  liveOccupancy = null,
+  sensorData = {
+    device_id: null,
+    temperature: null,
+    humidity: null,
+    lights_state: null,
+    ac_state: null
+  }
 }: RoomStatsPanelProps) {
   const [isExpanded, setIsExpanded] = useState(true);
 
@@ -51,7 +66,16 @@ export default function RoomStatsPanel({
 
           <div className="row border-t mt-4! pt-4!" id="occupancy">
             {isLive && liveOccupancy !== null ? (
-              <StatRow icon={User} label={`Occupancy: ${liveOccupancy}`} />
+              <StatRow 
+                icon={User} 
+                label="Occupancy: " 
+                value={liveOccupancy} 
+                classes={`${
+                  liveOccupancy === null ? "bg-white" : 
+                  liveOccupancy <= 5 ? "bg-[#00ff88]" : 
+                  "bg-[#f44]"}`
+                }
+              />
             ) : (
               <StatRow icon={User} label="Occupancy: " id="ui-iot-occu-header" id2="ui-iot-occupancy"/>
             )}
@@ -70,6 +94,65 @@ export default function RoomStatsPanel({
                 </div>
                 <div className="flex gap-2 items-center">
                   <StatRow icon={Lightbulb} label="Lights: " id2="ui-iot-lights"/>
+                </div>
+              </div>
+            </>
+          )}
+
+          {isLive && department !== "Security" && (
+            <>
+              <div className="row flex-wrap gap-4">
+                <div className="flex gap-2 items-center">
+                  <StatRow 
+                    icon={Thermometer} label="Temp:" 
+                    classes={`${
+                      sensorData.temperature === null ? "bg-white" : 
+                      sensorData.temperature <= 20 ? "bg-[#0088ff]" : 
+                      sensorData.temperature <= 22 ? "bg-[#00ffff]" : 
+                      sensorData.temperature <= 28 ? "bg-[#00ff88]" : 
+                      sensorData.temperature <= 30 ? "bg-[#ff8800]" : 
+                      "bg-[#f00]"}`
+                    }
+                    value={sensorData.temperature !== null ? `${sensorData.temperature}°` : '--°'} 
+                    
+                  />
+                </div>
+                <div className="flex gap-2 items-center">
+                  <StatRow 
+                    icon={Droplets} 
+                    label="Humidity:" value={sensorData.humidity !== null ? `${sensorData.humidity}%` : '--%'}
+                    classes={`${
+                      sensorData.humidity === null ? "bg-white" : 
+                      sensorData.humidity <= 40 ? "bg-[#0088ff]" : 
+                      sensorData.humidity <= 60 ? "bg-[#00ffff]" : 
+                      "bg-[#f00]"}`
+                    }
+                  />
+                </div>
+              </div>
+              
+              <div className="row flex-wrap gap-4">
+                <div className="flex gap-2 items-center">
+                  <StatRow 
+                    icon={AirVent} 
+                    label="AC:" value={sensorData.ac_state || '--'} 
+                    classes={`${
+                      sensorData.ac_state === null ? "bg-white" : 
+                      sensorData.ac_state === "on" ? "bg-[#0088ff]" : 
+                      "bg-[#f44]"}`
+                    }
+                  />
+                </div>
+                <div className="flex gap-2 items-center">
+                  <StatRow 
+                    icon={Lightbulb} 
+                    label="Lights:" value={sensorData.lights_state || '--'} 
+                    classes={`${
+                      sensorData.lights_state === null ? "bg-white" : 
+                      sensorData.lights_state === "on" ? "bg-[#0088ff]" : 
+                      "bg-[#f44]"}`
+                    }
+                  />
                 </div>
               </div>
             </>

@@ -107,7 +107,7 @@ export default function LiveModel() {
         <div className="w-full h-full overflow-hidden relative">
           
           <div className="h-full overflow-y-auto overflow-x-hidden p-5 pr-0! float-width">
-            <div className="mb-4 bg-[#222] p-4 rounded-xl shadow-lg border border-[#444]">
+            {/* <div className="mb-4 bg-[#222] p-4 rounded-xl shadow-lg border border-[#444]">
               <h3 className="text-white text-lg font-semibold mb-3 flex items-center gap-2">
                 Live IoT Feed
               </h3>
@@ -133,16 +133,17 @@ export default function LiveModel() {
                   <span className="text-xl font-bold">{sensorData.ac_state || '--'}</span>
                 </div>
               </div>
-            </div>
+            </div> */}
             
             {/* The Safe Length Implementation */}
             <RoomStatsPanel 
               department={department} 
               isLive={true} 
               liveOccupancy={roomCount} 
+              sensorData={sensorData}
             />
             
-            <ModelControlsPanel isReplay={true}/>
+            <ModelControlsPanel isLive={true}/>
             
             {/* Hidden Variables for Three.js */}
             <div style={{ display: "none" }}>
