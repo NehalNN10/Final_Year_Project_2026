@@ -24,6 +24,7 @@ export default function LiveModel() {
 
   // YOLO Tracking State (For your 3D Avatars later!)
   const [liveDetections, setLiveDetections] = useState([]);
+  const [roomCount, setRoomCount] = useState(0);
 
   useEffect(() => {
     async function fetchSession() {
@@ -57,9 +58,13 @@ export default function LiveModel() {
 
     // Listen for incoming YOLO Detections
     socket.on('live_tracking_update', (data) => {
-      console.log('🎥 Live YOLO Detections:', data);
-      // Ensure we always store an array so .length doesn't break
-      setLiveDetections(Array.isArray(data) ? data : []); 
+      console.log('🎥 Live YOLO Data:', data);
+      
+      // Update both states independently!
+      if (data) {
+        setRoomCount(data.room_count);
+        setLiveDetections(data.detections || []); 
+      }
     });
 
     // Cleanup when user leaves the page
@@ -134,7 +139,7 @@ export default function LiveModel() {
             <RoomStatsPanel 
               department={department} 
               isLive={true} 
-              liveOccupancy={liveDetections.length} 
+              liveOccupancy={roomCount} 
             />
             
             <ModelControlsPanel isReplay={true}/>

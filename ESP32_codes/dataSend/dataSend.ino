@@ -14,7 +14,7 @@
 const char* ssid = "HU-AltStdev";
 const char* password = "0r!!A!!487St";
 // Put your Mac's IP address here, keeping the http:// and :5000/sensor-data
-const char* serverName = "http://10.20.3.24:1767/sensor-data"; 
+const char* serverName = "http://10.20.2.223:1767/sensor-data"; 
 
 DHT dht(DHTPIN, DHTTYPE);
 
