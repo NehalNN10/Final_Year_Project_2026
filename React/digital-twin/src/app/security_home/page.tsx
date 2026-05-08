@@ -1,11 +1,12 @@
 "use client";
 
 import { useState, useEffect } from "react";
-import { Clock, User, Users } from "lucide-react";
+import { Clock, User, Users, AlertTriangle } from "lucide-react";
 import StatRow from "@/components/StatRow";
 import Navbar from "../../components/Navbar";
 import StaffList from "../../components/StaffList";
 import { LOOP_DURATION } from "@/lib/three/variables";
+import IntButton from "@/components/IntButton";
 
 export default function SecurityHome() {
   // --- States ---
@@ -108,9 +109,7 @@ export default function SecurityHome() {
             <p className="text-[var(--sub-text-color)]">Security data and metrics will be displayed here.</p>
           </div>
           {currentRole === 'Security Admin' && (
-            <button className="btn btn-red btn-auto m-0! py-1!" onClick={handleSendAllAlerts}>
-              <h2 className="font-bold">Create Emergency</h2>
-            </button>
+            <IntButton icon={AlertTriangle} label="Create Emergency" onClick={handleSendAllAlerts} classes="btn btn-red btn-auto m-0! py-2! text-2xl" size="28" />
           )}
         </div>
 

@@ -4,9 +4,10 @@ import { useEffect, useRef, useState } from "react";
 import Navbar from "../../components/Navbar";
 import RoomStatsPanel from "../../components/RoomStatsPanel";
 import ModelControlsPanel from "../../components/ModelControlsPanel";
-import { ChevronLeft, ChevronRight, Thermometer, Droplets, Lightbulb, Snowflake } from "lucide-react";
+import { ChevronLeft, ChevronRight, Thermometer, Droplets, Lightbulb, Snowflake, User } from "lucide-react";
 // 1. IMPORT SOCKET.IO
 import { io } from "socket.io-client";
+import DataBox from "@/components/DataBox";
 
 export default function LiveModel() {
   const containerRef = useRef<HTMLDivElement>(null);
@@ -107,35 +108,7 @@ export default function LiveModel() {
         <div className="w-full h-full overflow-hidden relative">
           
           <div className="h-full overflow-y-auto overflow-x-hidden p-5 pr-0! float-width">
-            {/* <div className="mb-4 bg-[#222] p-4 rounded-xl shadow-lg border border-[#444]">
-              <h3 className="text-white text-lg font-semibold mb-3 flex items-center gap-2">
-                Live IoT Feed
-              </h3>
-              
-              <div className="grid grid-cols-2 gap-3 text-white">
-                <div className="bg-[#333] p-3 rounded-lg flex flex-col items-center justify-center">
-                  <span className="text-gray-400 text-xs uppercase tracking-wider mb-1 flex items-center gap-1"><Thermometer size={14}/> Temp</span>
-                  <span className="text-2xl font-bold">{sensorData.temperature !== null ? `${sensorData.temperature}°` : '--°'}</span>
-                </div>
-                
-                <div className="bg-[#333] p-3 rounded-lg flex flex-col items-center justify-center">
-                  <span className="text-gray-400 text-xs uppercase tracking-wider mb-1 flex items-center gap-1"><Droplets size={14}/> Humidity</span>
-                  <span className="text-2xl font-bold">{sensorData.humidity !== null ? `${sensorData.humidity}%` : '--%'}</span>
-                </div>
-
-                <div className={`p-3 rounded-lg flex flex-col items-center justify-center transition-colors ${sensorData.lights_state === 'ON' ? 'bg-yellow-900/40 text-yellow-400 border border-yellow-800' : 'bg-[#333] text-white'}`}>
-                  <span className="text-gray-400 text-xs uppercase tracking-wider mb-1 flex items-center gap-1"><Lightbulb size={14}/> Lights</span>
-                  <span className="text-xl font-bold">{sensorData.lights_state || '--'}</span>
-                </div>
-
-                <div className={`p-3 rounded-lg flex flex-col items-center justify-center transition-colors ${sensorData.ac_state === 'ON' ? 'bg-cyan-900/40 text-cyan-400 border border-cyan-800' : 'bg-[#333] text-white'}`}>
-                  <span className="text-gray-400 text-xs uppercase tracking-wider mb-1 flex items-center gap-1"><Snowflake size={14}/> AC Unit</span>
-                  <span className="text-xl font-bold">{sensorData.ac_state || '--'}</span>
-                </div>
-              </div>
-            </div> */}
             
-            {/* The Safe Length Implementation */}
             <RoomStatsPanel 
               department={department} 
               isLive={true} 

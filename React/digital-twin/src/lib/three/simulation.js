@@ -3,7 +3,7 @@ import { createMarker } from "./world.js";
 import { FPS, LOOP_DURATION, iot, getRoom, roomInfo } from "./variables.js";
 import { camera, controls} from "./scene.js";
 import { heatmapCtx, heatmapTexture, heatmapSize, heatmapWidth, heatmapHeight} from "./scene.js";
-import { all } from "three/tsl";
+import { all, max } from "three/tsl";
 
 export const playback = {
     frame: 0,
@@ -91,6 +91,8 @@ export function renderFrame(index) {
         row = iot[room][safeIndex];
     }
 
+    else row = null; // Explicitly set to null if no data is found for safety
+
     // ✨ ADD THIS DIAGNOSTIC BLOCK ✨
     // This will print to your console once every 2 seconds
     if (Math.floor(playback.frame) % 50 === 0) { 
@@ -126,69 +128,54 @@ export function renderFrame(index) {
     }
         
     if (row) {
-        if (department !== "Security") {
-
-            if (uiElements.uiTemp) {
-                // const t = parseFloat(row['temp']);
-                const t = row.temperature;
-                uiElements.uiTemp.innerText = t + "°C";
-                
-                if (t <= 20) uiElements.uiTemp.style.backgroundColor = "#0088ff";
-                else if (t <= 22) uiElements.uiTemp.style.backgroundColor = "#00ffff";
-                else if (t <= 28) uiElements.uiTemp.style.backgroundColor = "#00ff88";
-                else if (t <= 30) uiElements.uiTemp.style.backgroundColor = "#ff8800";
-                else uiElements.uiTemp.style.backgroundColor = "#f00";
-            }
-            
-            if (uiElements.uiAC) {
-                // const ac = row['ac']; 
-                const ac = row.ac;
-                uiElements.uiAC.innerText = ac ? "ON" : "OFF";
-                uiElements.uiAC.style.backgroundColor = ac ? "#00ff88" : "#ff4444";
-            }
-
-            if (uiElements.uiLights) {
-                // const l = row['lights'];
-                const l = row.lights;
-                uiElements.uiLights.innerText = l ? "ON" : "OFF";
-                uiElements.uiLights.style.backgroundColor = l ? "#00ff88" : "#ff4444";
-            }
+        if (department === "Security") {
+            const event = new CustomEvent('iotDataUpdate', { 
+                detail: { 
+                    occupancy: row.occupancy,
+                    max_occupancy: roomInf ? roomInf.max_occupancy : null
+                }
+            });
+            window.dispatchEvent(event);
         }
 
-        if (uiElements.uiOccupancy && uiElements.uiOccuHeader) {
-            const l = row.occupancy;
-                
-            if (department == "Facilities"){
-                uiElements.uiOccuHeader.innerText = "Status: ";
-                uiElements.uiOccupancy.innerText = (l > 0) ? "Occupied" : "Vacant";
-                uiElements.uiOccupancy.style.backgroundColor = (l > 0) ? "#ff4444" : "#00ff88";
-            }
-            else {
-                uiElements.uiOccuHeader.innerText = "Occupancy Count: ";
-                uiElements.uiOccupancy.innerText = l;
-                uiElements.uiOccupancy.style.backgroundColor = (l > room.max_occupancy) ? "#ff4444" : ( l === 0 ? "#fff" : "#00ff88");
-            }
+        if (department === "Facilities") {
+            const event = new CustomEvent('iotDataUpdate', { 
+                detail: { 
+                    occ_status: row.occu > 0 ? true : false,
+                    temperature: row.temperature,
+                    ac: row.ac,
+                    lights: row.lights
+                }
+            });
+            window.dispatchEvent(event);
+        }
+
+        if (department === "Admin") {
+            const event = new CustomEvent('iotDataUpdate', { 
+                detail: { 
+                    occupancy: row.occupancy,
+                    max_occupancy: roomInf ? roomInf.max_occupancy : null,
+                    temperature: row.temperature,
+                    ac: row.ac,
+                    lights: row.lights
+                }
+            });
+            window.dispatchEvent(event);
         }
     }
-    
+
     else {
-        // We MUST check if React has rendered these elements before touching them!
-        if (uiElements.uiTemp) {
-            uiElements.uiTemp.innerText = "--";
-            uiElements.uiTemp.style.backgroundColor = "#ffffff";
-        }
-        if (uiElements.uiAC) {
-            uiElements.uiAC.innerText = "--";
-            uiElements.uiAC.style.backgroundColor = "#ffffff";
-        }
-        if (uiElements.uiLights) {
-            uiElements.uiLights.innerText = "--";
-            uiElements.uiLights.style.backgroundColor = "#ffffff";
-        }
-        if (uiElements.uiOccupancy) {
-            uiElements.uiOccupancy.innerText = "--";
-            uiElements.uiOccupancy.style.backgroundColor = "#ffffff";
-        }
+        // If no data row is found, dispatch an event with nulls so the UI can reset
+        const event = new CustomEvent('iotDataUpdate', {
+            detail: { 
+                occupancy: null,
+                max_occupancy: 0,
+                temperature: null,
+                ac: null,
+                lights: null
+            }
+        });
+        window.dispatchEvent(event);
     }
 
     if (uiElements.uiDate) {
@@ -229,7 +216,7 @@ export function renderFrame(index) {
             const occuCount = row.occu !== undefined ? parseInt(row.occu) : parseInt(row.occupancy);
             const isAcOn = (row.ac === true || row.ac === "On" || row.ac === "ON");
             const isLightsOn = (row.lights === true || row.lights === "On" || row.lights === "ON");
-            const currentTemp = parseFloat(row.temp);
+            const currentTemp = parseFloat(row.temperature);
             
             // Track conditions globally (NO 'this.' keyword used!)
             if (occuCount === 0 && isAcOn) trackers.acWasted[roomId] = (trackers.acWasted[roomId] || 0) + 1;
