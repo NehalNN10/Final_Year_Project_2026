@@ -46,7 +46,7 @@ export default function RoomStatsPanel({
   const [roomAC, setRoomAC] = useState<boolean | null>(null);
   const [roomLights, setRoomLights] = useState<boolean | null>(null);
   const [roomCount, setRoomCount] = useState<number | null>(null);
-  const [roomMax, setRoomMax] = useState<number>(5);
+  const [roomMax, setRoomMax] = useState();
   const [roomHumidity, setRoomHumidity] = useState<number | null>(null);
 
   useEffect(() => {
@@ -80,9 +80,10 @@ export default function RoomStatsPanel({
             if (sensorData.lights_state !== null) setRoomLights(sensorData.lights_state === "ON" ? true : false);
             if (sensorData.humidity !== null) setRoomHumidity(sensorData.humidity);
           }
+        setRoomMax(5);
       }
 
-      setRoomMax(5); // You can adjust this as needed
+       // You can adjust this as needed
   }, [isLive, liveOccupancy, sensorData]);
 
   return (
