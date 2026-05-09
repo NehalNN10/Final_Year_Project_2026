@@ -81,9 +81,10 @@ export function createObject(z, x, rot, objectUrl) {
 }
 
 export function createObjectMarker(x, z, rot, objectUrl) {
+    console.log("CreateObjectMarker", x, z, "with model", objectUrl);
     const group = new THREE.Group();
-    x-= 4.25; // Center X around middle of the room
-    z+= 2.4;  // Center Z around middle of the room
+    // x-= 4.25; // Center X around middle of the room
+    // z+= 2.4;  // Center Z around middle of the room
     group.position.set(x, 0, z);
     group.rotation.y = rot;
 
@@ -153,17 +154,28 @@ export function createObjectMarker(x, z, rot, objectUrl) {
 // );
 
 export function createMarker(x,z, color, radius = 0.1, label = '') {
+    console.log("CreateMarker", x, z, "with color", color);
     // This creates the "Template" marker for the pool
-    console.log("Creating marker at", x, z, "with color", color);
-    const meshGroup = createObjectMarker(x, z, Math.PI, models.roblox);
-    meshGroup.position.y = 0.5;
-    meshGroup.rotation.y = Math.random() * Math.PI * 2; // Random rotation for visual variety
+    const meshGroup = createObjectMarker(x, z, 0, models.roblox);
+    // //Math.PI
+    // meshGroup.position.y = 0.5;
+    // meshGroup.rotation.y = Math.random() * Math.PI * 2; // Random rotation for visual variety
 
-    // --- REMOVED SPRITE CREATION HERE ---
+    // // --- REMOVED SPRITE CREATION HERE ---
 
+    // const group = new THREE.Group();
+    // group.add(meshGroup);
+    // // group.add(sprite); // Removed
+    // scene.add(group);
+    
+    // return group;
     const group = new THREE.Group();
+    group.position.set(x, 0, z);        // Outer group holds the world position
+    
+    meshGroup.position.set(0, 0.5, 0);  // meshGroup offset WITHIN the group
+    meshGroup.rotation.y = Math.random() * Math.PI * 2;
+    
     group.add(meshGroup);
-    // group.add(sprite); // Removed
     scene.add(group);
     
     return group;
@@ -211,7 +223,10 @@ export function buildLiveWorld() {
     w_bench: createObject(-4.25/2 +0.8/2, 2.4+ 1.3*3/2 + 1.02, Math.PI, models.electric_table),
     s_bench: createObject(-4.25/2 +0.6/2, 2.4+ 1.3*2 + 1.02 + 0.8/2 + 0.25, Math.PI, models.small_table_white),
     
-    //marker1: createObjectMarker( -0.82,5.59 , 0, models.roblox),  
+    // marker1: createObjectMarker( 2.4,-1.3, 0, models.roblox),  
+    // marker2: createObjectMarker( 2.0,1.2, 0, models.roblox),  
+    // marker3: createObjectMarker( 4.2,1.2, 0, models.roblox),  
+    // marker4: createObjectMarker( 4.7,-1.2, 0, models.roblox),  
 
     wall_1: createWall(wallThickness, 4.25 + wallThickness,  -wallThickness/2, -wallThickness/2, materials.wall),
     
@@ -258,7 +273,7 @@ export function buildStaticWorld() {
     table_p13: createObject(-2.5, 2.5, Math.PI / 2, models.white_table),
     table_p21: createObject(4, 2.5, Math.PI / 2, models.white_table),
     table_p22: createObject(5.5, 2.5, Math.PI / 2, models.white_table),
-    table_p23: createObject(7, 2.5, Math.PI / 2, models.white_table),
+    table_p23: createObject(7, 2.5, Math.PI / 2, models.white_table), 
 
     table_v11: createObject(-4, 5.25, 0, models.white_table),
     table_v12: createObject(-4, 6.75, 0, models.white_table),

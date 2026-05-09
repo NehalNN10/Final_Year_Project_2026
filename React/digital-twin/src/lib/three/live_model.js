@@ -28,9 +28,10 @@ let trackMarkers = new Map();
 // }
 
 function updateTrackMarker(trackId, position, region) {
+    console.log(`UpdateTrackMarker for ${trackId} at (${position.x.toFixed(2)}, ${position.z.toFixed(2)}) in region ${region}`);
     // Centering logic based on your world dimensions
-    // position.x -= 4.25; // Center X around middle of the room
-    // position.z += 2.4;  // Center Z around middle of the room
+    // position.x -= 0.8; // Center X around middle of the room
+    // position.z -= 1.2;  // Center Z around middle of the room
     if (trackMarkers.has(trackId)) {
         const markerData = trackMarkers.get(trackId);
 
@@ -44,6 +45,7 @@ function updateTrackMarker(trackId, position, region) {
     }
 }
 function createTrackMarker(trackId, position, region) {
+    console.log(`CreateTrackMarker for ${trackId} at (${position.x.toFixed(2)}, ${position.z.toFixed(2)}) in region ${region}`);
     let hash = 0;
     for (let i = 0; i < trackId.length; i++) hash = trackId.charCodeAt(i) + ((hash << 5) - hash);
     const colorHex = new THREE.Color(`hsl(${Math.abs(hash) % 360}, 70%, 50%)`).getHex();
@@ -58,7 +60,7 @@ function createTrackMarker(trackId, position, region) {
         position: position,
         region: region
     });
-    console.log(`Created marker for ${trackId} at (${position.x.toFixed(2)}, ${position.z.toFixed(2)}) in region ${region}`);
+    
     return marker;
 }
 function animate() {
@@ -129,7 +131,7 @@ export async function initLiveEngine(container) {
             
             updateTrackMarker(compositeId, position, trackData.region);
 
-            console.log(`Updating marker for ${compositeId} at (${position.x.toFixed(2)}, ${position.z.toFixed(2)}) in region ${trackData.region}`);
+            console.log(`update live avatarsfor ${compositeId} at (${position.x.toFixed(2)}, ${position.z.toFixed(2)}) in region ${trackData.region}`);
         });
 
         // Instantly remove anyone who walked off-camera
