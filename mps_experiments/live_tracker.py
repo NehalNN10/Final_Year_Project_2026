@@ -300,13 +300,26 @@ while cap.isOpened():
         device="mps", verbose=False
     )
 
-
-
-    # initialize count via very first frame
+    # initialize count via very first frame (ONLY inside valid regions)
     if frame_idx == 0:
+        initial_count = 0
         if len(results) > 0 and results[0].boxes.id is not None:
-            count = len(results[0].boxes.id)
-            print(f"🔄 Initialized room count to {count} based on Frame 0.")
+            # Grab the bounding boxes for the first frame
+            first_frame_boxes = results[0].boxes.xyxy.cpu().numpy()
+            
+            for (x1, y1, x2, y2) in first_frame_boxes:
+                x1, y1, x2, y2 = map(int, (x1, y1, x2, y2))
+                foot = ((x1 + x2) // 2, y2)
+                foot_float = (float(foot[0]), float(foot[1]))
+                
+                # Check if this person's foot is inside ANY of our defined regions
+                for name, poly in REGIONS_IMG.items():
+                    if cv2.pointPolygonTest(poly.astype(np.int32), foot_float, False) >= 0:
+                        initial_count += 1
+                        break # Found them in a region, no need to check other regions
+            
+            count = initial_count
+            print(f"🔄 Initialized room count to {count} based on mapped regions in Frame 0.")
         else:
             count = 0
     
@@ -324,8 +337,6 @@ while cap.isOpened():
         cv2.putText(
             orig, name, (cx, cy), cv2.FONT_HERSHEY_SIMPLEX, 0.6, (255, 0, 0), 2
         )
-
-
 
     frame_payload = []
 
@@ -362,6 +373,11 @@ while cap.isOpened():
             # FOOT POINT
             foot = ((x1 + x2) // 2, y2)
 
+            # aspect ratio
+            h = y2 - y1
+            w = x2 - x1
+            aspect_ratio = h / w if w > 0 else 0
+
             region_name = None
             world_xy = None
 
@@ -377,14 +393,19 @@ while cap.isOpened():
             # Color based on mapped/not mapped
             color = (0, 255, 0) if region_name else (0, 0, 255)
            # Draw bbox
-            cv2.rectangle(orig, (x1, y1), (x2, y2), color, 2)
+            label = None
+            if region_name:
+                cv2.rectangle(orig, (x1, y1), (x2, y2), color, 2)
 
-            # Draw foot point
-            cv2.circle(orig, foot, 4, (0, 255, 255), -1)
+                # Draw foot point
+                cv2.circle(orig, foot, 4, (0, 255, 255), -1)
+
+                # label = None
 
             if world_xy is not None:
                 wx, wy = world_xy
-                label = f"ID {tid} | {region_name} | ({wx:.2f}, {wy:.2f})"
+                # label = f"ID {tid} | {region_name} | ({wx:.2f}, {wy:.2f}) | AR {aspect_ratio:.2f}"
+                label = f"ID {tid} | {region_name} | ({wx:.2f}, {wy:.2f}) | HEIGHT {h:.2f}"
                 
                 # 🌟 ONLY ADD TO PAYLOAD IF THEY HAVE VALID COORDS
                 frame_payload.append({
@@ -394,14 +415,19 @@ while cap.isOpened():
                     "occupancy": current_occupancy,
                     "region": region_name # Uses the real region name now!
                 })
-            else:
-                label = f"ID {tid} | OUT OF BOUNDS"
+            # else:
+            #     label = f"ID {tid} | OUT OF BOUNDS"
                 # If they are out of bounds, we do NOT add them to the payload.
 
             cv2.putText(
-                orig, label, (x1, y1 - 6), cv2.FONT_HERSHEY_SIMPLEX, 0.5, color, 2
+                orig, label, (x1, y1 - 10), cv2.FONT_HERSHEY_SIMPLEX, 1.5, color, 2
             )
 
+            # cv2.rectangle(orig, (x1, y1), (x2, y2), (0, 255, 0), 2)
+            # cv2.circle(orig, (px, py), 5, (0, 0, 255), -1)
+            # label = f"ID: {int(pid)} | Conf: {score:.2f}"
+            # cv2.putText(orig, label, (x1, y1 - 10), cv2.FONT_HERSHEY_SIMPLEX, 0.6, (0, 255, 0), 2)
+    
 
             # tweak
             # inside = cv2.pointPolygonTest(ROI_POLY.astype(np.int32), (float(feet_x), float(feet_y)), False)
@@ -613,10 +639,10 @@ while cap.isOpened():
             #     "region": "Raw Camera View" 
             # })
 
-            cv2.rectangle(orig, (x1, y1), (x2, y2), (0, 255, 0), 2)
-            cv2.circle(orig, (px, py), 5, (0, 0, 255), -1)
-            label = f"ID: {int(pid)} | Conf: {score:.2f}"
-            cv2.putText(orig, label, (x1, y1 - 10), cv2.FONT_HERSHEY_SIMPLEX, 0.6, (0, 255, 0), 2)
+            # cv2.rectangle(orig, (x1, y1), (x2, y2), (0, 255, 0), 2)
+            # cv2.circle(orig, (px, py), 5, (0, 0, 255), -1)
+            # label = f"ID: {int(pid)} | Conf: {score:.2f}"
+            # cv2.putText(orig, label, (x1, y1 - 10), cv2.FONT_HERSHEY_SIMPLEX, 0.6, (0, 255, 0), 2)
     
     #══════════════════════════════════════════════════════════
     # CLEAN LOST IDS
@@ -687,10 +713,13 @@ while cap.isOpened():
     )
 
   
-    # update master payload
+    count = max(0, count)
+    valid_bboxes = len(frame_payload)
+    reported_count = max(count, valid_bboxes)
+
     master_payload = {
-        "room_count": count,            # The persistent line-logic count
-        "detections": frame_payload     # The array of current bounding boxes
+        "room_count": reported_count,   # Sends the max(count, valid_boxes)
+        "detections": frame_payload     # The array of current valid bounding boxes
     }
 
     # Fire and Forget the Master Payload to Redis
