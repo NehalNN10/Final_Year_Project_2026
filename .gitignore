@@ -26,6 +26,7 @@ mps_experiments/vids
 mps_experiments/*.pt
 mps_experiments/*.csv
 mps_experiments/*.mov
+mps_experiments/*.mp4
 
 3js_practice/projects_lab_2d/files/tracks_output_ang2_hour.csv
 
