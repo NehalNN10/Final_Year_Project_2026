@@ -13,8 +13,7 @@ import {
   Lightbulb, 
   ChevronDown, 
   ChevronUp, 
-  Droplets,
-  Snowflake
+  Droplets
 } from "lucide-react";
 
 interface RoomStatsPanelProps {
@@ -52,31 +51,39 @@ export default function RoomStatsPanel({
 
   useEffect(() => {
       let lastUpdate = 0;
+      
+      const handleUpdate = (e: any) => {
+          if (isLive) return;
 
-      const handleUpdate = (e) => {
           const now = Date.now();
-          if (isLive) {
-              if (liveOccupancy) setRoomCount(liveOccupancy)
-              if (sensorData) {
-                  setRoomTemp(sensorData.temperature);
-                  setRoomAC(sensorData.ac_state);
-                  setRoomLights(sensorData.lights_state);
-                  setRoomHumidity(sensorData.humidity);
-              }
-          }
-          else {
+          if (now - lastUpdate > 500) {
               setRoomTemp(e.detail.temperature);
               setRoomAC(e.detail.ac);
               setRoomLights(e.detail.lights);
               setRoomCount(e.detail.occupancy);
               setRoomMax(e.detail.max_occupancy);
               lastUpdate = now;
-          };
+          }
       };
 
       window.addEventListener('iotDataUpdate', handleUpdate);
       return () => window.removeEventListener('iotDataUpdate', handleUpdate);
-  }, []);
+  }, [isLive]); 
+
+  useEffect(() => {
+      if (isLive) {
+          if (liveOccupancy !== null) setRoomCount(liveOccupancy);
+          
+          if (sensorData) {
+              setRoomTemp(sensorData.temperature);
+              setRoomAC(sensorData.ac_state);
+              setRoomLights(sensorData.lights_state);
+              
+              // (Assuming you added this state!)
+              setRoomHumidity(sensorData.humidity); 
+          }
+      }
+  }, [isLive, liveOccupancy, sensorData]);
 
   return (
     <div className="tracker-ui outer p-0!">
@@ -150,7 +157,7 @@ export default function RoomStatsPanel({
           {department !== "Security" && (
             <div className="flex flex-row flex-wrap gap-3 text-white">
               <DataBox 
-                icon={Snowflake} 
+                icon={AirVent} 
                 label="AC"
                 value={roomAC ? 'ON' : 'OFF'} 
                 bgCases={
