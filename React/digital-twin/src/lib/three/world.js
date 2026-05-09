@@ -232,6 +232,8 @@ export function buildLiveWorld() {
     
     wall_2: createWall(wallThickness, 4.25 + wallThickness, 7.5+wallThickness/2, -wallThickness/2, materials.wall),
     wall_3: createWall(7.5, wallThickness, 7.5/2, -4.25/2 - wallThickness/2, materials.wall),
+
+    detected_region: createWall(7.5-(7.5 - 0.4 - 2.375*2), 4.25-0.9, (7.5 + 7.5 - 0.4 - 2.375*2)/2, -0.9/2, materials.detection)
     });
 }
 
@@ -352,7 +354,16 @@ export const materials = {
     glass: new THREE.MeshBasicMaterial({ color: 0x888888, side: THREE.DoubleSide, transparent: true, opacity: 0.3 }),
     pillar: new THREE.MeshStandardMaterial({ color: 0xd1b100, side: THREE.DoubleSide }),
     bench: new THREE.MeshStandardMaterial({ color: 0x000000, side: THREE.DoubleSide }),
-    buggy: new THREE.MeshStandardMaterial({ color: 0x880000, side: THREE.DoubleSide })
+    buggy: new THREE.MeshStandardMaterial({ color: 0x880000, side: THREE.DoubleSide }),
+    detection: new THREE.MeshStandardMaterial({ 
+        color: 0x00ff88, 
+        side: THREE.DoubleSide, 
+        transparent: true, 
+        opacity: 0.4,
+        polygonOffset: true,
+        polygonOffsetFactor: -1,
+        polygonOffsetUnits: -1
+    })
 };
 
 export const wallThickness = 0.15;
