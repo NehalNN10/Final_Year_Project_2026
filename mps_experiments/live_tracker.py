@@ -19,6 +19,12 @@ else:
 REDIS_HOST = '13.204.143.167' 
 REDIS_PORT = 6379
 
+
+#SCALING
+ORIG_W = 3024
+ORIG_H = 1706
+
+
 try:
     redis_client = redis.Redis(host=REDIS_HOST, port=REDIS_PORT, decode_responses=True)
     redis_client.ping()
@@ -30,9 +36,9 @@ except redis.ConnectionError as e:
 # 2. CONFIGURATION & MODELS
 # =========================
 
-ORIG_W = 3024
-ORIG_H = 1706
+
 COUNT_COOLDOWN = 15
+
 
 #══════════════════════════════════════════════════════════════
 # HELPERS
@@ -101,7 +107,7 @@ model = YOLO(MODEL_PATH)
 cap = cv2.VideoCapture(VIDEO_PATH)
 cap.set(cv2.CAP_PROP_BUFFERSIZE, 2) 
 
-#SCALING
+
 NEW_W = int(cap.get(cv2.CAP_PROP_FRAME_WIDTH))
 NEW_H = int(cap.get(cv2.CAP_PROP_FRAME_HEIGHT))
 
@@ -114,9 +120,13 @@ else:
     scale_x = 1920 / ORIG_W
     scale_y = 1080 / ORIG_H
 
+
+
 # Helper function to scale a single (x, y) tuple
 def scale_point(pt):
     return (int(pt[0] * scale_x), int(pt[1] * scale_y))
+
+
 
 # Original Line Coordinates
 orig_inner_a = (2001, 1578)
@@ -145,6 +155,111 @@ OUTER_POLYGON = np.array([
     scale_point((474, 1556)),
     scale_point((1998, 1707)),
 ], dtype=np.int32)
+
+
+REGIONS_IMG = {
+    "WALKWAY_1": np.array(
+        [scale_point((471, 1488)), scale_point((1993, 1625)), scale_point((1899, 977)), scale_point((916, 938))], dtype=np.float32
+    ),
+    "WALKWAY_2": np.array(
+        [scale_point((1899, 977)), scale_point((916, 938)), scale_point((1068, 778)), scale_point((1872, 809))], dtype=np.float32
+    ),
+    "WALKWAY_3": np.array(
+        [scale_point((1068, 778)), scale_point((1872, 809)), scale_point((1841, 638)), scale_point((1197, 622))], dtype=np.float32
+    ),
+    "WALKWAY_4": np.array(
+        [
+            scale_point((471, 1488)),
+            scale_point((916, 938)),
+            scale_point((885, 661)),
+            scale_point((362, 1113)),
+        ],
+        dtype=np.float32,
+    ),
+    "WALKWAY_5": np.array(
+        [
+            scale_point((916, 938)),
+            scale_point((1068, 778)),
+            scale_point((1072, 544)),
+            scale_point((885, 661)),
+        ],
+        dtype=np.float32,
+    ),
+    "WALKWAY_6": np.array(
+        [
+            scale_point((1068, 778)),
+            scale_point((1197, 622)),
+            scale_point((1166, 419)),
+            scale_point((1072, 544)),
+        ],
+        dtype=np.float32,
+    ),
+   
+        "WALKWAY_7": np.array(
+        [ scale_point((1197, 622)), scale_point((1197, 423)),scale_point((1841, 423)),scale_point((1841, 638))], dtype=np.float32
+    ),
+}
+
+REGIONS_WORLD = {
+    "WALKWAY_1": np.array(
+        [(2.4, -1.3), (2.0, 1.2), (4.2, 1.2), (4.7, -1.2)], dtype=np.float32
+    ),
+    "WALKWAY_2": np.array(
+        [(4.2, 1.2), (4.7, -1.2), (5.9, -1.2), (5.9, 1.2)], dtype=np.float32
+    ),
+    "WALKWAY_3": np.array(
+        [(5.9, -1.2), (5.9, 1.2), (7.4, 1.2), (7.4, -1.3)], dtype=np.float32
+    ),
+    "WALKWAY_4": np.array(
+        [
+            (2.4, -1.3),
+            (4.7, -1.2),
+            (4.7, -1.3),
+            (2.4, -1.4),
+        ],
+        dtype=np.float32,
+    ),
+    "WALKWAY_5": np.array(
+        [(4.7, -1.2), (5.9, -1.2), (5.9, -1.3), (4.7, -1.3)], dtype=np.float32
+    ),
+    "WALKWAY_6": np.array(
+        [
+            (5.9, -1.2),
+            (7.5, -1.3),
+            (7.5, -1.4),
+            (5.9, -1.3),
+        ],
+        dtype=np.float32,
+    ),
+     "WALKWAY_7": np.array(
+        [ (7.4, -1.3), (7.5, -1.3),(7.4, 1.2),(7.3, 1.2)], dtype=np.float32
+    ),
+
+}
+
+
+# =========================
+# HOMOGRAPHIES
+# =========================
+HOMOGRAPHIES = {}
+
+for name in REGIONS_IMG:
+    H, _ = cv2.findHomography(REGIONS_IMG[name], REGIONS_WORLD[name])
+    HOMOGRAPHIES[name] = H
+
+# =========================
+# HELPERS
+# =========================
+def point_in_polygon(point, polygon):
+    return cv2.pointPolygonTest(polygon.astype(np.int32), point, False) >= 0
+
+
+def map_point(point_px, H):
+    pt = np.array([[point_px]], dtype=np.float32)
+    mapped = cv2.perspectiveTransform(pt, H)
+    return mapped[0][0]
+
+
 
 # =========================
 # 3. ASYNC PUBLISH FUNCTION
@@ -180,10 +295,12 @@ while cap.isOpened():
     start_time = time.time()
     
     results = model.track(
-        frame, conf=0.4, iou=0.5, classes=[0], 
+        frame, conf=0.5, iou=0.5, classes=[0], 
         persist=True, tracker="bytetrack.yaml", 
         device="mps", verbose=False
     )
+
+
 
     # initialize count via very first frame
     if frame_idx == 0:
@@ -197,6 +314,19 @@ while cap.isOpened():
     fps = 1.0 / (time.time() - start_time)
     
     orig = frame.copy()
+           # Draw regions
+    for name, poly in REGIONS_IMG.items():
+
+        cv2.polylines(orig, [poly.astype(np.int32)], True, (255, 0, 0), 2)
+
+        cx, cy = np.mean(poly, axis=0).astype(int)
+
+        cv2.putText(
+            orig, name, (cx, cy), cv2.FONT_HERSHEY_SIMPLEX, 0.6, (255, 0, 0), 2
+        )
+
+
+
     frame_payload = []
 
     # 🌟 3. Extract Latency Metrics (from the first result object)
@@ -220,6 +350,8 @@ while cap.isOpened():
         current_occupancy = len(ids)
 
         for (x1, y1, x2, y2), pid, score in zip(boxes, ids, scores):
+
+
             x1, y1, x2, y2 = map(int, (x1, y1, x2, y2))
             px = (x1 + x2) // 2
             py = y2
@@ -229,6 +361,53 @@ while cap.isOpened():
 
             # FOOT POINT
             foot = ((x1 + x2) // 2, y2)
+
+            region_name = None
+            world_xy = None
+
+            # Find which region contains point
+            for name, poly in REGIONS_IMG.items():
+
+                if point_in_polygon(foot, poly):
+
+                    region_name = name
+                    world_xy = map_point(foot, HOMOGRAPHIES[name])
+                    break
+
+            # Color based on mapped/not mapped
+            color = (0, 255, 0) if region_name else (0, 0, 255)
+           # Draw bbox
+            cv2.rectangle(orig, (x1, y1), (x2, y2), color, 2)
+
+            # Draw foot point
+            cv2.circle(orig, foot, 4, (0, 255, 255), -1)
+
+            if world_xy is not None:
+                wx, wy = world_xy
+                label = f"ID {tid} | {region_name} | ({wx:.2f}, {wy:.2f})"
+                
+                # 🌟 ONLY ADD TO PAYLOAD IF THEY HAVE VALID COORDS
+                frame_payload.append({
+                    "id": int(pid),
+                    "x": float(wx),  
+                    "z": float(wy),  
+                    "occupancy": current_occupancy,
+                    "region": region_name # Uses the real region name now!
+                })
+            else:
+                label = f"ID {tid} | OUT OF BOUNDS"
+                # If they are out of bounds, we do NOT add them to the payload.
+
+            cv2.putText(
+                orig, label, (x1, y1 - 6), cv2.FONT_HERSHEY_SIMPLEX, 0.5, color, 2
+            )
+
+
+            # tweak
+            # inside = cv2.pointPolygonTest(ROI_POLY.astype(np.int32), (float(feet_x), float(feet_y)), False)
+
+            # if inside < 0:
+            #     continue
 
             # CURRENT SIDES
             inner_side_now = point_side(foot, INNER_A, INNER_B)
@@ -415,13 +594,24 @@ while cap.isOpened():
             state["outer_side"] = outer_side_now
             state["zone"] = current_zone
 
-            frame_payload.append({
-                "id": int(pid),
-                "x": float(px),  
-                "z": float(py),  
-                "occupancy": current_occupancy,
-                "region": "Raw Camera View" 
-            })
+            # feet_x = foot[0]
+            # feet_y = foot[1]
+            # # model_x, model_z = apply_homography(H_MATRIX, px, py, scale_x, scale_y)
+            # cam_pt = np.array([[[feet_x, feet_y]]], dtype=np.float32)
+            # world_pt = cv2.perspectiveTransform(cam_pt, H_world)
+            # model_x = float(world_pt[0][0][0])
+            # model_z = float(world_pt[0][0][1])
+
+            # wx = float(wx)
+            # wy = float(wy)
+            # print(f"ID {tid} | World Coords: ({wx:.2f}, {wy:.2f}) | Region: {region_name}")
+            # frame_payload.append({
+            #     "id": int(pid),
+            #     "x": wx,  
+            #     "z": wy,  
+            #     "occupancy": current_occupancy,
+            #     "region": "Raw Camera View" 
+            # })
 
             cv2.rectangle(orig, (x1, y1), (x2, y2), (0, 255, 0), 2)
             cv2.circle(orig, (px, py), 5, (0, 0, 255), -1)
@@ -496,6 +686,7 @@ while cap.isOpened():
         2
     )
 
+  
     # update master payload
     master_payload = {
         "room_count": count,            # The persistent line-logic count

@@ -9,6 +9,12 @@ import { ChevronLeft, ChevronRight, Thermometer, Droplets, Lightbulb, Snowflake,
 import { io } from "socket.io-client";
 import DataBox from "@/components/DataBox";
 
+declare global {
+  interface Window {
+    updateLiveAvatars?: (detections: any[]) => void;
+  }
+}
+
 export default function LiveModel() {
   const containerRef = useRef<HTMLDivElement>(null);
   const [department, setDepartment] = useState("Loading...");
@@ -65,6 +71,10 @@ export default function LiveModel() {
       if (data) {
         setRoomCount(data.room_count);
         setLiveDetections(data.detections || []); 
+      
+        if (window.updateLiveAvatars) {
+          window.updateLiveAvatars(data.detections || []);
+        }
       }
     });
 
