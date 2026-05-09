@@ -1,3 +1,7 @@
+from gevent import monkey
+monkey.patch_all()
+
+import gevent
 import os
 import json
 import redis
@@ -39,7 +43,8 @@ redis_client = redis.Redis(host='13.204.143.167', port=6379, decode_responses=Tr
 # live_tracking_data = {}
 redis_thread = None
 
-socketio = SocketIO(app, cors_allowed_origins="*", async_mode='threading')
+# socketio = SocketIO(app, cors_allowed_origins="*", async_mode='threading')
+socketio = SocketIO(app, cors_allowed_origins="*")
 
 # global iot data object
 latest_iot_data = {
@@ -88,10 +93,10 @@ def redis_listener():
 def start_redis_listener():
     """Start Redis listener in background thread"""
     global redis_thread
-    if redis_thread is None or not redis_thread.is_alive():
-        redis_thread = Thread(target=redis_listener, daemon=True)
-        redis_thread.start()
-        print("✅ Redis listener thread started")
+    if redis_thread is None:
+        # 🌟 Use gevent.spawn instead of Thread
+        redis_thread = gevent.spawn(redis_listener)
+        print("✅ Redis listener greenlet started")
 
 @socketio.on('connect')
 def handle_connect():
@@ -530,4 +535,5 @@ if __name__ == '__main__':
                 host='0.0.0.0',  
                 port=1767,       
                 debug=False,
-                allow_unsafe_werkzeug=True)
+                # allow_unsafe_werkzeug=True)
+                )
