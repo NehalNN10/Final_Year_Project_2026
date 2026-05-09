@@ -54,7 +54,7 @@ export default function ModelControlsPanel({ isReplay = false, isLive = false }:
               className="btn btn-primary mx-0! mb-0! mt-2!" 
               onClick={() => import(ui).then(mod => mod.resetCameraViewLive())}
             >
-              <Camera size={20} /> <span className="ml-2">Yo Camera</span>
+              <Camera size={20} /> <span className="ml-2">Reset Camera</span>
             </button>
           )}
 
