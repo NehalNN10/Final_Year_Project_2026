@@ -80,9 +80,10 @@ export function createObject(z, x, rot, objectUrl) {
     return group;
 }
 
-export function createObjectMarker(z, x, rot, objectUrl) {
+export function createObjectMarker(x, z, rot, objectUrl) {
     const group = new THREE.Group();
-
+    x-= 4.25; // Center X around middle of the room
+    z+= 2.4;  // Center Z around middle of the room
     group.position.set(x, 0, z);
     group.rotation.y = rot;
 
@@ -118,9 +119,43 @@ export function createObjectMarker(z, x, rot, objectUrl) {
     
 }
 
-export function createMarker(z, x, color, radius = 0.1, label = '') {
+// const loader = new GLTFLoader();
+
+// loader.load(
+//     './files/model.glb', // 1. Path to your file
+//     function (gltf) {
+//         const model = gltf.scene;
+
+//         // 2. Transform the model
+//         model.position.set(0, 0.5, 0); // X, Y, Z
+//         model.scale.set(1, 1, 1);      // Scale it if it's too big/small
+//         model.rotation.y = Math.PI / 2; // Rotate if needed
+
+//         // 3. Optional: Force the model to be bright (if lighting is still tricky)
+//         model.traverse((child) => {
+//             if (child.isMesh) {
+//                 // Determine if you want shadows
+//                 child.castShadow = true;
+//                 child.receiveShadow = true;
+//             }
+//         });
+
+//         scene.add(model);
+//         console.log("Model loaded successfully!");
+//     },
+//     function (xhr) {
+//         // Optional: Loading progress
+//         console.log((xhr.loaded / xhr.total * 100) + '% loaded');
+//     },
+//     function (error) {
+//         console.error('An error happened loading the model:', error);
+//     }
+// );
+
+export function createMarker(x,z, color, radius = 0.1, label = '') {
     // This creates the "Template" marker for the pool
-    const meshGroup = createObjectMarker(z, x, Math.PI, models.roblox);
+    console.log("Creating marker at", x, z, "with color", color);
+    const meshGroup = createObjectMarker(x, z, Math.PI, models.roblox);
     meshGroup.position.y = 0.5;
     meshGroup.rotation.y = Math.random() * Math.PI * 2; // Random rotation for visual variety
 
@@ -175,6 +210,8 @@ export function buildLiveWorld() {
     b_bench: createObject(-4.25/2 + 0.08 +0.6/2, 2.4+ 1.3/2, Math.PI, models.small_table_black),
     w_bench: createObject(-4.25/2 +0.8/2, 2.4+ 1.3*3/2 + 1.02, Math.PI, models.electric_table),
     s_bench: createObject(-4.25/2 +0.6/2, 2.4+ 1.3*2 + 1.02 + 0.8/2 + 0.25, Math.PI, models.small_table_white),
+    
+    //marker1: createObjectMarker( -0.82,5.59 , 0, models.roblox),  
 
     wall_1: createWall(wallThickness, 4.25 + wallThickness,  -wallThickness/2, -wallThickness/2, materials.wall),
     
