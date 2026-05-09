@@ -43,8 +43,8 @@ export default function RoomStatsPanel({
 }: RoomStatsPanelProps) {
   const [isExpanded, setIsExpanded] = useState(true);
   const [roomTemp, setRoomTemp] = useState<number | null>(null);
-  const [roomAC, setRoomAC] = useState<string | boolean | null>(null);
-  const [roomLights, setRoomLights] = useState<string | boolean | null>(null);
+  const [roomAC, setRoomAC] = useState<boolean | null>(null);
+  const [roomLights, setRoomLights] = useState<boolean | null>(null);
   const [roomCount, setRoomCount] = useState<number | null>(null);
   const [roomMax, setRoomMax] = useState<number>(5);
   const [roomHumidity, setRoomHumidity] = useState<number | null>(null);
@@ -75,14 +75,14 @@ export default function RoomStatsPanel({
           if (liveOccupancy !== null) setRoomCount(liveOccupancy);
           
           if (sensorData) {
-              setRoomTemp(sensorData.temperature);
-              setRoomAC(sensorData.ac_state);
-              setRoomLights(sensorData.lights_state);
-              
-              // (Assuming you added this state!)
-              setRoomHumidity(sensorData.humidity); 
+            if (sensorData.temperature !== null) setRoomTemp(sensorData.temperature);
+            if (sensorData.ac_state !== null) setRoomAC(sensorData.ac_state === "ON" ? true : false);
+            if (sensorData.lights_state !== null) setRoomLights(sensorData.lights_state === "ON" ? true : false);
+            if (sensorData.humidity !== null) setRoomHumidity(sensorData.humidity);
           }
       }
+
+      setRoomMax(5); // You can adjust this as needed
   }, [isLive, liveOccupancy, sensorData]);
 
   return (
@@ -159,7 +159,7 @@ export default function RoomStatsPanel({
               <DataBox 
                 icon={AirVent} 
                 label="AC"
-                value={roomAC === 'ON' ? 'ON' : 'OFF'}
+                value={roomAC === null ? null : roomAC ? "ON" : "OFF"} 
                 bgCases={
                   roomAC === null ? 'bg-[var(--surface-color)] text-[var(--text-color)] border-[var(--text-color)] '
                   : roomAC ? 'bg-[#00ff88]/50 text-[#00ff88] border-[#00ff88]' 
@@ -170,7 +170,7 @@ export default function RoomStatsPanel({
               <DataBox 
                 icon={Lightbulb} 
                 label="Lights"
-                value={roomLights === 'ON' ? 'ON' : 'OFF'}
+                value={roomLights ? 'ON' : 'OFF'} 
                 bgCases={
                   roomLights === null ? 'bg-[var(--surface-color)] text-[var(--text-color)] border-[var(--text-color)] '
                   : roomLights ? 'bg-[#00ff88]/50 text-[#00ff88] border-[#00ff88]' 
