@@ -294,7 +294,8 @@ export default function SandboxModel() {
               {acAlerts.length > 0 ? (
                 acAlerts.map(room => (
                   <IoTAlert 
-                    roomData={room}  
+                    key={room.room_id}
+                    roomData={room} 
                     time={currentRoomStats[room.room_id].uiAlerts.ac} 
                   />
                 ))
@@ -311,7 +312,8 @@ export default function SandboxModel() {
               {lightsAlerts.length > 0 ? (
                 lightsAlerts.map(room => (
                   <IoTAlert 
-                    roomData={room} 
+                    key={room.room_id}
+                    roomData={room}
                     time={currentRoomStats[room.room_id].uiAlerts.lights} 
                   />
                 ))
@@ -328,7 +330,8 @@ export default function SandboxModel() {
               {tempAlerts.length > 0 ? (
                 tempAlerts.map(room => (
                   <IoTAlert 
-                    roomData={room} 
+                    key={room.room_id}
+                    roomData={room}
                     time={currentRoomStats[room.room_id].uiAlerts.temp}
                   />
                 ))
@@ -345,7 +348,8 @@ export default function SandboxModel() {
               {occuAlerts.length > 0 ? (
                 occuAlerts.map(room => (
                   <IoTAlert 
-                    roomData={room} 
+                    key={room.room_id}
+                    roomData={room}
                     time={currentRoomStats[room.room_id].uiAlerts.occu}
                   />
                 ))
