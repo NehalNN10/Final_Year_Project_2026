@@ -370,9 +370,6 @@ while cap.isOpened():
             tid = int(pid)
             current_ids.add(tid)
 
-            # FOOT POINT
-            foot = ((x1 + x2) // 2, y2)
-
             # aspect ratio
             h = y2 - y1
             w = x2 - x1
@@ -381,12 +378,38 @@ while cap.isOpened():
             region_name = None
             world_xy = None
 
+            # FOOT POINT
+            foot = ((x1 + x2) // 2, y2)
+
             # Find which region contains point
             for name, poly in REGIONS_IMG.items():
 
                 if point_in_polygon(foot, poly):
 
                     region_name = name
+
+                    # ghost leg logic
+                    if aspect_ratio < 2.2:
+                        if region_name == "WALKWAY_3":
+                            if h < 355:
+                                foot = (foot[0], foot[1] + (355 - h))
+                        elif region_name == "WALKWAY_2":
+                            if h < 520:
+                                foot = (foot[0], foot[1] + (520 - h))
+                        elif region_name == "WALKWAY_1":
+                            if h < 630:
+                                foot = (foot[0], foot[1] + (630 - h))
+                    else:
+                        if region_name == "WALKWAY_3":
+                            if h < 455:
+                                foot = (foot[0], foot[1] + (455 - h))
+                        elif region_name == "WALKWAY_2":
+                            if h < 550:
+                                foot = (foot[0], foot[1] + (550 - h))
+                        elif region_name == "WALKWAY_1":
+                            if h < 700:
+                                foot = (foot[0], foot[1] + (700 - h))
+
                     world_xy = map_point(foot, HOMOGRAPHIES[name])
                     break
 
@@ -405,7 +428,7 @@ while cap.isOpened():
             if world_xy is not None:
                 wx, wy = world_xy
                 # label = f"ID {tid} | {region_name} | ({wx:.2f}, {wy:.2f}) | AR {aspect_ratio:.2f}"
-                label = f"ID {tid} | {region_name} | ({wx:.2f}, {wy:.2f}) | HEIGHT {h:.2f}"
+                label = f"ID {tid} | {region_name} | ({wx:.2f}, {wy:.2f}) | AR {aspect_ratio:.2f} | H {h}"
                 
                 # 🌟 ONLY ADD TO PAYLOAD IF THEY HAVE VALID COORDS
                 frame_payload.append({
