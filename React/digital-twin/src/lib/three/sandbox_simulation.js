@@ -332,7 +332,7 @@ export class SandboxSimulation {
                 if (roomInf && row.occupancy > roomInf.max_occupancy) row.uiAlerts.occu = `Over capacity: ${row.occupancy}/${roomInf.max_occupancy}`;
                 
                 const lastAlert = this.roomLastAlertTime[roomId] || 0;
-                if (seconds - lastAlert >= 120) {
+                if (seconds - lastAlert >= threshold) {
                     const activeAlerts = [];
                     const descriptions = [];
 

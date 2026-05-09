@@ -1,6 +1,6 @@
 import * as THREE from "three";
 import { createMarker } from "./world.js";
-import { FPS, LOOP_DURATION, iot, getRoom, roomInfo } from "./variables.js";
+import { FPS, LOOP_DURATION, iot, getRoom, roomInfo, sendFacilitiesAlert } from "./variables.js";
 import { camera, controls} from "./scene.js";
 import { heatmapCtx, heatmapTexture, heatmapSize, heatmapWidth, heatmapHeight} from "./scene.js";
 import { all, max } from "three/tsl";
@@ -83,11 +83,11 @@ export function renderFrame(index) {
 
     const room = hit ? getRoom(intersectionPoint.x, intersectionPoint.z) : null;
     const roomInf = room ? roomInfo[room] : null;
-    const seconds = Math.floor(playback.frame / FPS);
+    const second = Math.floor(playback.frame / FPS);
     let row = null;
     
     if (room && iot && iot[room] && iot[room].length > 0) {
-        const safeIndex = seconds % iot[room].length; 
+        const safeIndex = second % iot[room].length; 
         row = iot[room][safeIndex];
     }
 
@@ -99,7 +99,7 @@ export function renderFrame(index) {
         console.log("--- 3D ENGINE DIAGNOSTIC ---");
         console.log("1. Raycaster sees room: ", room || "NONE (Look at the floor!)");
         console.log("2. Array length for room: ", iot[room] ? iot[room].length : 0);
-        console.log("3. Current Second: ", seconds);
+        console.log("3. Current Second: ", second);
         console.log("4. Extracted Row Data: ", row);
         console.log("5. Logged in Dept: ", department);
     }
@@ -190,57 +190,60 @@ export function renderFrame(index) {
         const secondsIntoCycle = nowSeconds % LOOP_DURATION;
         const cycleStartTime = new Date(now.getTime() - (secondsIntoCycle * 1000));
         
-        const frameTime = new Date(cycleStartTime.getTime() + (seconds) * 1000);
+        const frameTime = new Date(cycleStartTime.getTime() + (second) * 1000);
         
         uiElements.uiTime.innerText = frameTime.toLocaleTimeString(); 
         
     }
 
-    const currentSeconds = Math.floor(Date.now() / 1000);
-    if (currentSeconds !== lastSecond) {
-        lastSecond = currentSeconds;
+    const seconds = Math.floor(Date.now() / 1000);
+    
+    if (seconds !== lastSecond) {
+        lastSecond = seconds;
 
         Object.keys(iot).forEach(roomId => {
-            // Safety check to ensure data actually exists
-            if (!iot[roomId] || iot[roomId].length === 0) return;
-            
-            // Safely loop the index for the background tracker!
-            const safeIndex = seconds % iot[roomId].length;
+            const safeIndex = second % iot[roomId].length;
             const row = iot[roomId][safeIndex];
             
-            if (!row) return; // Final safety net
-            
+            if (!row) return; // Safety check in case the room has no data yet
+
             const threshold = 120;
             
-            // Parse strings safely
-            const occuCount = row.occu !== undefined ? parseInt(row.occu) : parseInt(row.occupancy);
-            const isAcOn = (row.ac === true || row.ac === "On" || row.ac === "ON");
-            const isLightsOn = (row.lights === true || row.lights === "On" || row.lights === "ON");
-            const currentTemp = parseFloat(row.temperature);
-            
-            // Track conditions globally (NO 'this.' keyword used!)
-            if (occuCount === 0 && isAcOn) trackers.acWasted[roomId] = (trackers.acWasted[roomId] || 0) + 1;
+            if (row.occupancy === 0 && row.ac) trackers.acWasted[roomId] = (trackers.acWasted[roomId] || 0) + 1;
             else trackers.acWasted[roomId] = 0;
 
-            if (occuCount === 0 && isLightsOn) trackers.lightsWasted[roomId] = (trackers.lightsWasted[roomId] || 0) + 1;
+            if (row.occupancy === 0 && row.lights) trackers.lightsWasted[roomId] = (trackers.lightsWasted[roomId] || 0) + 1;
             else trackers.lightsWasted[roomId] = 0;
 
-            if (currentTemp > 28) trackers.tempWarm[roomId] = (trackers.tempWarm[roomId] || 0) + 1;
+            if (row.temperature > 28) trackers.tempWarm[roomId] = (trackers.tempWarm[roomId] || 0) + 1;
             else trackers.tempWarm[roomId] = 0;
 
-            if (currentTemp < 22) trackers.tempCold[roomId] = (trackers.tempCold[roomId] || 0) + 1;
+            if (row.temperature < 22) trackers.tempCold[roomId] = (trackers.tempCold[roomId] || 0) + 1;
             else trackers.tempCold[roomId] = 0;
 
+            row.uiAlerts = { ac: null, lights: null, temp: null, occu: null };
+            
+            const formatTime = (totalSec) => {
+                const m = Math.floor(totalSec / 60);
+                const s = totalSec % 60;
+                return m > 0 ? `${m} min ${s} sec` : `${s} sec`;
+            };
+
+            // If a tracker crossed the threshold, attach the formatted time string!
+            if (trackers.acWasted[roomId] >= threshold) row.uiAlerts.ac = formatTime(trackers.acWasted[roomId]);
+            if (trackers.lightsWasted[roomId] >= threshold) row.uiAlerts.lights = formatTime(trackers.lightsWasted[roomId]);
+            
+            if (trackers.tempWarm[roomId] >= threshold) row.uiAlerts.temp = `Too Warm (${row.temperature.toFixed(1)}°C) for ${formatTime(trackers.tempWarm[roomId])}`;
+            else if (trackers.tempCold[roomId] >= threshold) row.uiAlerts.temp = `Too Cold (${row.temperature.toFixed(1)}°C) for ${formatTime(trackers.tempCold[roomId])}`;
+            
+            // Instant Occupancy Alert (no threshold needed)
+            const roomInf = roomInfo[roomId];
+            if (roomInf && row.occupancy > roomInf.max_occupancy) row.uiAlerts.occu = `Over capacity: ${row.occupancy}/${roomInf.max_occupancy}`;
+            
             const lastAlert = roomLastAlertTime[roomId] || 0;
-            if (currentSeconds - lastAlert >= 120) {
+            if (seconds - lastAlert >= threshold) {
                 const activeAlerts = [];
                 const descriptions = [];
-
-                const formatTime = (totalSec) => {
-                    const m = Math.floor(totalSec / 60);
-                    const s = totalSec % 60;
-                    return m > 0 ? `${m} min ${s} sec` : `${s} sec`;
-                };
 
                 if (trackers.acWasted[roomId] >= threshold) {
                     activeAlerts.push("AC Being Wasted");
@@ -252,19 +255,26 @@ export function renderFrame(index) {
                 }
                 if (trackers.tempWarm[roomId] >= threshold) {
                     activeAlerts.push("Temperature Too Warm");
-                    descriptions.push(`Temperature over 28°C (${currentTemp.toFixed(1)}°C) for ${formatTime(trackers.tempWarm[roomId])}.`);
+                    descriptions.push(`Temperature over 28°C (${row.temperature.toFixed(1)}°C) for ${formatTime(trackers.tempWarm[roomId])}.`);
                 }
                 if (trackers.tempCold[roomId] >= threshold) {
                     activeAlerts.push("Temperature Too Cold");
-                    descriptions.push(`Temperature under 20°C (${currentTemp.toFixed(1)}°C) for ${formatTime(trackers.tempCold[roomId])}.`);
+                    descriptions.push(`Temperature under 20°C (${row.temperature.toFixed(1)}°C) for ${formatTime(trackers.tempCold[roomId])}.`);
                 }
 
                 if (activeAlerts.length > 0) {
                     const combinedTitle = activeAlerts.join(" & ");
                     const combinedDesc = descriptions.join("\n \n");
 
-                    sendFacilitiesAlert(roomId, combinedTitle, getTime(), combinedDesc);
-                    roomLastAlertTime[roomId] = currentSeconds;
+                    const currentTime = new Date().toLocaleTimeString();
+                    
+                    if (typeof sendFacilitiesAlert === 'function') {
+                        sendFacilitiesAlert(roomId, combinedTitle, currentTime, combinedDesc);
+                    } else {
+                        console.warn(`[ALERT READY] But sendFacilitiesAlert is missing! Data:`, {roomId, combinedTitle, combinedDesc});
+                    }
+
+                    roomLastAlertTime[roomId] = seconds;
                 }
             }
         });
@@ -491,50 +501,6 @@ export async function loadSimulationData(onLoadComplete) {
     } catch (e) { 
         console.error("Error loading tracks:", e); 
     }
-
-    // try {
-    //     const iResp = await fetch(iot["C-007"]);
-    //     if (iResp.ok) {
-    //         const iText = await iResp.text();
-    //         const iRows = iText.split('\n').map(r => r.trim()).filter(r => r);
-    //         const headers = iRows[0].split(',').map(h => h.trim().toLowerCase());
-            
-    //         globalIoTData = iRows.slice(1).map(row => {
-    //             const vals = row.split(',');
-    //             const obj = {};
-    //             headers.forEach((h, i) => obj[h] = vals[i]);
-    //             return obj;
-    //         });
-    //     }
-    // } catch (e) { console.error("Error loading IoT", e); }
-
-    // playback.maxFrames = Math.max(globalTrackFrames.length, globalIoTData.length) - 1;
-    
-    //neww  
-//     try {
-//         const iResp = await fetch(track_count);
-//         if (iResp.ok) {
-//         const iText = await iResp.text();
-//         const iRows = iText
-//             .split("\n")
-//             .map((r) => r.trim())
-//             .filter((r) => r);
-//         const headers = iRows[0].split(",").map((h) => h.trim().toLowerCase());
-
-//         iRows.slice(1).forEach((row) => {
-//             const vals = row.split(",");
-//             const frameNum = parseInt(vals[headers.indexOf("frame")]);
-//             const countNum = parseInt(vals[headers.indexOf("count")]);
-//             if (!isNaN(frameNum) && !isNaN(countNum)) {
-//             globalCountData.set(frameNum, countNum);
-//             }
-//         });
-//     }
-//   } catch (e) {
-//     console.error("Error loading Count", e);
-//   }
-
-    /*************** */
     
     if (onLoadComplete) onLoadComplete();
 }

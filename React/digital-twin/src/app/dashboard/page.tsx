@@ -1,11 +1,12 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef } from "react";
 import { Clock, Users, Thermometer, Wind, Lightbulb, LightbulbOff, Check, X, User, UserMinus, AirVent } from "lucide-react";
 import Navbar from "../../components/Navbar";
 import StaffList from "../../components/StaffList";
 import FormRow from "../../components/FormRow";
 import StatRow from "@/components/StatRow";
+import IoTAlert from "@/components/IoTAlert";
 import { LOOP_DURATION } from "@/lib/three/variables";
 
 
@@ -24,6 +25,9 @@ export default function Dashboard() {
   const [emergencyForm, setEmergencyForm] = useState({ roomNumber: "", alertType: "AC", timeSince: "", description: "" });
   const [currentRoomStats, setCurrentRoomStats] = useState<any>({});
   const [currentTimeSpan, setCurrentTimeSpan] = useState("Loading Time...");
+
+  const trackersRef = useRef<any>({ acWasted: {}, lightsWasted: {}, tempWarm: {}, tempCold: {} });
+  const lastAlertRef = useRef<any>({});
 
   // --- Initial Data Fetch ---
   useEffect(() => {
@@ -52,27 +56,110 @@ export default function Dashboard() {
         .catch(err => console.error("Error fetching data:", err));
     }, []);
 
-  // --- Real-Time Simulation Loop ---
   useEffect(() => {
     if (roomsData.length === 0) return;
     
     const interval = setInterval(() => {
       const now = new Date();
-      const currentFrame = Math.floor(now.getTime() / 1000) % LOOP_DURATION;
+      const currentSecond = Math.floor(now.getTime() / 1000);
+      const currentFrame = currentSecond % LOOP_DURATION;
       
       const cycleStartTime = new Date(now.getTime() - (currentFrame * 1000));
       setCurrentTimeSpan(new Date(cycleStartTime.getTime() + (currentFrame * 1000)).toLocaleTimeString());
 
       const newStats: any = {};
+      const trackers = trackersRef.current;
+      const lastAlerts = lastAlertRef.current;
+
       roomsData.forEach(room => {
+        let row = null;
         if (room.timeseries?.length > 0) {
-          newStats[room.room_id] = room.timeseries.find((e: any) => e.time === currentFrame) 
+          row = room.timeseries.find((e: any) => e.time === currentFrame) 
             || [...room.timeseries].reverse().find((e: any) => e.time <= currentFrame) 
             || room.timeseries[0];
-        } else {
-          newStats[room.room_id] = { occupancy: "--", temperature: "--", ac: null, lights: null };
         }
+
+        if (!row || row.occupancy === "--") {
+          newStats[room.room_id] = { occupancy: "--", temperature: "--", ac: null, lights: null, uiAlerts: null };
+          return;
+        }
+
+        const roomId = room.room_id;
+        const threshold = 120;
+
+        if (row.occupancy === 0 && row.ac) trackers.acWasted[roomId] = (trackers.acWasted[roomId] || 0) + 1;
+        else trackers.acWasted[roomId] = 0;
+
+        if (row.occupancy === 0 && row.lights) trackers.lightsWasted[roomId] = (trackers.lightsWasted[roomId] || 0) + 1;
+        else trackers.lightsWasted[roomId] = 0;
+
+        if (row.temperature > 28) trackers.tempWarm[roomId] = (trackers.tempWarm[roomId] || 0) + 1;
+        else trackers.tempWarm[roomId] = 0;
+
+        if (row.temperature < 22) trackers.tempCold[roomId] = (trackers.tempCold[roomId] || 0) + 1;
+        else trackers.tempCold[roomId] = 0;
+
+        const uiAlerts: any = { ac: null, lights: null, temp: null, occu: null };
+
+        const formatTime = (totalSec: number) => {
+            const m = Math.floor(totalSec / 60);
+            const s = totalSec % 60;
+            return m > 0 ? `${m} min ${s} sec` : `${s} sec`;
+        };
+
+        if (trackers.acWasted[roomId] >= threshold) uiAlerts.ac = formatTime(trackers.acWasted[roomId]);
+        if (trackers.lightsWasted[roomId] >= threshold) uiAlerts.lights = formatTime(trackers.lightsWasted[roomId]);
+        if (trackers.tempWarm[roomId] >= threshold) uiAlerts.temp = `Too Warm (${Math.round(row.temperature)}°C) for ${formatTime(trackers.tempWarm[roomId])}`;
+        if (trackers.tempCold[roomId] >= threshold) uiAlerts.temp = `Too Cold (${Math.round(row.temperature)}°C) for ${formatTime(trackers.tempCold[roomId])}`;
+
+        if (room.max_occupancy && row.occupancy > room.max_occupancy) {
+            uiAlerts.occu = `Over capacity: ${row.occupancy}/${room.max_occupancy}`;
+        }
+
+        const lastAlert = lastAlerts[roomId] || 0;
+        if (currentSecond - lastAlert >= threshold) {
+            const activeAlerts = [];
+            const descriptions = [];
+
+            if (trackers.acWasted[roomId] >= threshold) {
+                activeAlerts.push("AC Wasted");
+                descriptions.push(`AC being wasted with zero occupancy for ${formatTime(trackers.acWasted[roomId])}.`);
+            }
+            if (trackers.lightsWasted[roomId] >= threshold) {
+                activeAlerts.push("Lights Wasted");
+                descriptions.push(`Lights being wasted with zero occupancy for ${formatTime(trackers.lightsWasted[roomId])}.`);
+            }
+            if (trackers.tempWarm[roomId] >= threshold) {
+                activeAlerts.push("Temp Too Warm");
+                descriptions.push(`Temperature over 28°C (${row.temperature}°C) for ${formatTime(trackers.tempWarm[roomId])}.`);
+            }
+            if (trackers.tempCold[roomId] >= threshold) {
+                activeAlerts.push("Temp Too Cold");
+                descriptions.push(`Temperature under 20°C (${row.temperature}°C) for ${formatTime(trackers.tempCold[roomId])}.`);
+            }
+
+            if (activeAlerts.length > 0) {
+                const combinedTitle = activeAlerts.join(" & ");
+                const combinedDesc = descriptions.join("\n \n");
+
+                fetch('/api/send_facilities_alert', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({
+                        room_number: roomId,
+                        alert_type: combinedTitle,
+                        time_since: now.toLocaleTimeString(),
+                        description: combinedDesc
+                    })
+                }).catch(err => console.error("Failed to send auto-alert:", err));
+
+                lastAlerts[roomId] = currentSecond;
+            }
+        }
+
+        newStats[roomId] = { ...row, uiAlerts };
       });
+
       setCurrentRoomStats(newStats);
     }, 1000);
     
@@ -143,6 +230,11 @@ export default function Dashboard() {
     return "#ff0000";
   };
 
+  const acAlerts = roomsData.filter(room => currentRoomStats[room.room_id]?.uiAlerts?.ac);
+  const lightsAlerts = roomsData.filter(room => currentRoomStats[room.room_id]?.uiAlerts?.lights);
+  const tempAlerts = roomsData.filter(room => currentRoomStats[room.room_id]?.uiAlerts?.temp);
+  const occuAlerts = roomsData.filter(room => currentRoomStats[room.room_id]?.uiAlerts?.occu);
+
   // --- UI Render ---
   return (
     <>
@@ -169,19 +261,73 @@ export default function Dashboard() {
         <div className="row boxes">
           <div className="tracker-ui scroll outer box basis-70">
             <h3 className="font-bold">AC Alerts</h3>
-            <div className="p-4 text-center">No active alerts.</div>
+            <div className="mt-4">
+              {acAlerts.length > 0 ? (
+                acAlerts.map(room => (
+                  <IoTAlert 
+                    key={room.room_id} // 🚨 ADD THIS
+                    roomData={room} 
+                    time={currentRoomStats[room.room_id].uiAlerts.ac} 
+                  />
+                ))
+              ) : (
+                <div className="p-4 text-center">No active alerts.</div>
+              )}
+            </div>
           </div>
+
+          {/* LIGHTS ALERTS */}
           <div className="tracker-ui scroll outer box basis-70">
             <h3 className="font-bold">Lights Alerts</h3>
-            <div className="p-4 text-center">No active alerts.</div>
+            <div className="mt-4">
+              {lightsAlerts.length > 0 ? (
+                lightsAlerts.map(room => (
+                  <IoTAlert 
+                    key={room.room_id} // 🚨 ADD THIS
+                    roomData={room}
+                    time={currentRoomStats[room.room_id].uiAlerts.lights} 
+                  />
+                ))
+              ) : (
+                <div className="p-4 text-center">No active alerts.</div>
+              )}
+            </div>
           </div>
+
+          {/* TEMPERATURE ALERTS */}
           <div className="tracker-ui scroll outer box basis-70">
             <h3 className="font-bold">Temperature Alerts</h3>
-            <div className="p-4 text-center">No active alerts.</div>
+            <div className="mt-4">
+              {tempAlerts.length > 0 ? (
+                tempAlerts.map(room => (
+                  <IoTAlert 
+                    key={room.room_id} // 🚨 ADD THIS
+                    roomData={room}
+                    time={currentRoomStats[room.room_id].uiAlerts.temp}
+                  />
+                ))
+              ) : (
+                <div className="p-4 text-center">No active alerts.</div>
+              )}
+            </div>
           </div>
+
+          {/* OCCUPANCY ALERTS */}
           <div className="tracker-ui scroll outer box basis-70">
             <h3 className="font-bold">Occupancy Alerts</h3>
-            <div className="p-4 text-center">No active alerts.</div>
+            <div className="mt-4">
+              {occuAlerts.length > 0 ? (
+                occuAlerts.map(room => (
+                  <IoTAlert 
+                    key={room.room_id} // 🚨 ADD THIS
+                    roomData={room}
+                    time={currentRoomStats[room.room_id].uiAlerts.occu}
+                  />
+                ))
+              ) : (
+                <div className="p-4 text-center">No active alerts.</div>
+              )}
+            </div>
           </div>
         </div>
 
