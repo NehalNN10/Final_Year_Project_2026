@@ -159,7 +159,7 @@ export default function RoomStatsPanel({
               <DataBox 
                 icon={AirVent} 
                 label="AC"
-                value={roomAC ? 'ON' : 'OFF'} 
+                value={roomAC === 'ON' ? 'ON' : 'OFF'}
                 bgCases={
                   roomAC === null ? 'bg-[var(--surface-color)] text-[var(--text-color)] border-[var(--text-color)] '
                   : roomAC ? 'bg-[#00ff88]/50 text-[#00ff88] border-[#00ff88]' 
@@ -170,7 +170,7 @@ export default function RoomStatsPanel({
               <DataBox 
                 icon={Lightbulb} 
                 label="Lights"
-                value={roomLights ? 'ON' : 'OFF'} 
+                value={roomLights === 'ON' ? 'ON' : 'OFF'}
                 bgCases={
                   roomLights === null ? 'bg-[var(--surface-color)] text-[var(--text-color)] border-[var(--text-color)] '
                   : roomLights ? 'bg-[#00ff88]/50 text-[#00ff88] border-[#00ff88]' 
