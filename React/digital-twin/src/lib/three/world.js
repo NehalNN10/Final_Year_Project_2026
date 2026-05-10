@@ -360,6 +360,7 @@ export const materials = {
         side: THREE.DoubleSide, 
         transparent: true, 
         opacity: 0.4,
+        depthWrite: false,
         polygonOffset: true,
         polygonOffsetFactor: -1,
         polygonOffsetUnits: -1
@@ -372,7 +373,7 @@ export const wallHeight = 2;
 export function createWall(w, h, x, z, material, l=wallHeight, y=wallHeight/2) {
     const geo = new THREE.BoxGeometry(w, l, h);
     const mesh = new THREE.Mesh(geo, material);
-    if (material != materials.glass) { mesh.receiveShadow = true; mesh.castShadow = true; }
+    if (material != materials.glass && material != materials.detection) { mesh.receiveShadow = true; mesh.castShadow = true; }
     mesh.position.set(x, y, z);
     scene.add(mesh);
     return mesh;
@@ -381,7 +382,7 @@ export function createObject2(w, h, z, x, material) {
     const geo = new THREE.BoxGeometry(w, 0.5, h);
     const mesh = new THREE.Mesh(geo, material);
     mesh.position.set(x, 0.5/2, z);
-    if (material != materials.glass) { mesh.receiveShadow = true; mesh.castShadow = true; }
+    if (material != materials.glass && material != materials.detection) { mesh.receiveShadow = true; mesh.castShadow = true; }
     scene.add(mesh);
     return mesh;
 }

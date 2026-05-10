@@ -9,6 +9,7 @@ import { RGBELoader } from "three/examples/jsm/loaders/RGBELoader.js";
 
 export let scene, camera, renderer, controls, composer, outlinePass, renderPass;
 export let heatmapCanvas, heatmapCtx, heatmapTexture, heatmapPlane, heatmapSize, heatmapWidth, heatmapHeight;
+export let heatmapLiveCanvas, heatmapLiveCtx, heatmapLiveTexture, heatmapLivePlane, heatmapLiveSize, heatmapLiveWidth, heatmapLiveHeight;
 export function initScene(container) {
     // Force a minimum size if container is briefly 0x0 during React hydration
     const w = container.clientWidth || window.innerWidth || 800;
@@ -185,4 +186,71 @@ export function setupHeatmap(showHeatmap) {
     heatmapPlane.position.set(0, 0.1, 0);                  
     
     scene.add(heatmapPlane);
+}
+
+export function setupHeatmapLive(showHeatmapLive) {
+    // --- HARDCODED LAB DIMENSIONS ---
+    const floorWidth = 7.5;
+    const floorDepth = 4.25;
+    const bounds = { xMin: -4.25/2, xMax: 4.25/2, zMin: 0, zMax: 7.5 };
+    const opacity = 0.6;
+    const floorVertices = [
+        [-4.25/2, 0], [-4.25/2, 7.5], [4.25/2, 7.5], [4.25/2, 0], [-4.25/2, 0]
+    ];
+    // --------------------------------
+
+    const aspectRatio = floorWidth / floorDepth; 
+    const heatmapLiveBaseSize = 128;
+    heatmapLiveWidth = heatmapLiveBaseSize;
+    heatmapLiveHeight = Math.round(heatmapLiveBaseSize / aspectRatio);
+    heatmapLiveSize = heatmapLiveBaseSize; 
+
+    heatmapLiveCanvas = document.createElement("canvas");
+    heatmapLiveCanvas.width = Math.floor(heatmapLiveWidth);
+    heatmapLiveCanvas.height = Math.floor(heatmapLiveHeight);
+    heatmapLiveWidth = heatmapLiveCanvas.width;
+    heatmapLiveHeight = heatmapLiveCanvas.height;
+    heatmapLiveCtx = heatmapLiveCanvas.getContext("2d");
+
+    heatmapLiveTexture = new THREE.CanvasTexture(heatmapLiveCanvas);
+    heatmapLiveTexture.minFilter = THREE.LinearFilter;
+    heatmapLiveTexture.magFilter = THREE.LinearFilter;
+
+    const floorShape = new THREE.Shape();
+    floorVertices.forEach((vertex, idx) => {
+        if (idx === 0) {
+            floorShape.moveTo(vertex[0], vertex[1]);
+        } else {
+            floorShape.lineTo(vertex[0], vertex[1]);
+        }
+    });
+
+    const customGeometry = new THREE.ShapeGeometry(floorShape);
+    const posAttribute = customGeometry.attributes.position;
+    const uvAttribute = customGeometry.attributes.uv;
+
+    for (let i = 0; i < posAttribute.count; i++) {
+        const x = posAttribute.getX(i);
+        const y = posAttribute.getY(i);
+        const u = (x - bounds.xMin) / floorWidth; 
+        const v = 1.0 - ((y - bounds.zMin) / floorDepth); 
+        uvAttribute.setXY(i, u, v);
+    }
+
+    heatmapLivePlane = new THREE.Mesh(
+        customGeometry,
+        new THREE.MeshBasicMaterial({
+            map: heatmapLiveTexture,
+            transparent: true,
+            opacity: opacity,
+            depthWrite: false,
+        })
+    );
+
+    heatmapLivePlane.material.opacity = showHeatmapLive ? 1 : 0;
+    heatmapLivePlane.rotation.x = -Math.PI / 2;
+    heatmapLivePlane.rotation.z = -Math.PI / 2;
+    heatmapLivePlane.position.set(0, 0.1, 0);                  
+    
+    scene.add(heatmapLivePlane);
 }

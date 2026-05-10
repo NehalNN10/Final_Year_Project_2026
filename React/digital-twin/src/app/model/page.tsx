@@ -16,7 +16,7 @@ export default function DigitalTwinModel() {
 
   const ui = "../../lib/three/ui.js";
 
-useEffect(() => {
+  useEffect(() => {
     async function fetchSession() {
       try {
         const response = await fetch('/api/session', {
