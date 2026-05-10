@@ -46,7 +46,7 @@ export default function RoomStatsPanel({
   const [roomAC, setRoomAC] = useState<boolean | null>(null);
   const [roomLights, setRoomLights] = useState<boolean | null>(null);
   const [roomCount, setRoomCount] = useState<number | null>(null);
-  const [roomMax, setRoomMax] = useState();
+  const [roomMax, setRoomMax] = useState(5);
   const [roomHumidity, setRoomHumidity] = useState<number | null>(null);
 
   useEffect(() => {

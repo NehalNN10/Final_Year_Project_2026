@@ -5,7 +5,7 @@ import Navbar from "../../components/Navbar";
 import RoomStatsPanel from "../../components/RoomStatsPanel";
 import ModelControlsPanel from "../../components/ModelControlsPanel";
 // 🌟 Added AlertTriangle to imports
-import { ChevronLeft, ChevronRight, Thermometer, Droplets, Lightbulb, Snowflake, User, AlertTriangle } from "lucide-react";
+import { ChevronLeft, ChevronRight, Thermometer, Droplets, Lightbulb, Snowflake, User, AlertTriangle, Radar } from "lucide-react";
 // 1. IMPORT SOCKET.IO
 import { io } from "socket.io-client";
 import DataBox from "@/components/DataBox";
@@ -24,6 +24,7 @@ export default function LiveModel() {
   const [department, setDepartment] = useState("Loading...");
   const [role, setRole] = useState("Loading..."); // 🌟 Added Role state
   const [isSidebarOpen, setIsSidebarOpen] = useState(true);
+  const [showHeatmap, setShowHeatmap] = useState(false);
 
   // IoT State
   const [sensorData, setSensorData] = useState({
@@ -135,11 +136,32 @@ export default function LiveModel() {
     return <div className="loading-screen text-white bg-[#131313] h-screen flex justify-center items-center">Loading Live Feed...</div>;
   }
 
+  const handleToggleHeatmap = () => {
+    const newState = !showHeatmap;
+    setShowHeatmap(newState);
+    
+    import("../../lib/three/live_model.js").then(mod => {
+      if (mod.toggleHeatmap) {
+         mod.toggleHeatmap(newState);
+      }
+    });
+  };
+
   return (
   <>
     <Navbar department={department} />
 
     <div className="main flex w-full" style={{ height: 'calc(100vh - 4.5rem)' }}>
+
+      {department !== "Facilities" && (
+        <IntButton 
+          icon={Radar} 
+          size="30"
+          label={showHeatmap ? "Heatmap: ON" : "Heatmap: OFF"} 
+          onClick={handleToggleHeatmap} 
+          classes={`absolute top-5 right-5 btn btn-auto m-0! p-2! rounded-0 z-150 text-[1.25rem]! ${showHeatmap ? "btn-yellow" : "btn-black"}`} 
+        />
+      )}
             
       <div className={`float ${isSidebarOpen ? "float-width" : "w-0"}`}>
         <div className="w-full h-full overflow-hidden relative">
@@ -183,7 +205,7 @@ export default function LiveModel() {
         </button>
       </div>
 
-      <div id="model-container" ref={containerRef}>
+      <div id="model-container" ref={containerRef} className="flex-1 w-full h-full relative overflow-hidden bg-[--bg-color]/50">
         <div className="crosshair"></div>
       </div>
 
