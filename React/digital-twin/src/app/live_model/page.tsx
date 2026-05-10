@@ -287,7 +287,7 @@ export default function LiveModel() {
           document.getElementById('dashboard-section')?.scrollIntoView({ behavior: 'smooth' }); 
         }
       }}
-      className="fixed top-36 right-[-1] z-[999] group flex items-center bg-[var(--primary-color)] border border-[var(--primary-color)]/50 hover:border-[var(--primary-color)] text-[var(--primary-text-color)] p-2 rounded-l-lg transition-all duration-300 shadow-[0_0_15px_var(--primary-color)] cursor-pointer"
+      className="fixed top-50 right-[-1] z-[999] group flex items-center bg-[var(--primary-color)] border border-[var(--primary-color)]/50 hover:border-[var(--primary-color)] text-[var(--primary-text-color)] p-2 rounded-l-lg transition-all duration-300 shadow-[0_0_15px_var(--primary-color)] cursor-pointer"
     >
       {isScrolledDown ? <Box size={24} className="shrink-0" /> : <LayoutDashboard size={24} className="shrink-0" />}
       

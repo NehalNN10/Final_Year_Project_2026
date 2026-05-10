@@ -4,6 +4,7 @@ export const LOOP_DURATION = 1800;
 // Start them as empty objects
 export const roomInfo = {};
 export const iot = {};
+export const liveRoomInfo = {};
 
 // We will call this function right before booting the 3D world!
 export async function initRoomInfo() {
@@ -19,6 +20,10 @@ export async function initRoomData() {
 export async function initVariables() {
     await initRoomInfo();
     await initRoomData();
+}
+
+export async function initLiveVariables() {
+    liveRoomInfo["C-067"] = await getRoomInfo("C-067");
 }
 
 export async function getRoomData(roomId) {
@@ -51,6 +56,13 @@ export async function getRoomInfo(roomId) {
         console.error("Failed to fetch room info:", error.message);
         return null;
     }
+}
+
+export function getLiveRoom(x, z) {
+    if (z >= -4.25/2 && z <= 4.25/2 && x >= 0 && x <= 7.5) {
+        return "C-067";
+    } 
+    return null;
 }
 
 export function getRoom(x, z) {

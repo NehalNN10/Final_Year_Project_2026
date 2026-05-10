@@ -164,8 +164,10 @@ export default function FacilityHome() {
                     </th>
                   </tr>
                 </thead>
-                <tbody>
-                  {roomsData.map(room => {
+                <tbody className="text-[var(--text-color)] bg-[var(--bg-color)]">
+                  {[...roomsData]
+                    .sort((a, b) => a.room_id.localeCompare(b.room_id, undefined, { numeric: true }))
+                    .map(room => {
                     const stats = currentRoomStats[room.room_id] || { occupancy: "--", temperature: "--", ac: null, lights: null };
                     const hasData = stats.occupancy !== "--";
 
