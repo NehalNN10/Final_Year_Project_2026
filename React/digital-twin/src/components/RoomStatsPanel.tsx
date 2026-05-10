@@ -46,7 +46,7 @@ export default function RoomStatsPanel({
   const [roomAC, setRoomAC] = useState<boolean | null>(null);
   const [roomLights, setRoomLights] = useState<boolean | null>(null);
   const [roomCount, setRoomCount] = useState<number | null>(null);
-  const [roomMax, setRoomMax] = useState(5);
+  const [roomMax, setRoomMax] = useState<number>(5);
   const [roomHumidity, setRoomHumidity] = useState<number | null>(null);
 
   useEffect(() => {
@@ -171,7 +171,7 @@ export default function RoomStatsPanel({
               <DataBox 
                 icon={Lightbulb} 
                 label="Lights"
-                value={roomLights ? 'ON' : 'OFF'} 
+                value={roomLights === null ? null : roomLights ? 'ON' : 'OFF'} 
                 bgCases={
                   roomLights === null ? 'bg-[var(--surface-color)] text-[var(--text-color)] border-[var(--text-color)] '
                   : roomLights ? 'bg-[#00ff88]/50 text-[#00ff88] border-[#00ff88]' 
