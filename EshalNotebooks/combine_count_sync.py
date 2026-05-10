@@ -11,7 +11,7 @@ output_path = "csv_files/temp_files_30mins/combined_count_sync.csv"
 global_count = 18
 
 # Delay for cam1 and cam2
-FRAME_DELAY = 200
+FRAME_DELAY = 300
 
 # Read CSVs
 df1 = pd.read_csv(csv1_path)
@@ -23,15 +23,19 @@ df3 = pd.read_csv(csv3_path)
 frame_changes = defaultdict(int)
 
 # ---------------------------------------------------
-# csv1 changes apply 200 frames later
+# csv1 changes apply 200 frames later (EXCEPT overrides)
 # ---------------------------------------------------
 for _, row in df1.iterrows():
     original_frame = int(row["Frame"])
     count_change = int(row["Count"])
 
-    applied_frame = original_frame + FRAME_DELAY
-    frame_changes[applied_frame] += count_change
+    # SPECIAL CASE: apply immediately
+    if original_frame == 102 or original_frame == 506:
+        applied_frame = original_frame
+    else:
+        applied_frame = original_frame + FRAME_DELAY
 
+    frame_changes[applied_frame] += count_change
 # ---------------------------------------------------
 # csv2 changes apply 200 frames later
 # ---------------------------------------------------
