@@ -11,7 +11,7 @@ output_path = "csv_files/temp_files_30mins/combined_count_sync.csv"
 global_count = 18
 
 # Delay for cam1 and cam2
-FRAME_DELAY = 300
+FRAME_DELAY = 500
 
 # Read CSVs
 df1 = pd.read_csv(csv1_path)
