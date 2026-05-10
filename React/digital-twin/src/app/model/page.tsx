@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useRef, useState } from "react";
+import { useEffect, useRef, useState, useMemo } from "react";
 import Navbar from "../../components/Navbar";
 import RoomStatsPanel from "../../components/RoomStatsPanel";
 import ModelControlsPanel from "../../components/ModelControlsPanel";
@@ -16,7 +16,7 @@ export default function DigitalTwinModel() {
 
   const ui = "../../lib/three/ui.js";
 
-useEffect(() => {
+  useEffect(() => {
     async function fetchSession() {
       try {
         const response = await fetch('/api/session', {
@@ -64,7 +64,7 @@ useEffect(() => {
     setShowHeatmap(!showHeatmap);
     
     // Tell the 3D engine to flip its heatmap state
-    import(ui).then(mod => {
+    import("../../lib/three/ui.js").then(mod => {
       mod.toggleHeatmap();
     });
   };
@@ -108,10 +108,12 @@ useEffect(() => {
             {isSidebarOpen ? <ChevronLeft size={24} /> : <ChevronRight size={24} />}
           </button>
         </div>
-
-        <div id="model-container" ref={containerRef}>
-          <div className="crosshair"></div>
-        </div>
+          
+        {useMemo(() => (
+          <div id="model-container" ref={containerRef} className="flex-1 w-full h-full relative overflow-hidden bg-[--bg-color]/50">
+            <div className="crosshair"></div>
+          </div>
+        ), [])}
 
       </div>
     </>

@@ -11,6 +11,12 @@ import FormRow from "@/components/FormRow";
 import StaffList from "@/components/StaffList";
 import IoTAlert from "@/components/IoTAlert";
 
+declare global {
+  interface Window {
+    sandboxAPI?: any;
+  }
+}
+
 export default function SandboxModel() {
   const containerRef = useRef<HTMLDivElement>(null);
   const [isExpanded, setIsExpanded] = useState(true);
@@ -58,7 +64,7 @@ export default function SandboxModel() {
 
     let sandboxApp: any;
     
-    import("../../lib/three/sandbox.js").then((module) => {
+    import("../../lib/three/sandbox.js").then((module: any) => {
       console.log("Booting up OOP Sandbox Engine...");
       
       sandboxApp = new module.SandboxEngine(

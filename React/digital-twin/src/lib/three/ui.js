@@ -1,5 +1,5 @@
 import * as THREE from "three";
-import { camera, controls, heatmapPlane, scene, setupHeatmap } from "./scene.js";
+import { camera, controls, heatmapPlane, heatmapLive, scene } from "./scene.js";
 import { FPS } from "./variables.js";
 import { playback, renderFrame } from "./simulation.js";
 
