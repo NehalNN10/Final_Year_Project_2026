@@ -1,7 +1,7 @@
 "use client";
 
 import { useState } from "react";
-import { Camera, ChevronDown, ChevronUp, ListRestart, Radar } from "lucide-react";
+import { Camera, ChevronDown, ChevronUp, ListRestart } from "lucide-react";
 import IntButton from "./IntButton";
 
 interface ModelControlsPanelProps {
@@ -11,9 +11,6 @@ interface ModelControlsPanelProps {
 
 export default function ModelControlsPanel({ isReplay = false, isLive = false }: ModelControlsPanelProps) {
   const [isExpanded, setIsExpanded] = useState(true);
-  
-  // State for toggling the heatmap UI button
-  const [showHeatmap, setShowHeatmap] = useState(false);
 
   const ui = "../lib/three/ui.js";
 

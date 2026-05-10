@@ -1,8 +1,7 @@
 import * as THREE from 'three';
 import { camera } from "./scene.js"; 
-import { getRoom, getTime, getDate, roomInfo } from './variables.js';
+import { getLiveRoom, getTime, getDate, liveRoomInfo } from './variables.js';
 import { heatmapLiveCtx, heatmapLiveWidth, heatmapLiveHeight, heatmapLiveTexture } from './scene.js';
-import { toggleHeatmapLive } from './ui.js';
 
 export const liveSettings = {
     showHeatmap: false // Toggle this from your React UI!
@@ -29,8 +28,8 @@ export function renderLiveFrame() {
     raycaster.setFromCamera(screenCenter, camera);
     const hit = raycaster.ray.intersectPlane(floorPlane, intersectionPoint);
 
-    const room = hit ? getRoom(intersectionPoint.x, intersectionPoint.z) : null;
-    const roomInf = (room && roomInfo && roomInfo[room]) ? roomInfo[room] : null;
+    const room = hit ? getLiveRoom(intersectionPoint.x, intersectionPoint.z) : null;
+    const roomInf = (room && liveRoomInfo && liveRoomInfo[room]) ? liveRoomInfo[room] : null;
 
     // 1. Fetch UI Elements directly from the DOM
     const uiName = document.getElementById('ui-room-name');

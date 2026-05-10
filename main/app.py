@@ -320,7 +320,7 @@ def get_security_info():
         roles = Role.objects(department='Security')
         roles_data = [{'name': r.name} for r in roles]
 
-        rooms = Rooms.objects()
+        rooms = Rooms.objects().order_by('room_id')
         rooms_data = [{'id': str(r.id), 'room_id': r.room_id, 'name': r.room_name} for r in rooms]
 
         return jsonify({'roles': roles_data, 'rooms': rooms_data})
@@ -408,7 +408,7 @@ def api_security_home_data():
             staff_rooms[staff['user_id']] = rooms_for_staff
 
         rooms_data = []
-        for r in Rooms.objects():
+        for r in Rooms.objects().order_by('room_id'):
             rd_entries = RoomData.objects(room=r).order_by('time')
             timeseries = []
             for rd in rd_entries:
@@ -463,7 +463,7 @@ def api_facility_home_data():
                 })
 
         rooms_data = []
-        for r in Rooms.objects():
+        for r in Rooms.objects().order_by('room_id'):
             rd_entries = RoomData.objects(room=r).order_by('time')
             timeseries = []
             for rd in rd_entries:

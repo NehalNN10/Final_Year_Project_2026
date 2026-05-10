@@ -10,7 +10,8 @@ with app.app_context():
     # Role.objects.delete()
     # Rooms.objects.delete()
     # SecurityEmails.objects.delete()
-    RoomData.objects.delete()
+    room_7 = Rooms.objects(room_id='C-007').first()
+    RoomData.objects(room=room_7).delete()
 
     print("Seeding Database...")
 
@@ -89,12 +90,12 @@ with app.app_context():
     #     max_occupancy=35
     # ).save()
 
-    Rooms(
-        room_id='E-220',
-        room_name='Tariq Rafi Hall',
-        room_floor='First Floor',
-        max_occupancy=250
-    ).save()
+    # Rooms(
+    #     room_id='E-220',
+    #     room_name='Tariq Rafi Hall',
+    #     room_floor='First Floor',
+    #     max_occupancy=250
+    # ).save()
 
     # SecurityEmails(
     #     room=Rooms.objects(room_id='C-109').first(),
@@ -116,26 +117,26 @@ with app.app_context():
     #     user=User.objects(user_id='mk07899').first()
     # ).save()
 
-    data_proj = pd.read_csv("../csv_files/active_files/csv_power_lab_iot_30min.csv")
-    occu_proj = pd.read_csv('../csv_files/active_files//dilab_counts_fixed.csv')
+    # data_proj = pd.read_csv("../csv_files/active_files/csv_power_lab_iot_30min.csv")
+    # occu_proj = pd.read_csv('../csv_files/active_files//dilab_counts_fixed.csv')
 
-    occu_subset = occu_proj.iloc[0:44999:25].reset_index(drop=True)
-    data_proj['occu'] = occu_subset['Count']
-    target_room = Rooms.objects(room_id='C-006').first()
+    # occu_subset = occu_proj.iloc[0:44999:25].reset_index(drop=True)
+    # data_proj['occu'] = occu_subset['Count']
+    # target_room = Rooms.objects(room_id='C-006').first()
 
-    for index, row in data_proj.iterrows():
-        RoomData(
-            room = target_room,
-            time = row['timestamp'],
-            occupancy = row['occu'],
-            temperature = row['temp'],
-            ac = row['ac'] == 'On',
-            lights = row['lights'] == 'On'
-        ).save()
+    # for index, row in data_proj.iterrows():
+    #     RoomData(
+    #         room = target_room,
+    #         time = row['timestamp'],
+    #         occupancy = row['occu'],
+    #         temperature = row['temp'],
+    #         ac = row['ac'] == 'On',
+    #         lights = row['lights'] == 'On'
+    #     ).save()
     
     print("Seeding Database...")
     data_proj = pd.read_csv("../csv_files/active_files/combined_proj_data_30min.csv")
-    occu_proj = pd.read_csv('../csv_files/active_files/combined_count_30min.csv')
+    occu_proj = pd.read_csv('../csv_files/temp_files_30mins/combined_count_sync.csv')
 
     occu_subset = occu_proj.iloc[0:44999:25].reset_index(drop=True)
     data_proj['occu'] = occu_subset['Count']
@@ -151,32 +152,32 @@ with app.app_context():
             lights = row['lights'] == 'On'
         ).save()
 
-    print("Seeding Database...")
-    data_proj = pd.read_csv("../csv_files/active_files/arif_iot_30min.csv")
-    target_room = Rooms.objects(room_id='C-109').first()
+    # print("Seeding Database...")
+    # data_proj = pd.read_csv("../csv_files/active_files/arif_iot_30min.csv")
+    # target_room = Rooms.objects(room_id='C-109').first()
 
-    for index, row in data_proj.iterrows():
-        RoomData(
-            room = target_room,
-            time = row['timestamp'],
-            occupancy = row['occu'],
-            temperature = row['temp'],
-            ac = row['ac'] == 'On',
-            lights = row['lights'] == 'On'
-        ).save()
+    # for index, row in data_proj.iterrows():
+    #     RoomData(
+    #         room = target_room,
+    #         time = row['timestamp'],
+    #         occupancy = row['occu'],
+    #         temperature = row['temp'],
+    #         ac = row['ac'] == 'On',
+    #         lights = row['lights'] == 'On'
+    #     ).save()
 
-    print("Seeding Database...")
-    data_proj = pd.read_csv("../csv_files/active_files/hall_iot_30min.csv")
-    target_room = Rooms.objects(room_id='E-220').first()
+    # print("Seeding Database...")
+    # data_proj = pd.read_csv("../csv_files/active_files/hall_iot_30min.csv")
+    # target_room = Rooms.objects(room_id='E-220').first()
 
-    for index, row in data_proj.iterrows():
-        RoomData(
-            room = target_room,
-            time = row['timestamp'],
-            occupancy = row['occu'],
-            temperature = row['temp'],
-            ac = row['ac'] == 'On',
-            lights = row['lights'] == 'On'
-        ).save()
+    # for index, row in data_proj.iterrows():
+    #     RoomData(
+    #         room = target_room,
+    #         time = row['timestamp'],
+    #         occupancy = row['occu'],
+    #         temperature = row['temp'],
+    #         ac = row['ac'] == 'On',
+    #         lights = row['lights'] == 'On'
+    #     ).save()
 
     print("Database seeded successfully!")

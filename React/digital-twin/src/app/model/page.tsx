@@ -55,6 +55,12 @@ export default function DigitalTwinModel() {
     };
   }, [department]); 
 
+  const threeCanvas = useMemo(() => (
+    <div id="model-container" ref={containerRef} className="flex-1 w-full h-full relative overflow-hidden bg-[--bg-color]/50">
+      <div className="crosshair"></div>
+    </div>
+  ), []);
+
   if (department === "Loading...") {
     return <div className="loading-screen">Loading Digital Twin...</div>;
   }
@@ -109,18 +115,7 @@ export default function DigitalTwinModel() {
           </button>
         </div>
           
-        {/* {useMemo(() => (
-          <div id="model-container" ref={containerRef} className="flex-1 w-full h-full relative overflow-hidden bg-[--bg-color]/50">
-            <div className="crosshair"></div>
-          </div>
-        ), [])} */}
-        <div
-          id="model-container"
-          ref={containerRef}
-          className="flex-1 w-full h-full relative overflow-hidden bg-[--bg-color]/50"
-        >
-          <div className="crosshair"></div>
-        </div>
+        {threeCanvas}
 
       </div>
     </>

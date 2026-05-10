@@ -1,5 +1,5 @@
 import * as THREE from 'three';
-import { initVariables, sendFacilitiesAlert, roomInfo } from './variables.js'; 
+import { initLiveVariables, sendFacilitiesAlert, liveRoomInfo, getRoomInfo } from './variables.js';
 import { initScene, scene, camera, renderer, controls, setupHeatmapLive, heatmapLivePlane, composer } from './scene.js';
 import { loadAssets, buildLiveWorld, createMarker} from './world.js';
 import { renderLiveFrame, liveSettings, updateHeatmapLive } from './live_simulation.js';
@@ -215,7 +215,7 @@ export async function initLiveEngine(container) {
         renderer.domElement.style.display = 'block';
     }
 
-    await initVariables();
+    await initLiveVariables();
 
     // 🌟 BRIDGE 1: YOLO Data (Handles Heatmap & Avatars)
     window.updateLiveAvatars = (detectionsArray, currentCount) => {

@@ -147,7 +147,9 @@ export default function SecurityHome() {
                   </tr>
                 </thead>
                 <tbody className="text-[var(--text-color)] bg-[var(--bg-color)]">
-                  {roomsData.map(room => {
+                  {[...roomsData]
+                    .sort((a, b) => a.room_id.localeCompare(b.room_id, undefined, { numeric: true }))
+                    .map(room => {
                     const stats = currentRoomStats[room.room_id] || { occupancy: "--", temperature: "--", ac: null, lights: null };
 
                     const count = stats.occupancy;

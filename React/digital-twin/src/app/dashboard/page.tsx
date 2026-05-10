@@ -34,9 +34,12 @@ export default function Dashboard() {
     fetch("/api/facility_home_data")
       .then((res) => res.json())
       .then((data) => {
-        setRoomsData(data.rooms || []);
-        setFacilityStaff(data.staff_list || []);
+        const sortedRooms = (data.rooms || []).sort((a: any, b: any) => 
+          a.room_id.localeCompare(b.room_id, undefined)
+        );
+        setRoomsData(sortedRooms);
         
+        setFacilityStaff(data.staff_list || []);
         if (data.current_role) setCurrentRole(data.current_role);
         if (data.name) setName(data.name);
       })
@@ -369,7 +372,9 @@ export default function Dashboard() {
                   </tr>
                 </thead>
                 <tbody className="text-[var(--text-color)] bg-[var(--bg-color)]">
-                  {roomsData.map(room => {
+                  {[...roomsData]
+                    .sort((a, b) => a.room_id.localeCompare(b.room_id, undefined, { numeric: true }))
+                    .map(room => {
                     const stats = currentRoomStats[room.room_id] || { occupancy: "--", temperature: "--", ac: null, lights: null };
                     const hasData = stats.occupancy !== "--";
 
