@@ -11,9 +11,28 @@ interface ModelControlsPanelProps {
 
 export default function ModelControlsPanel({ isReplay = false, isLive = false }: ModelControlsPanelProps) {
   const [isExpanded, setIsExpanded] = useState(true);
+  
+  // State for toggling the heatmap UI button
   const [showHeatmap, setShowHeatmap] = useState(false);
 
   const ui = "../lib/three/ui.js";
+
+  // 🌟 THE NEW TOGGLE FUNCTION
+  const handleToggleHeatmap = async () => {
+    const newState = !showHeatmap;
+    setShowHeatmap(newState);
+
+    // If we are on the Live page, tell the live_model.js to show the heatmap
+    if (isLive) {
+      const mod = await import("../lib/three/live_model.js");
+      mod.liveSettings.showHeatmap = newState;
+    } 
+    // If we are on the Replay page, tell simulation.js to show the heatmap
+    else {
+      const mod = await import("../lib/three/simulation.js");
+      mod.playback.showHeatmap = newState;
+    }
+  };
 
   return (
     <div className="tracker-ui outer p-0!">
@@ -40,6 +59,15 @@ export default function ModelControlsPanel({ isReplay = false, isLive = false }:
               <span>Left Click & Pan</span>
           </div>
           
+          {/* 🌟 THE NEW HEATMAP BUTTON */}
+          <button 
+            className={`btn mx-0! mb-0! mt-4! ${showHeatmap ? 'btn-red' : 'btn-primary'}`} 
+            onClick={handleToggleHeatmap}
+          >
+              <Radar size={20} /> 
+              <span className="ml-2">{showHeatmap ? "Hide Heatmap" : "Show Heatmap"}</span>
+          </button>
+
           {!isLive && (
             <button 
               className="btn btn-primary mx-0! mb-0! mt-2!" 
@@ -72,19 +100,6 @@ export default function ModelControlsPanel({ isReplay = false, isLive = false }:
                 <ListRestart size={20} /> <span className="ml-2">Model Replay</span>
               </button>
           )}
-          {/* {!isReplay && (
-              <button 
-              className="btn btn-primary mx-0! mb-0! mt-2!" 
-              id="replay-btn" 
-              onClick={() => {
-                  import("../lib/three/simulation.js").then(mod => {
-                  window.location.href = `/model_replay?frame=44999`;
-                  });
-              }}
-              >
-                <ListRestart size={20} /> <span className="ml-2">Full Model Replay</span>
-              </button>
-          )} */}
         </div>
       </div>
     </div>

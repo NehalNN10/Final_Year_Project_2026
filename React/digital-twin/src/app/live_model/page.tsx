@@ -4,20 +4,25 @@ import { useEffect, useRef, useState } from "react";
 import Navbar from "../../components/Navbar";
 import RoomStatsPanel from "../../components/RoomStatsPanel";
 import ModelControlsPanel from "../../components/ModelControlsPanel";
-import { ChevronLeft, ChevronRight, Thermometer, Droplets, Lightbulb, Snowflake, User } from "lucide-react";
+// 🌟 Added AlertTriangle to imports
+import { ChevronLeft, ChevronRight, Thermometer, Droplets, Lightbulb, Snowflake, User, AlertTriangle } from "lucide-react";
 // 1. IMPORT SOCKET.IO
 import { io } from "socket.io-client";
 import DataBox from "@/components/DataBox";
+// 🌟 Import IntButton for the emergency trigger
+import IntButton from "@/components/IntButton";
 
 declare global {
   interface Window {
-    updateLiveAvatars?: (detections: any[]) => void;
+    updateLiveAvatars?: (detections: any[], roomCount: number) => void;
+    updateLiveSensorData?: (sensorData: any) => void;
   }
 }
 
 export default function LiveModel() {
   const containerRef = useRef<HTMLDivElement>(null);
   const [department, setDepartment] = useState("Loading...");
+  const [role, setRole] = useState("Loading..."); // 🌟 Added Role state
   const [isSidebarOpen, setIsSidebarOpen] = useState(true);
 
   // IoT State
@@ -29,7 +34,7 @@ export default function LiveModel() {
     ac_state: null
   });
 
-  // YOLO Tracking State (For your 3D Avatars later!)
+  // YOLO Tracking State
   const [liveDetections, setLiveDetections] = useState([]);
   const [roomCount, setRoomCount] = useState(0);
 
@@ -39,6 +44,7 @@ export default function LiveModel() {
         const response = await fetch('/api/session');
         const data = await response.json();
         setDepartment(data.department || "Guest");
+        setRole(data.role || "Guest"); // 🌟 Fetch the role
       } catch (error) {
         setDepartment("Security"); 
       }
@@ -47,38 +53,60 @@ export default function LiveModel() {
   }, []);
 
   // ==========================================
+  // 🌟 EMERGENCY ALERT LOGIC
+  // ==========================================
+  const handleEmergencyAlert = async () => {
+    if (!window.confirm("🚨 Are you sure you want to trigger an emergency alert for this live room?")) return;
+
+    try {
+      await fetch('/api/send_emergency_alert', { 
+        method: 'POST', 
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ 
+          // Use the ESP32 ID if available, otherwise fallback to a generic name
+          room_number: sensorData.device_id || "Live_Room", 
+          occupancy_count: roomCount
+        })
+      });
+      alert('✅ Emergency alert successfully sent for the live room!');
+    } catch (error) {
+      console.error("Error sending alert:", error);
+      alert('❌ Error sending alert. Check the console.'); 
+    }
+  };
+
+  // ==========================================
   // 2. THE WEBSOCKET CONNECTION
   // ==========================================
   useEffect(() => {
-    // Change localhost to your Mac's IP on the presentation PC!
     const socket = io('http://localhost:1767');
 
     socket.on('connect', () => {
       console.log('✅ Connected to Flask WebSocket Server!');
     });
 
-    // Listen for incoming IoT Data
     socket.on('iot_update', (data) => {
       console.log('🌡️ Live IoT Update:', data);
-      setSensorData(data); // Instantly updates your UI dashboard
+      setSensorData(data); 
+      
+      if (window.updateLiveSensorData) {
+        window.updateLiveSensorData(data);
+      }
     });
 
-    // Listen for incoming YOLO Detections
     socket.on('live_tracking_update', (data) => {
       console.log('🎥 Live YOLO Data:', data);
       
-      // Update both states independently!
       if (data) {
         setRoomCount(data.room_count);
         setLiveDetections(data.detections || []); 
       
         if (window.updateLiveAvatars) {
-          window.updateLiveAvatars(data.detections || []);
+          window.updateLiveAvatars(data.detections || [], data.room_count);
         }
       }
     });
 
-    // Cleanup when user leaves the page
     return () => {
       socket.disconnect();
     };
@@ -92,7 +120,6 @@ export default function LiveModel() {
 
     let destroyFn: () => void;
     
-    // Boot the specialized LIVE engine instead of the playback engine!
     import("../../lib/three/live_model.js").then((module) => {
       console.log("Three.js LIVE engine booting up...");
       module.initLiveEngine(containerRef.current!);
@@ -119,6 +146,17 @@ export default function LiveModel() {
           
           <div className="h-full overflow-y-auto overflow-x-hidden p-5 pr-0! float-width">
             
+            {/* 🌟 EMERGENCY ALERT BUTTON (Now visible to everyone!) */}
+            <div className="mb-4">
+              <IntButton 
+                icon={AlertTriangle} 
+                label="Create Emergency" 
+                onClick={handleEmergencyAlert} 
+                classes="btn btn-red btn-auto m-0! py-2! text-xl w-full flex justify-center" 
+                size="24" 
+              />
+            </div>
+
             <RoomStatsPanel 
               department={department} 
               isLive={true} 

@@ -371,6 +371,7 @@ while cap.isOpened():
             current_ids.add(tid)
 
             # aspect ratio
+            # aspect ratio
             h = y2 - y1
             w = x2 - x1
             aspect_ratio = h / w if w > 0 else 0
@@ -379,72 +380,72 @@ while cap.isOpened():
             world_xy = None
 
             # FOOT POINT
+            # FOOT POINT
             foot = ((x1 + x2) // 2, y2)
 
-            # Find which region contains point
+            region_name = None
+            world_xy = None
+
+            # 1. Find which region contains point FIRST (Occlusion depends on this)
             for name, poly in REGIONS_IMG.items():
-
                 if point_in_polygon(foot, poly):
-
                     region_name = name
-
-                    # ghost leg logic
-                    if aspect_ratio < 2.2:
-                        if region_name == "WALKWAY_3":
-                            if h < 355:
-                                foot = (foot[0], foot[1] + (355 - h))
-                        elif region_name == "WALKWAY_2":
-                            if h < 520:
-                                foot = (foot[0], foot[1] + (520 - h))
-                        elif region_name == "WALKWAY_1":
-                            if h < 630:
-                                foot = (foot[0], foot[1] + (630 - h))
-                    else:
-                        if region_name == "WALKWAY_3":
-                            if h < 455:
-                                foot = (foot[0], foot[1] + (455 - h))
-                        elif region_name == "WALKWAY_2":
-                            if h < 550:
-                                foot = (foot[0], foot[1] + (550 - h))
-                        elif region_name == "WALKWAY_1":
-                            if h < 700:
-                                foot = (foot[0], foot[1] + (700 - h))
-
                     world_xy = map_point(foot, HOMOGRAPHIES[name])
                     break
 
-            # Color based on mapped/not mapped
-            color = (0, 255, 0) if region_name else (0, 0, 255)
-           # Draw bbox
-            label = None
+            # ==========================================
+            # 🌟 ASPECT RATIO / HEIGHT OCCLUSION LOGIC
+            # ==========================================
+            is_occluded = False
+            if region_name:
+                if aspect_ratio < 2.2:
+                    if region_name == "WALKWAY_3" and h < 355:
+                        is_occluded = True
+                    elif region_name == "WALKWAY_2" and h < 520:
+                        is_occluded = True
+                    elif region_name == "WALKWAY_1" and h < 630:
+                        is_occluded = True
+                else:
+                    if region_name == "WALKWAY_3" and h < 455:
+                        is_occluded = True
+                    elif region_name == "WALKWAY_2" and h < 550:
+                        is_occluded = True
+                    elif region_name == "WALKWAY_1" and h < 700:
+                        is_occluded = True
+
+            # 2. Assign Color (Orange if occluded, Green if normal, Red if out of bounds)
+            if region_name:
+                color = (0, 165, 255) if is_occluded else (0, 255, 0)
+            else:
+                color = (0, 0, 255)
+
+            # 3. Draw BBox & Labels
             if region_name:
                 cv2.rectangle(orig, (x1, y1), (x2, y2), color, 2)
-
-                # Draw foot point
                 cv2.circle(orig, foot, 4, (0, 255, 255), -1)
-
-                # label = None
 
             if world_xy is not None:
                 wx, wy = world_xy
-                # label = f"ID {tid} | {region_name} | ({wx:.2f}, {wy:.2f}) | AR {aspect_ratio:.2f}"
-                label = f"ID {tid} | {region_name} | ({wx:.2f}, {wy:.2f}) | AR {aspect_ratio:.2f} | H {h}"
+                occ_label = " | [OCC]" if is_occluded else ""
+                label = f"ID {tid} | {region_name} | ({wx:.2f}, {wy:.2f}) | AR {aspect_ratio:.2f} | H {h}{occ_label}"
                 
-                # 🌟 ONLY ADD TO PAYLOAD IF THEY HAVE VALID COORDS
+                # 🌟 ADD OCCLUSION FLAG TO PAYLOAD
                 frame_payload.append({
                     "id": int(pid),
                     "x": float(wx),  
                     "z": float(wy),  
                     "occupancy": current_occupancy,
-                    "region": region_name # Uses the real region name now!
+                    "region": region_name,
+                    "is_occluded": is_occluded # Sent to Three.js!
                 })
-            # else:
-            #     label = f"ID {tid} | OUT OF BOUNDS"
-                # If they are out of bounds, we do NOT add them to the payload.
+            else:
+                label = f"ID {tid} | OUT OF BOUNDS"
 
             cv2.putText(
                 orig, label, (x1, y1 - 10), cv2.FONT_HERSHEY_SIMPLEX, 1.5, color, 2
             )
+            
+            # ... keep your point_side and crossed_line logic as-is below this ...
 
             # cv2.rectangle(orig, (x1, y1), (x2, y2), (0, 255, 0), 2)
             # cv2.circle(orig, (px, py), 5, (0, 0, 255), -1)
