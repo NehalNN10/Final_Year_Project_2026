@@ -109,11 +109,18 @@ export default function DigitalTwinModel() {
           </button>
         </div>
           
-        {useMemo(() => (
+        {/* {useMemo(() => (
           <div id="model-container" ref={containerRef} className="flex-1 w-full h-full relative overflow-hidden bg-[--bg-color]/50">
             <div className="crosshair"></div>
           </div>
-        ), [])}
+        ), [])} */}
+        <div
+          id="model-container"
+          ref={containerRef}
+          className="flex-1 w-full h-full relative overflow-hidden bg-[--bg-color]/50"
+        >
+          <div className="crosshair"></div>
+        </div>
 
       </div>
     </>
