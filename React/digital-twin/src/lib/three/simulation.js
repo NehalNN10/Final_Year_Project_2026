@@ -183,7 +183,7 @@ export function renderFrame(index) {
     }
         
     // --- NEW CODE START: TIME CALCULATION ---
-    if (uiElements.uiTime) {
+    if (uiElements.uiTime && Math.floor(playback.frame) % 60 === 0) {
         const now = new Date();
         const nowSeconds = Math.floor(now.getTime() / 1000);
         
