@@ -72,14 +72,16 @@ export default function LiveModel() {
   // ==========================================
   const handleEmergencyAlert = async () => {
     if (!window.confirm("🚨 Are you sure you want to trigger an emergency alert for this live room?")) return;
-
+     if (roomCount == 0) {
+      return;
+    }
     try {
       await fetch('/api/send_emergency_alert', { 
         method: 'POST', 
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ 
           // Use the ESP32 ID if available, otherwise fallback to a generic name
-          room_number: sensorData.device_id || "Live_Room", 
+          room_number: 'C-067', 
           occupancy_count: roomCount
         })
       });
@@ -279,7 +281,7 @@ export default function LiveModel() {
   <div className="relative min-h-screen">
     <Navbar department={department} />
 
-    <button 
+    {/* <button 
       onClick={() => {
         if (isScrolledDown) {
           window.scrollTo({ top: 0, behavior: 'smooth' });
@@ -294,18 +296,28 @@ export default function LiveModel() {
       <span className="max-w-0 opacity-0 overflow-hidden group-hover:max-w-[160px] group-hover:opacity-100 group-hover:ml-2 transition-all duration-300 ease-in-out whitespace-nowrap font-bold">
         {isScrolledDown ? "3D Model View" : "Dashboard View"}
       </span>
-    </button>
+    </button> */}
     
 
     <div className="main flex h-[calc(100vh-4.5rem)] relative overflow-hidden">
 
-      {department !== "Facilities" && (
+      {/* {department !== "Facilities" && (
         <IntButton 
           icon={Radar} 
           size="30"
           label={showHeatmap ? "Heatmap: ON" : "Heatmap: OFF"} 
           onClick={handleToggleHeatmap} 
           classes={`absolute top-5 right-5 btn btn-auto m-0! p-2! rounded-0 z-50 text-[1.25rem]! ${showHeatmap ? "btn-yellow" : "btn-black"}`} 
+        />
+      )} */}
+
+      {department !== "Facilities" && (
+        <IntButton 
+          icon={AlertTriangle} 
+          label="Create Emergency" 
+          onClick={handleEmergencyAlert} 
+          classes="absolute top-5 right-5 btn btn-red btn-auto m-0! p-2! rounded-0 z-50 text-[1.25rem]!" 
+          size="24" 
         />
       )}
             
@@ -314,7 +326,7 @@ export default function LiveModel() {
           
           <div className="h-full overflow-y-auto overflow-x-hidden p-5 pr-0! float-width">
             
-            <div className="mb-4">
+            {/* <div className="mb-4">
               <IntButton 
                 icon={AlertTriangle} 
                 label="Create Emergency" 
@@ -322,7 +334,7 @@ export default function LiveModel() {
                 classes="btn btn-red btn-auto m-0! py-2! text-xl w-full flex justify-center" 
                 size="24" 
               />
-            </div>
+            </div> */}
 
             <RoomStatsPanel 
               department={department} 
@@ -353,7 +365,7 @@ export default function LiveModel() {
 
     </div>
 
-    <div id="dashboard-section" className="side-nav row mt-0! text-black">
+    {/* <div id="dashboard-section" className="side-nav row mt-0! text-black">
       <span>Dashboard</span>
     </div>
 
@@ -485,8 +497,7 @@ export default function LiveModel() {
             </tbody>
           </table>
         </div>
-      </div>
-    </div>
+      </div> */}
   </div>
   );
 }

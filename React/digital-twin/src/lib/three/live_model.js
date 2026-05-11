@@ -42,8 +42,8 @@ function evaluateLiveAlerts() {
         if (liveIoTData.temperature !== null && liveIoTData.temperature < 22) trackers.tempCold++; 
         else trackers.tempCold = 0;
 
-        const roomId = liveIoTData.device_id || "Live_Room";
-        const roomInf = roomInfo[roomId];
+        const roomId = "C-067";
+        const roomInf = liveRoomInfo[roomId];
         let occuAlert = null;
         if (roomInf && liveOccupancy > roomInf.max_occupancy) {
             occuAlert = `Over capacity: ${liveOccupancy}/${roomInf.max_occupancy}`;

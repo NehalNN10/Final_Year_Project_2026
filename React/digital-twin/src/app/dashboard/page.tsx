@@ -202,7 +202,9 @@ export default function Dashboard() {
         // Grab the live occupancy at this exact second
         const liveStats = currentRoomStats[room.room_id] || {};
         const currentOccupancy = liveStats.occupancy !== "--" ? liveStats.occupancy : 0;
-
+        if (currentOccupancy === 0) {
+          return Promise.resolve(); // Skip sending alert for empty rooms
+        }
         return fetch('/api/send_emergency_alert', { 
           method: 'POST', 
           headers: { 'Content-Type': 'application/json' },

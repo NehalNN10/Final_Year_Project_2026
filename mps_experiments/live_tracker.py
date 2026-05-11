@@ -371,7 +371,6 @@ while cap.isOpened():
             current_ids.add(tid)
 
             # aspect ratio
-            # aspect ratio
             h = y2 - y1
             w = x2 - x1
             aspect_ratio = h / w if w > 0 else 0
@@ -379,7 +378,6 @@ while cap.isOpened():
             region_name = None
             world_xy = None
 
-            # FOOT POINT
             # FOOT POINT
             foot = ((x1 + x2) // 2, y2)
 
@@ -394,24 +392,63 @@ while cap.isOpened():
                     break
 
             # ==========================================
-            # 🌟 ASPECT RATIO / HEIGHT OCCLUSION LOGIC
+            # 🌟 OCCLUSION DETECTION (Overlap Logic)
             # ==========================================
             is_occluded = False
+            
+            # Only check for occlusion if current person is inside a region
             if region_name:
+                # Check if this person's foot is inside another person's bounding box
+                for other_box, other_id in zip(boxes, ids):
+                    if int(pid) == int(other_id):
+                        continue # Skip checking against their own box
+                    
+                    ox1, oy1, ox2, oy2 = map(int, other_box)
+                    other_foot = ((ox1 + ox2) // 2, oy2)
+                    
+                    # Check if the other person is also in a region
+                    other_in_region = False
+                    for name, poly in REGIONS_IMG.items():
+                        if point_in_polygon(other_foot, poly):
+                            other_in_region = True
+                            break
+                    
+                    # Only flag as occluded if both are in regions AND foot overlaps
+                    if other_in_region and ox1 <= foot[0] <= ox2 and oy1 <= foot[1] <= oy2:
+                        is_occluded = True
+                        break
+
+            # --- FALLBACK: AR / Height Logic (Commented out) ---
+            if is_occluded and region_name:
                 if aspect_ratio < 2.2:
                     if region_name == "WALKWAY_3" and h < 355:
-                        is_occluded = True
+                        # is_occluded = True
+                        foot = (foot[0], foot[1] + 355 - h)
                     elif region_name == "WALKWAY_2" and h < 520:
-                        is_occluded = True
+                        # is_occluded = True
+                        foot = (foot[0], foot[1] + 520 - h)
+
                     elif region_name == "WALKWAY_1" and h < 630:
-                        is_occluded = True
+                        # is_occluded = True
+                        foot = (foot[0], foot[1] + 630 - h)
                 else:
                     if region_name == "WALKWAY_3" and h < 455:
-                        is_occluded = True
+                        # is_occluded = True
+                        foot = (foot[0], foot[1] + 455 - h)
                     elif region_name == "WALKWAY_2" and h < 550:
-                        is_occluded = True
-                    elif region_name == "WALKWAY_1" and h < 700:
-                        is_occluded = True
+                        # is_occluded = True
+                        foot = (foot[0], foot[1] + 550 - h)
+                    elif region_name == "WALKWAY_1" and h < 650:
+                        # is_occluded = True
+                        foot = (foot[0], foot[1] + 650 - h)
+
+
+
+            # 2. Assign Color (Orange if occluded, Green if normal, Red if out of bounds)
+            if region_name:
+                color = (0, 165, 255) if is_occluded else (0, 255, 0)
+            else:
+                color = (0, 0, 255)
 
             # 2. Assign Color (Orange if occluded, Green if normal, Red if out of bounds)
             if region_name:
@@ -438,12 +475,10 @@ while cap.isOpened():
                     "region": region_name,
                     "is_occluded": is_occluded # Sent to Three.js!
                 })
-            else:
-                label = f"ID {tid} | OUT OF BOUNDS"
 
-            cv2.putText(
-                orig, label, (x1, y1 - 10), cv2.FONT_HERSHEY_SIMPLEX, 1.5, color, 2
-            )
+                cv2.putText(
+                    orig, label, (x1, y1 - 10), cv2.FONT_HERSHEY_SIMPLEX, 1.5, color, 2
+                )
             
             # ... keep your point_side and crossed_line logic as-is below this ...
 

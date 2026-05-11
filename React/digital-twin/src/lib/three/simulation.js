@@ -269,7 +269,7 @@ export function renderFrame(index) {
                     const currentTime = new Date().toLocaleTimeString();
                     
                     if (typeof sendFacilitiesAlert === 'function') {
-                        sendFacilitiesAlert(roomId, combinedTitle, currentTime, combinedDesc);
+                        sendFacilitiesAlert(roomId, combinedTitle, combinedDesc);
                     } else {
                         console.warn(`[ALERT READY] But sendFacilitiesAlert is missing! Data:`, {roomId, combinedTitle, combinedDesc});
                     }

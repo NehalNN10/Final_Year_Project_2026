@@ -34,13 +34,18 @@ export function middleware(request: NextRequest) {
     if (hasSession) {
         // If a non-Facilities user tries to view the Facilities home
         if (path.startsWith('/facility_home') && userDept !== 'Facilities') {
-            const redirectPath = userDept === 'Security' ? '/security_home' : '/dashboard';
+            const redirectPath = userDept === 'Security' ? '/security_home' : userDept === 'Admin' ? '/dashboard' : '/login';
             return NextResponse.redirect(new URL(redirectPath, request.url));
         }
         
         // If a non-Security user tries to view the Security home
         if (path.startsWith('/security_home') && userDept !== 'Security') {
-            const redirectPath = userDept === 'Facilities' ? '/facility_home' : '/dashboard';
+            const redirectPath = userDept === 'Facilities' ? '/facility_home' : userDept === 'Admin' ? '/dashboard' : '/login';
+            return NextResponse.redirect(new URL(redirectPath, request.url));
+        }
+
+        if (path.startsWith('/dashboard') && userDept !== 'Admin') {
+            const redirectPath = userDept === 'Facilities' ? '/facility_home' :  userDept === 'Security' ? '/security_home' : '/login';
             return NextResponse.redirect(new URL(redirectPath, request.url));
         }
     }
