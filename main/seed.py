@@ -136,7 +136,7 @@ with app.app_context():
     
     print("Seeding Database...")
     data_proj = pd.read_csv("../csv_files/active_files/combined_proj_data_30min.csv")
-    occu_proj = pd.read_csv('../csv_files/temp_files_30mins/combined_count_sync.csv')
+    occu_proj = pd.read_csv('../csv_files/active_files/combined_count_123.csv')
 
     occu_subset = occu_proj.iloc[0:44999:25].reset_index(drop=True)
     data_proj['occu'] = occu_subset['Count']

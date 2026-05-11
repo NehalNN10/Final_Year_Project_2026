@@ -68,7 +68,7 @@ export class SandboxSimulation {
             const id = "SandboxNPC_" + Date.now();
             
             // Note: Make sure X is first, then Z!
-            const marker = createMarker(this.intersectionPoint.z, this.intersectionPoint.x, 0x00ff88, 0.2, id);
+            const marker = createMarker(this.intersectionPoint.x, this.intersectionPoint.z, 0x00ff88, 0.2, id);
             
             marker.visible = true;
             
@@ -239,39 +239,40 @@ export class SandboxSimulation {
             if (uiElements.uiID) uiElements.uiID.innerText = roomInf.room_id;
             if (uiElements.uiFloor) uiElements.uiFloor.innerText = roomInf.room_floor;
 
-            if (department !== "Security" && row) {
-                if (uiElements.uiTemp) {
-                    const t = row.temp;
-                    uiElements.uiTemp.innerText = t.toFixed(1) + "°C";
-                    
-                    if (t <= 20) uiElements.uiTemp.style.backgroundColor = "#0088ff";
-                    else if (t <= 22) uiElements.uiTemp.style.backgroundColor = "#00ffff";
-                    else if (t <= 28) uiElements.uiTemp.style.backgroundColor = "#00ff88";
-                    else if (t <= 30) uiElements.uiTemp.style.backgroundColor = "#ff8800";
-                    else uiElements.uiTemp.style.backgroundColor = "#f00";
-                }
-                
-                if (uiElements.uiAC) {
-                    uiElements.uiAC.innerText = row.ac ? "ON" : "OFF";
-                    uiElements.uiAC.style.backgroundColor = row.ac ? "#00ff88" : "#ff4444";
+            if (row) {
+                if (department === "Security") {
+                    const event = new CustomEvent('iotDataUpdate', { 
+                        detail: { 
+                            occupancy: row.occupancy,
+                            max_occupancy: roomInf ? roomInf.max_occupancy : null
+                        }
+                    });
+                    window.dispatchEvent(event);
                 }
 
-                if (uiElements.uiLights) {
-                    uiElements.uiLights.innerText = row.lights ? "ON" : "OFF";
-                    uiElements.uiLights.style.backgroundColor = row.lights ? "#00ff88" : "#ff4444";
+                if (department === "Facilities") {
+                    const event = new CustomEvent('iotDataUpdate', { 
+                        detail: { 
+                            occ_status: row.occupancy > 0 ? true : false,
+                            temperature: row.temp,
+                            ac: row.ac,
+                            lights: row.lights
+                        }
+                    });
+                    window.dispatchEvent(event);
                 }
-            }
 
-            if (uiElements.uiOccupancy && uiElements.uiOccuHeader && row) {
-                const l = row.occupancy; 
-                if (department === "Facilities"){
-                    uiElements.uiOccuHeader.innerText = "Status: ";
-                    uiElements.uiOccupancy.innerText = (l > 0) ? "Occupied" : "Vacant";
-                    uiElements.uiOccupancy.style.backgroundColor = (l > 0) ? "#ff4444" : "#00ff88";
-                } else {
-                    uiElements.uiOccuHeader.innerText = "Occupancy Count: ";
-                    uiElements.uiOccupancy.innerText = l;
-                    uiElements.uiOccupancy.style.backgroundColor = (l > roomInf.max_occupancy) ? "#ff4444" : ( l === 0 ? "#fff" : "#00ff88");
+                if (department === "Admin") {
+                    const event = new CustomEvent('iotDataUpdate', { 
+                        detail: { 
+                            occupancy: row.occupancy,
+                            max_occupancy: roomInf ? roomInf.max_occupancy : null,
+                            temperature: row.temp,
+                            ac: row.ac,
+                            lights: row.lights
+                        }
+                    });
+                    window.dispatchEvent(event);
                 }
             }
 
@@ -298,7 +299,7 @@ export class SandboxSimulation {
 
             Object.keys(this.roomIoT).forEach(roomId => {
                 const row = this.roomIoT[roomId];
-                const threshold = 120;
+                const threshold = 20;
                 
                 if (row.occupancy === 0 && row.ac) this.trackers.acWasted[roomId] = (this.trackers.acWasted[roomId] || 0) + 1;
                 else this.trackers.acWasted[roomId] = 0;
