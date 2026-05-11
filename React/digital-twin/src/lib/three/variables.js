@@ -95,8 +95,7 @@ export function sendFacilitiesAlert(roomId, alertType, timeStr, description) {
         body: JSON.stringify({
             room_number: roomId,
             alert_type: alertType,
-            time_since: timeStr,
-            description: description + " (Sandbox Mode)"
+            description: description
         })
     })
     .then(r => r.json())

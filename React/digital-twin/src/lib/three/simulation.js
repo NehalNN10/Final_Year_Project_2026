@@ -265,8 +265,6 @@ export function renderFrame(index) {
                 if (activeAlerts.length > 0) {
                     const combinedTitle = activeAlerts.join(" & ");
                     const combinedDesc = descriptions.join("\n \n");
-
-                    const currentTime = new Date().toLocaleTimeString();
                     
                     if (typeof sendFacilitiesAlert === 'function') {
                         sendFacilitiesAlert(roomId, combinedTitle, combinedDesc);

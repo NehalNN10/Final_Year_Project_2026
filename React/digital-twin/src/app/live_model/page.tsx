@@ -229,7 +229,7 @@ export default function LiveModel() {
                   fetch('/api/send_facilities_alert', {
                       method: 'POST',
                       headers: { 'Content-Type': 'application/json' },
-                      body: JSON.stringify({ room_number: roomId, alert_type: activeAlerts.join(" & "), time_since: new Date().toLocaleTimeString(), description: descriptions.join("\n \n") })
+                      body: JSON.stringify({ room_number: roomId, alert_type: activeAlerts.join(" & "), description: descriptions.join("\n \n") })
                   }).catch(err => console.error(err));
                   lastAlerts[roomId] = currentSecond;
               }

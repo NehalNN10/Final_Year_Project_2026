@@ -7,7 +7,7 @@ from datetime import datetime
 
 load_dotenv()
 
-def send_facilities_alert(room_number, alert_type, time_since, recipient, description=None):
+def send_facilities_alert(room_number, alert_type, recipient, description=None):
     # Credentials
     username = os.getenv("SMTP_USERNAME") 
     password = os.getenv("SMTP_PASSWORD")
@@ -31,7 +31,6 @@ def send_facilities_alert(room_number, alert_type, time_since, recipient, descri
     
     Room Number: {room_number}
     Resource Alert Type: {alert_type}
-    Time Since Alert: {time_since}
     Timestamp: {timestamp}
     Details: {description if description else "No additional details provided."}
     
@@ -81,7 +80,6 @@ def send_facilities_alert(room_number, alert_type, time_since, recipient, descri
                 <td style="padding:15px;">
                   <p style="margin:5px 0;"><strong>Room Number:</strong> {{room_number}}</p>
                   <p style="margin:5px 0;"><strong>Resource Alert Type:</strong> {{alert_type}}</p>
-                  <p style="margin:5px 0;"><strong>Time Since Alert:</strong> {{time_since}}</p>
                   <p style="margin:5px 0;"><strong>Timestamp:</strong> {{timestamp}}</p>
                   {{description_html}}
                 </td>
@@ -115,7 +113,6 @@ def send_facilities_alert(room_number, alert_type, time_since, recipient, descri
     # Inject variables into the HTML string
     html_content = html_content.replace('{{room_number}}', str(room_number))
     html_content = html_content.replace('{{alert_type}}', str(alert_type))
-    html_content = html_content.replace('{{time_since}}', str(time_since))
     html_content = html_content.replace('{{timestamp}}', str(timestamp))
     html_content = html_content.replace('{{description_html}}', description_html)
 

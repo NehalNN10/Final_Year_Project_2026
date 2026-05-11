@@ -14,7 +14,7 @@ let lastSecond = -1;
 let lastAlertTime = 0;
 let heatmapThrottle = 0;
 
-const ALERT_THRESHOLD = 120; // 120 seconds
+const ALERT_THRESHOLD = 10; // 120 seconds
 const trackers = { acWasted: 0, lightsWasted: 0, tempWarm: 0, tempCold: 0 };
 
 function formatTime(totalSec) {

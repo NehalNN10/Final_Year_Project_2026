@@ -190,7 +190,6 @@ def send_fac_alert():
     try:
         room_number = data.get('room_number')
         alert_type = data.get('alert_type')
-        time_since = data.get('time_since')
         description = data.get('description', '')
 
         recipients = []
@@ -203,7 +202,7 @@ def send_fac_alert():
             raise ValueError('No recipient email configured or DEFAULT_EMERGENCY_RECIPIENT not set.')
 
         for rcpt in recipients:
-            send_facilities_alert(room_number, alert_type, time_since, rcpt, description)
+            send_facilities_alert(room_number, alert_type, rcpt, description)
 
         print(f"Facilities Alert Sent - Room: {room_number}, Alert Type: {alert_type}, Time Since: {time_since}, Description: {description}, recipients={recipients}")
         return jsonify({'success': True, 'message': 'Facilities alert sent successfully!', 'recipients': recipients}), 200
