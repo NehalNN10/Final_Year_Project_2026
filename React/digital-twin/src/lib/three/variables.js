@@ -1,5 +1,5 @@
 export const FPS = 25; 
-export const LOOP_DURATION = 1800; 
+export const LOOP_DURATION = 1200; 
 
 // Start them as empty objects
 export const roomInfo = {};

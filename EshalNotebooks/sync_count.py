@@ -1,22 +1,33 @@
 import pandas as pd
 
-# Load cam3 count CSV
-df = pd.read_csv("csv_files/temp_files_30mins/cam2_people_count_log_door2.csv")
+# Load count CSV
+df = pd.read_csv("csv_files/active_files/dilab_counts_fixed.csv")
 
-# Synchronization parameters
+# Sync parameters
 SCALE = 0.8017
 OFFSET = -18
 
-# Align frames
-df["Frame"] = (df["Frame"] * SCALE + OFFSET).astype(int)
+# Synchronize frames
+df["Frame"] = (df["Frame"] * SCALE + OFFSET).round().astype(int)
 
-# Remove negative frames if any
+# Remove invalid frames
 df = df[df["Frame"] >= 0]
 
-# Sort nicely
+# Merge duplicate frames
+df = (
+    df.groupby("Frame", as_index=False)
+      .agg({
+          "Count": "max"   # change if needed
+      })
+)
+
+# Sort
 df = df.sort_values("Frame").reset_index(drop=True)
 
 # Save
-df.to_csv("C:/Users/USER/Documents/Git_Final_Year_Project/Git_Final_Year_Project_2026/old_assets/cam2_people_count_log_door2_synced.csv", index=False)
+df.to_csv(
+    "csv_files/active_files/dilab_counts_synced.csv",
+    index=False
+)
 
-print("Synced cam3 count CSV saved.")
+print("Synced cam4 count CSV saved.")
