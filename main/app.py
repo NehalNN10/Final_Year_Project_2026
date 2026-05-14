@@ -204,7 +204,7 @@ def send_fac_alert():
         for rcpt in recipients:
             send_facilities_alert(room_number, alert_type, rcpt, description)
 
-        print(f"Facilities Alert Sent - Room: {room_number}, Alert Type: {alert_type}, Time Since: {time_since}, Description: {description}, recipients={recipients}")
+        print(f"Facilities Alert Sent - Room: {room_number}, Alert Type: {alert_type}, Description: {description}, recipients={recipients}")
         return jsonify({'success': True, 'message': 'Facilities alert sent successfully!', 'recipients': recipients}), 200
     except Exception as e:
         print(f"Error sending facilities alert: {e}")
@@ -408,6 +408,8 @@ def api_security_home_data():
 
         rooms_data = []
         for r in Rooms.objects().order_by('room_id'):
+            if r.room_id == "C-067":
+                continue
             rd_entries = RoomData.objects(room=r).order_by('time')
             timeseries = []
             for rd in rd_entries:
@@ -463,6 +465,8 @@ def api_facility_home_data():
 
         rooms_data = []
         for r in Rooms.objects().order_by('room_id'):
+            if r.room_id == "C-067":
+                continue
             rd_entries = RoomData.objects(room=r).order_by('time')
             timeseries = []
             for rd in rd_entries:

@@ -207,7 +207,7 @@ export function renderFrame(index) {
             
             if (!row) return; // Safety check in case the room has no data yet
 
-            const threshold = 120;
+            const threshold = 200;
             
             if (row.occupancy === 0 && row.ac) trackers.acWasted[roomId] = (trackers.acWasted[roomId] || 0) + 1;
             else trackers.acWasted[roomId] = 0;
